@@ -1,3 +1,5 @@
+https://www.sitepoint.com/react-with-typescript-best-practices/
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
