@@ -19,8 +19,8 @@ import IconExpandMore from '@material-ui/icons/ExpandMore'
 import InputBase from "@material-ui/core/InputBase";
 import Button from "@material-ui/core/Button";
 
-import {authenSlice, signin} from "../../store/authen";
-import store from "../../store";
+import {authenSlice, signin} from "../store/authen";
+import store from "../store";
 import {connect} from "react-redux";
 
 const drawerWidth = 240;
