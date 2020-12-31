@@ -1,11 +1,15 @@
 import React from 'react';
 
-import AppBar from "../../components/AppBar";
+import PageFrame from "../../components/PageFrame";
 
 const Home = () => {
     return (
         <div>
-            <AppBar/>
+            <PageFrame>
+                <div>
+                    Hello
+                </div>
+            </PageFrame>
         </div>
     );
 }
