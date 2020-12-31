@@ -10,16 +10,18 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import Collapse from '@material-ui/core/Collapse'
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import IconExpandLess from '@material-ui/icons/ExpandLess'
 import IconExpandMore from '@material-ui/icons/ExpandMore'
 import InputBase from "@material-ui/core/InputBase";
+import Button from "@material-ui/core/Button";
+
+import {authenSlice, signin} from "../../store/authen";
+import store from "../../store";
+import {connect} from "react-redux";
 
 const drawerWidth = 240;
 
@@ -92,6 +94,9 @@ const useStyles = makeStyles((theme) => ({
     content: {
         marginTop: '70px',
     },
+    btn: {
+        marginLeft: '10px',
+    },
     // necessary for content to be below app bar
     toolbar: theme.mixins.toolbar,
 }));
@@ -117,9 +122,10 @@ const dummyCat = [
     }
 ]
 
-const PageFrame = (props) => {
-    const classes = useStyles();
+const PageFrame = ({token, children}) => {
+    console.log(token)
 
+    const classes = useStyles();
     const isOpenArray = dummyCat.map((cat, index) => {
         if (cat.subcat) return {"open": false, "shouldShowIcon": true}
         return {"open": false, "shouldShowIcon": false}
@@ -138,6 +144,9 @@ const PageFrame = (props) => {
         history.push(`/cat/${path}`)
     }
 
+    const onSigninClick = (username, password) => {
+        store.dispatch(signin({username, password}))
+    }
 
     return (
         <div className={classes.root}>
@@ -168,6 +177,13 @@ const PageFrame = (props) => {
                             inputProps={{'aria-label': 'search'}}
                         />
                     </div>
+                    {!token ? <div>
+                        <Button className={classes.btn}
+                                onClick={() => onSigninClick("a", "b")}
+                                color="inherit">Log In</Button>
+                        <Button className={classes.btn}
+                                color="inherit">Sign Up</Button>
+                    </div> : null}
                 </Toolbar>
             </AppBar>
             <Drawer
@@ -212,10 +228,16 @@ const PageFrame = (props) => {
                 </List>
             </Drawer>
             <main className={classes.content}>
-                {props.children}
+                {children}
             </main>
         </div>
     );
 }
 
-export default PageFrame;
+const mapStateToProps = state => ({
+    token: state.authen.token
+})
+
+export default connect(
+    mapStateToProps
+)(PageFrame);
