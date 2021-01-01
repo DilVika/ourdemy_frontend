@@ -191,7 +191,8 @@ const mapStateToProps = state => ({
     err: state.authen.signUpErr,
     loading: state.authen.signingUp,
     otp: state.authen.shouldOtp,
-    finish: state.signingUpFinish
+    finish: state.signingUpFinish,
+    otploading: state.otping,
 })
 
 export default connect(

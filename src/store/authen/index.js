@@ -10,6 +10,7 @@ const initialState = {
     signingUp: false,
     signUpErr: null,
     signingOut: false,
+    otping: false,
     shouldOtp: false,
     signingUpFinish: false,
 };
@@ -82,6 +83,9 @@ export const authenSlice = createSlice({
         },
         loadingSignUp: (state, _) => {
             state.signingUp = true
+        },
+        loadingOtp: (state, _) => {
+            state.otping = true
         },
 
     },
