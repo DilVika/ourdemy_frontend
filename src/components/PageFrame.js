@@ -212,7 +212,10 @@ const PageFrame = ({token, categories, children}) => {
             <main className={classes.content}>
                 {children}
             </main>
-            <SignUpDialog open={signUpDialogOpen} onClose={() => setSignUpDialogOpen(false)}/>
+            <SignUpDialog open={signUpDialogOpen} onClose={() => {
+                setSignUpDialogOpen(false)
+                store.dispatch(authenSlice.actions.resetSignUpState())
+            }}/>
         </div>
     );
 }

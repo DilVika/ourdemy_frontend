@@ -33,15 +33,25 @@ const SignUpDialog = ({open, onClose, err, loading, otp, otploading, finish}) =>
     const otpunameRef = useRef("")
     const otpRef = useRef("")
 
-    if (finish) {
-        onClose()
-        return <div/>
-    }
-
     return (
         <div>
             {
-                !otp ? <Dialog open={open} onClose={() => onClose()} aria-labelledby="form-dialog-title">
+                finish ?
+                    <Dialog open={open} onClose={() => onClose()} aria-labelledby="form-dialog-title">
+                        <AppBar className={classes.appBar}>
+                            <Toolbar>
+                                <Typography variant="h6" className={classes.title}>
+                                    Sign up finished
+                                </Typography>
+                            </Toolbar>
+                        </AppBar>
+                        <DialogActions>
+                            <Button onClick={() => onClose()} color="primary">
+                                Ok
+                            </Button>
+                        </DialogActions>
+                    </Dialog> : !otp ?
+                    <Dialog open={open} onClose={() => onClose()} aria-labelledby="form-dialog-title">
                         <AppBar className={classes.appBar}>
                             <Toolbar>
                                 <Typography variant="h6" className={classes.title}>
@@ -159,7 +169,8 @@ const SignUpDialog = ({open, onClose, err, loading, otp, otploading, finish}) =>
                         </DialogContent>
                         <DialogActions>
                             {!otploading ? <div>
-                                <Button onClick={() => store.dispatch(authenSlice.actions.signupMode())} color="primary">
+                                <Button onClick={() => store.dispatch(authenSlice.actions.signupMode())}
+                                        color="primary">
                                     Switch to Sign up
                                 </Button>
                                 <Button onClick={() => onClose()} color="primary">
@@ -187,12 +198,21 @@ const SignUpDialog = ({open, onClose, err, loading, otp, otploading, finish}) =>
     );
 }
 
+SignUpDialog.defaultProps = {
+    open: false,
+    err: null,
+    loading: false,
+    otp: false,
+    otploading: false,
+    finish: false
+}
+
 const mapStateToProps = state => ({
     err: state.authen.signUpErr,
     loading: state.authen.signingUp,
     otp: state.authen.shouldOtp,
-    finish: state.signingUpFinish,
-    otploading: state.otping,
+    otploading: state.authen.otping,
+    finish: state.authen.signingUpFinish,
 })
 
 export default connect(
