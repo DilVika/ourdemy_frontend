@@ -20,10 +20,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "format": "prettier-eslint --eslint-config-path ./.eslintrc.js --write '**/*.js'",
-    "lint": "eslint './src/**/*.{js,jsx}'",
-    "lint:fix": "eslint './src/**/*.{js,jsx}' --fix"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -44,11 +41,6 @@
     ]
   },
   "devDependencies": {
-    "@material-ui/icons": "^4.11.2",
-    "eslint-config-prettier": "^7.1.0",
-    "eslint-loader": "^4.0.2",
-    "eslint-plugin-prettier": "^3.3.0",
-    "eslint-plugin-react": "^7.22.0",
-    "prettier": "^2.2.1"
+    "@material-ui/icons": "^4.11.2"
   }
 }
