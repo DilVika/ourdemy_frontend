@@ -23,6 +23,11 @@ import { authenSlice, signin } from "../store/authen";
 import store from "../store";
 import { connect } from "react-redux";
 
+import Slide from '@material-ui/core/Slide';
+import useScrollTrigger from '@material-ui/core/useScrollTrigger';
+
+import PropTypes from 'prop-types';
+
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
@@ -101,6 +106,30 @@ const useStyles = makeStyles((theme) => ({
   toolbar: theme.mixins.toolbar,
 }));
 
+function HideOnScroll(props) {
+  const { children, window } = props;
+  // Note that you normally won't need to set the window ref as useScrollTrigger
+  // will default to window.
+  // This is only being set here because the demo is in an iframe.
+  const trigger = useScrollTrigger({ target: window ? window() : undefined });
+
+  return (
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  );
+}
+
+HideOnScroll.propTypes = {
+  children: PropTypes.element.isRequired,
+  /**
+   * Injected by the documentation to work in an iframe.
+   * You won't need it on your project.
+   */
+  window: PropTypes.func,
+};
+
+
 const dummyCat = [
   {
     cid: "1A",
@@ -151,17 +180,11 @@ const PageFrame = ({ token, children }) => {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppBar position="fixed">
+      <HideOnScroll >
+      <AppBar position="fixed" >
         <Toolbar>
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="open drawer"
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography className={classes.title} variant="h4" noWrap>
+         
+          <Typography className={classes.title} variant="h5" noWrap>
             Ourdemy
           </Typography>
           <div className={classes.search}>
@@ -193,6 +216,7 @@ const PageFrame = ({ token, children }) => {
           ) : null}
         </Toolbar>
       </AppBar>
+      </HideOnScroll>
       <Drawer
         className={classes.drawer}
         variant="permanent"
