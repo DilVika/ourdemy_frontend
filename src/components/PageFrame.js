@@ -101,40 +101,18 @@ const useStyles = makeStyles((theme) => ({
     toolbar: theme.mixins.toolbar,
 }));
 
-const dummyCat = [
-    {
-        "cid": "1A",
-        "cat_name": "Game",
-        "subcat": [
-            {
-                "cid": "1B",
-                "subcat_name": "TW3"
-            },
-            {
-                "cid": "2B",
-                "subcat_name": "Genshin"
-            }
-        ]
-    },
-    {
-        "cid": "2A",
-        "cat_name": "Cats",
-    }
-]
 
-const PageFrame = ({token, children}) => {
-    console.log(token)
-
+const PageFrame = ({token, categories, children}) => {
     const classes = useStyles();
-    const isOpenArray = dummyCat.map((cat, index) => {
-        if (cat.subcat) return {"open": false, "shouldShowIcon": true}
-        return {"open": false, "shouldShowIcon": false}
+    const isOpenArray = categories.map((cat, index) => {
+        return false
     })
+
     const [itemOpen, setItemOpen] = useState(isOpenArray);
 
     const toggleItem = (index, open) => {
         const itemOpenCopy = [...itemOpen]
-        itemOpenCopy[index].open = open
+        itemOpenCopy[index] = open
         setItemOpen(itemOpenCopy)
     }
 
@@ -197,22 +175,22 @@ const PageFrame = ({token, children}) => {
                 <div className={classes.toolbar}/>
                 <Divider/>
                 <List>
-                    {dummyCat.map((cat, index) => (
+                    {categories.map((cat, index) => (
                         <div key={cat.cid}>
                             <ListItem button>
                                 <ListItemText primary={cat.cat_name} onClick={() => nav(cat.cat_name)}/>
-                                <div role="button" onClick={(e) => toggleItem(index, !itemOpen[index].open)}>
-                                    {itemOpen[index].shouldShowIcon ? itemOpen[index].open ? <IconExpandLess/> :
-                                        <IconExpandMore/> : null}
+                                <div role="button" onClick={(e) => toggleItem(index, !itemOpen[index])}>
+                                    {itemOpen[index] ? <IconExpandLess/> :
+                                        <IconExpandMore/>}
                                 </div>
                             </ListItem>
                             {
-                                cat.subcat ?
-                                    <Collapse in={itemOpen[index].open} timeout="auto" unmountOnExit>
+                                cat.subcats ?
+                                    <Collapse in={itemOpen[index]} timeout="auto" unmountOnExit>
                                         <Divider/>
                                         <List component="div" disablePadding>
-                                            {cat.subcat.map((sub, index) => (
-                                                <ListItem button key={sub.cid}>
+                                            {cat.subcats.map((sub, index) => (
+                                                <ListItem button key={sub.scid}>
                                                     <ListItemText inset
                                                                   onClick={() => nav(`${cat.cat_name}/${sub.subcat_name}`)}
                                                                   primary={sub.subcat_name}/>
@@ -223,7 +201,6 @@ const PageFrame = ({token, children}) => {
                                     : null
                             }
                         </div>
-
                     ))}
                 </List>
             </Drawer>
@@ -234,9 +211,13 @@ const PageFrame = ({token, children}) => {
     );
 }
 
-const mapStateToProps = state => ({
-    token: state.authen.token
-})
+const mapStateToProps = state => {
+    console.log(state)
+    return {
+        token: state.authen.token,
+        categories: state.cat.category
+    }
+}
 
 export default connect(
     mapStateToProps

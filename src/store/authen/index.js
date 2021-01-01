@@ -1,10 +1,8 @@
 import axios from 'axios';
 import {
     createSlice,
-    configureStore,
     createAsyncThunk,
 } from '@reduxjs/toolkit';
-import {act} from "@testing-library/react";
 
 const initialState = {
     token: null
