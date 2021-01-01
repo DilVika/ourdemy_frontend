@@ -19,9 +19,10 @@ import IconExpandMore from '@material-ui/icons/ExpandMore'
 import InputBase from "@material-ui/core/InputBase";
 import Button from "@material-ui/core/Button";
 
-import {authenSlice, signin} from "../store/authen";
+import {authenSlice, signin, signout} from "../store/authen";
 import store from "../store";
 import {connect} from "react-redux";
+import SignUpDialog from "./SignUpDialog";
 
 const drawerWidth = 240;
 
@@ -109,6 +110,7 @@ const PageFrame = ({token, categories, children}) => {
     })
 
     const [itemOpen, setItemOpen] = useState(isOpenArray);
+    const [signUpDialogOpen, setSignUpDialogOpen] = useState(false);
 
     const toggleItem = (index, open) => {
         const itemOpenCopy = [...itemOpen]
@@ -160,8 +162,11 @@ const PageFrame = ({token, categories, children}) => {
                                 onClick={() => onSigninClick("a", "b")}
                                 color="inherit">Log In</Button>
                         <Button className={classes.btn}
-                                color="inherit">Sign Up</Button>
-                    </div> : null}
+                                color="inherit" onClick={() => setSignUpDialogOpen(true)}>Sign Up</Button>
+                    </div> : <div>
+                        <Button className={classes.btn}
+                                color="inherit" onClick={() => store.dispatch(signout())}>Log out</Button>
+                    </div>}
                 </Toolbar>
             </AppBar>
             <Drawer
@@ -207,17 +212,15 @@ const PageFrame = ({token, categories, children}) => {
             <main className={classes.content}>
                 {children}
             </main>
+            <SignUpDialog open={signUpDialogOpen} onClose={() => setSignUpDialogOpen(false)}/>
         </div>
     );
 }
 
-const mapStateToProps = state => {
-    console.log(state)
-    return {
-        token: state.authen.token,
-        categories: state.cat.category
-    }
-}
+const mapStateToProps = state => ({
+    token: state.authen.token,
+    categories: state.cat.category
+})
 
 export default connect(
     mapStateToProps
