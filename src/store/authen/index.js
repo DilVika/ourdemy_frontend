@@ -51,7 +51,7 @@ export const otpConfirm = createAsyncThunk(
             return thunkAPI.rejectWithValue("missing otp")
         }
         try {
-            thunkAPI.dispatch(authenSlice.actions.loadingSignUp())
+            thunkAPI.dispatch(authenSlice.actions.loadingOtp())
             const response = await axios.patch(`${process.env.REACT_APP_BACKEND_URL}/users/otp`, {
                 "username": otpData.username,
                 "otp": otpData.otp,
@@ -87,7 +87,15 @@ export const authenSlice = createSlice({
         loadingOtp: (state, _) => {
             state.otping = true
         },
-
+        resetSignUpState: (state, _) => {
+            state.signingIn = false
+            state.signingUp = false
+            state.signUpErr = null
+            state.signingOut = false
+            state.otping = false
+            state.shouldOtp = false
+            state.signingUpFinish = false
+        }
     },
     extraReducers: {
         [signup.fulfilled]: (state, action) => {
