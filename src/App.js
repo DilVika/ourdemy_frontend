@@ -10,9 +10,10 @@ import './App.css';
 import Home from "./pages/home";
 import store from "./store";
 import {Provider} from "react-redux";
-import NotFound from "./components/NotFound";
+import NotFound from "./pages/NotFound";
 import AuthRoute from "./components/AuthRoute";
 import PageFrame from "./components/PageFrame";
+import Profile from "./pages/Profile";
 
 function App() {
     return (
@@ -23,9 +24,7 @@ function App() {
                         <Home/>
                     </Route>
                     <AuthRoute exact path="/profile">
-                        <PageFrame>
-                            profile
-                        </PageFrame>
+                        <Profile/>
                     </AuthRoute>
                     <Route path="*">
                         <NotFound/>
