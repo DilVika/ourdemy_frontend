@@ -18,8 +18,9 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    maxWidth: 500,
-    backgroundColor: red[100],
+     maxWidth: 1000,
+     minWidth:500
+    
   },
   media: {
     height: 0,
@@ -40,13 +41,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function RecipeReviewCard(props) {
+export default function ComplexCard(props) {
   const classes = useStyles();
-  const [expanded, setExpanded] = React.useState(false);
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
 
   return (
     <Card className={classes.root}>
@@ -66,12 +62,12 @@ export default function RecipeReviewCard(props) {
       />
       <CardMedia
         className={classes.media}
-        image={props.imagesrc ?? "https://picsum.photos/500/300"}
-        title="Paella dish"
+        image={props.imagesrc ?? "https://picsum.photos/300/300"}
+        title={props.title}
       />
       <CardContent>
         <Typography variant="body2" color="textSecondary" component="p">
-          Brief Details. 
+          {props.detail ?? 'Brief Details.'} 
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
