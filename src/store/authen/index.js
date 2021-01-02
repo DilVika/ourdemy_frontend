@@ -5,21 +5,32 @@ import {
 } from '@reduxjs/toolkit';
 
 const initialState = {
-    token: null,
+    token: localStorage.getItem("token") || null,
+    refresh: localStorage.getItem("refresh") || null,
     signingIn: false,
     signingUp: false,
     signUpErr: null,
+    signInErr: null,
     signingOut: false,
     otping: false,
     shouldOtp: false,
     signingUpFinish: false,
+    signingInFinish: false,
 };
 
 export const signin = createAsyncThunk(
     'authen/signin',
     async (userData, thunkAPI) => {
-        // const response = await axios.get(`/api/${type}`);
-        return {"token": "abc123"};
+        try {
+            thunkAPI.dispatch(authenSlice.actions.loadingSignIn())
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/users/signin`, {
+                "username": userData.username,
+                "password": userData.password,
+            });
+            return response.data
+        } catch (err) {
+            return thunkAPI.rejectWithValue("login failed: username or password mismatch")
+        }
     },
 );
 
@@ -84,6 +95,9 @@ export const authenSlice = createSlice({
         loadingSignUp: (state, _) => {
             state.signingUp = true
         },
+        loadingSignIn: (state, _) => {
+            state.signingIn = true
+        },
         loadingOtp: (state, _) => {
             state.otping = true
         },
@@ -95,6 +109,13 @@ export const authenSlice = createSlice({
             state.otping = false
             state.shouldOtp = false
             state.signingUpFinish = false
+        },
+        resetSignInState: (state, _) => {
+            state.signingIn = false
+            state.signingUp = false
+            state.signInErr = null
+            state.signingOut = false
+            state.signingInFinish = false
         }
     },
     extraReducers: {
@@ -106,12 +127,22 @@ export const authenSlice = createSlice({
             state.signUpErr = action.payload
         },
         [signin.fulfilled]: (state, action) => {
-            state.token = action.payload.token
+            state.token = action.payload.accessToken
+            state.refresh = action.payload.refreshToken
             state.signingIn = false
+            state.signingInFinish = true
+            localStorage.setItem("token", action.payload.accessToken)
+            localStorage.setItem("refresh", action.payload.refreshToken)
+        },
+        [signin.rejected]: (state, action) => {
+            state.signingIn = false
+            state.signInErr = action.payload
         },
         [signout.fulfilled]: (state, action) => {
             state.token = null
             state.signingOut = false
+            localStorage.removeItem("token")
+            localStorage.removeItem("refresh")
         },
         [otpConfirm.fulfilled]: (state, action) => {
             state.shouldOtp = false
