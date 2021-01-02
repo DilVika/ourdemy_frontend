@@ -5,8 +5,8 @@ import {
 } from '@reduxjs/toolkit';
 
 const initialState = {
-    token: null,
-    refresh: null,
+    token: localStorage.getItem("token") || null,
+    refresh: localStorage.getItem("refresh") || null,
     signingIn: false,
     signingUp: false,
     signUpErr: null,
@@ -131,6 +131,8 @@ export const authenSlice = createSlice({
             state.refresh = action.payload.refreshToken
             state.signingIn = false
             state.signingInFinish = true
+            localStorage.setItem("token", action.payload.accessToken)
+            localStorage.setItem("refresh", action.payload.refreshToken)
         },
         [signin.rejected]: (state, action) => {
             state.signingIn = false
@@ -139,6 +141,8 @@ export const authenSlice = createSlice({
         [signout.fulfilled]: (state, action) => {
             state.token = null
             state.signingOut = false
+            localStorage.removeItem("token")
+            localStorage.removeItem("refresh")
         },
         [otpConfirm.fulfilled]: (state, action) => {
             state.shouldOtp = false
