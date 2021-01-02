@@ -24,6 +24,8 @@ import store from "../store";
 import {connect} from "react-redux";
 import SignUpDialog from "./SignUpDialog";
 import SignInDialog from "./SignInDialog";
+import {Menu, MenuItem} from "@material-ui/core";
+import {AccountCircle} from "@material-ui/icons";
 
 const drawerWidth = 240;
 
@@ -113,7 +115,9 @@ const PageFrame = ({token, categories, children}) => {
     const [itemOpen, setItemOpen] = useState(isOpenArray);
     const [signUpDialogOpen, setSignUpDialogOpen] = useState(false);
     const [signInDialogOpen, setSignInDialogOpen] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
 
+    const history = useHistory();
 
     const toggleItem = (index, open) => {
         const itemOpenCopy = [...itemOpen]
@@ -121,9 +125,16 @@ const PageFrame = ({token, categories, children}) => {
         setItemOpen(itemOpenCopy)
     }
 
-    const history = useHistory();
+    const closeMenu = () => {
+        setAnchorEl(null)
+    }
 
-    const nav = (path) => {
+    const closeAndNav = (path) => {
+        setAnchorEl(null)
+        history.push(`/${path}`)
+    }
+
+    const navCat = (path) => {
         history.push(`/cat/${path}`)
     }
 
@@ -156,8 +167,10 @@ const PageFrame = ({token, categories, children}) => {
                         <Button className={classes.btn}
                                 color="inherit" onClick={() => setSignUpDialogOpen(true)}>Sign Up</Button>
                     </div> : <div>
-                        <Button className={classes.btn}
-                                color="inherit" onClick={() => store.dispatch(signout())}>Log out</Button>
+                        <IconButton className={classes.btn} aria-controls="simple-menu" aria-haspopup="true"
+                                    color="inherit" onClick={(e) => setAnchorEl(e.currentTarget)}>
+                            <AccountCircle/>
+                        </IconButton>
                     </div>}
                 </Toolbar>
             </AppBar>
@@ -175,7 +188,7 @@ const PageFrame = ({token, categories, children}) => {
                     {categories.map((cat, index) => (
                         <div key={cat.cid}>
                             <ListItem button>
-                                <ListItemText primary={cat.cat_name} onClick={() => nav(cat.cat_name)}/>
+                                <ListItemText primary={cat.cat_name} onClick={() => navCat(cat.cat_name)}/>
                                 <div role="button" onClick={(e) => toggleItem(index, !itemOpen[index])}>
                                     {itemOpen[index] ? <IconExpandLess/> :
                                         <IconExpandMore/>}
@@ -189,7 +202,7 @@ const PageFrame = ({token, categories, children}) => {
                                             {cat.subcats.map((sub, index) => (
                                                 <ListItem button key={sub.scid}>
                                                     <ListItemText inset
-                                                                  onClick={() => nav(`${cat.cat_name}/${sub.subcat_name}`)}
+                                                                  onClick={() => navCat(`${cat.cat_name}/${sub.subcat_name}`)}
                                                                   primary={sub.subcat_name}/>
                                                 </ListItem>
                                             ))}
@@ -212,6 +225,19 @@ const PageFrame = ({token, categories, children}) => {
                 setSignInDialogOpen(false)
                 store.dispatch(authenSlice.actions.resetSignInState())
             }}/>
+            <Menu
+                id="simple-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={closeMenu}
+            >
+                <MenuItem onClick={() => closeAndNav('profile')}>Profile</MenuItem>
+                <MenuItem onClick={() => {
+                    closeMenu()
+                    store.dispatch(signout())
+                }}>Logout</MenuItem>
+            </Menu>
         </div>
     );
 }

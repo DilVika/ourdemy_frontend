@@ -12,6 +12,7 @@ import store from "./store";
 import {Provider} from "react-redux";
 import NotFound from "./components/NotFound";
 import AuthRoute from "./components/AuthRoute";
+import PageFrame from "./components/PageFrame";
 
 function App() {
     return (
@@ -21,10 +22,10 @@ function App() {
                     <Route exact path="/">
                         <Home/>
                     </Route>
-                    <AuthRoute exact path="/lecturer">
-                        <div>
-                            Hello
-                        </div>
+                    <AuthRoute exact path="/profile">
+                        <PageFrame>
+                            profile
+                        </PageFrame>
                     </AuthRoute>
                     <Route path="*">
                         <NotFound/>
