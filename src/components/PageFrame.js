@@ -12,21 +12,19 @@ import ListItem from "@material-ui/core/ListItem";
 import Collapse from "@material-ui/core/Collapse";
 import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import IconExpandLess from "@material-ui/icons/ExpandLess";
 import IconExpandMore from "@material-ui/icons/ExpandMore";
 import InputBase from "@material-ui/core/InputBase";
 import Button from "@material-ui/core/Button";
 
-import { authenSlice, signin } from "../store/authen";
+import {authenSlice, signin, signout} from "../store/authen";
 import store from "../store";
-import { connect } from "react-redux";
-
-import Slide from '@material-ui/core/Slide';
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-
-import PropTypes from 'prop-types';
+import {connect} from "react-redux";
+import SignUpDialog from "./SignUpDialog";
+import SignInDialog from "./SignInDialog";
+import {Menu, MenuItem} from "@material-ui/core";
+import {AccountCircle} from "@material-ui/icons";
 
 const drawerWidth = 240;
 
@@ -82,205 +80,166 @@ const useStyles = makeStyles((theme) => ({
         width: "20ch",
       },
     },
-  },
-  appBar: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: drawerWidth,
-    zIndex: 2,
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-    zIndex: 1,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-  },
-  content: {
-    marginTop: "70px",
-  },
-  btn: {
-    marginLeft: "10px",
-  },
-  // necessary for content to be below app bar
-  toolbar: theme.mixins.toolbar,
-}));
+    drawerPaper: {
+        width: drawerWidth,
+    },
+    content: {
+        flexGrow: 1,
+        marginTop: '70px',
+        display: 'flex'
+    },
+    pageContent: {
+        flexGrow: 1,
+        
+    },
+    btn: {
+        marginLeft: '10px',
+    },
+    // necessary for content to be below app bar
+    toolbar: theme.mixins.toolbar,
+}}));
 
-function HideOnScroll(props) {
-  const { children, window } = props;
-  // Note that you normally won't need to set the window ref as useScrollTrigger
-  // will default to window.
-  // This is only being set here because the demo is in an iframe.
-  const trigger = useScrollTrigger({ target: window ? window() : undefined });
 
-  return (
-    <Slide appear={false} direction="down" in={!trigger}>
-      {children}
-    </Slide>
-  );
+const PageFrame = ({token, categories, children}) => {
+    const classes = useStyles();
+    const isOpenArray = categories.map((cat, index) => {
+        return false
+    })
+
+    const [itemOpen, setItemOpen] = useState(isOpenArray);
+    const [signUpDialogOpen, setSignUpDialogOpen] = useState(false);
+    const [signInDialogOpen, setSignInDialogOpen] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    const history = useHistory();
+
+    const toggleItem = (index, open) => {
+        const itemOpenCopy = [...itemOpen]
+        itemOpenCopy[index] = open
+        setItemOpen(itemOpenCopy)
+    }
+
+    const closeMenu = () => {
+        setAnchorEl(null)
+    }
+
+    const closeAndNav = (path) => {
+        setAnchorEl(null)
+        history.push(`/${path}`)
+    }
+
+    const navCat = (path) => {
+        history.push(`/cat/${path}`)
+    }
+
+    return (
+        <div className={classes.root}>
+            <CssBaseline/>
+            <AppBar position="fixed">
+                <Toolbar>
+                    <Typography className={classes.title} variant="h4" noWrap>
+                        Ourdemy
+                    </Typography>
+                    <div className={classes.search}>
+                        <div className={classes.searchIcon}>
+                            <SearchIcon/>
+                        </div>
+                        <InputBase
+                            placeholder="Search…"
+                            classes={{
+                                root: classes.inputRoot,
+                                input: classes.inputInput,
+                            }}
+                            inputProps={{'aria-label': 'search'}}
+                        />
+                    </div>
+                    {!token ? <div>
+                        <Button className={classes.btn}
+                                onClick={() => setSignInDialogOpen(true)}
+                                color="inherit">Log In</Button>
+                        <Button className={classes.btn}
+                                color="inherit" onClick={() => setSignUpDialogOpen(true)}>Sign Up</Button>
+                    </div> : <div>
+                        <IconButton className={classes.btn} aria-controls="simple-menu" aria-haspopup="true"
+                                    color="inherit" onClick={(e) => setAnchorEl(e.currentTarget)}>
+                            <AccountCircle/>
+                        </IconButton>
+                    </div>}
+                </Toolbar>
+            </AppBar>
+            <Drawer
+                className={classes.drawer}
+                variant="permanent"
+                classes={{
+                    paper: classes.drawerPaper,
+                }}
+                anchor="left"
+            >
+                <div className={classes.toolbar}/>
+                <Divider/>
+                <List>
+                    {categories.map((cat, index) => (
+                        <div key={cat.cid}>
+                            <ListItem button>
+                                <ListItemText primary={cat.cat_name} onClick={() => navCat(cat.cat_name)}/>
+                                <div role="button" onClick={(e) => toggleItem(index, !itemOpen[index])}>
+                                    {itemOpen[index] ? <IconExpandLess/> :
+                                        <IconExpandMore/>}
+                                </div>
+                            </ListItem>
+                            {
+                                cat.subcats ?
+                                    <Collapse in={itemOpen[index]} timeout="auto" unmountOnExit>
+                                        <Divider/>
+                                        <List component="div" disablePadding>
+                                            {cat.subcats.map((sub, index) => (
+                                                <ListItem button key={sub.scid}>
+                                                    <ListItemText inset
+                                                                  onClick={() => navCat(`${cat.cat_name}/${sub.subcat_name}`)}
+                                                                  primary={sub.subcat_name}/>
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Collapse>
+                                    : null
+                            }
+                        </div>
+                    ))}
+                </List>
+            </Drawer>
+            <main className={classes.content}>
+                <div className={classes.pageContent}>
+                    {children}
+                </div>
+            </main>
+            <SignUpDialog open={signUpDialogOpen} onClose={() => {
+                setSignUpDialogOpen(false)
+                store.dispatch(authenSlice.actions.resetSignUpState())
+            }}/>
+            <SignInDialog open={signInDialogOpen} onClose={() => {
+                setSignInDialogOpen(false)
+                store.dispatch(authenSlice.actions.resetSignInState())
+            }}/>
+            <Menu
+                id="simple-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={closeMenu}
+            >
+                <MenuItem onClick={() => closeAndNav('profile')}>Profile</MenuItem>
+                <MenuItem onClick={() => {
+                    closeMenu()
+                    store.dispatch(signout())
+                }}>Logout</MenuItem>
+            </Menu>
+        </div>
+    );
 }
 
-HideOnScroll.propTypes = {
-  children: PropTypes.element.isRequired,
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
-  window: PropTypes.func,
-};
-
-
-const dummyCat = [
-  {
-    cid: "1A",
-    cat_name: "Game",
-    subcat: [
-      {
-        cid: "1B",
-        subcat_name: "TW3",
-      },
-      {
-        cid: "2B",
-        subcat_name: "Genshin",
-      },
-    ],
-  },
-  {
-    cid: "2A",
-    cat_name: "Cats",
-  },
-];
-
-const PageFrame = ({ token, children }) => {
-  console.log(token);
-
-  const classes = useStyles();
-  const isOpenArray = dummyCat.map((cat, index) => {
-    if (cat.subcat) return { open: false, shouldShowIcon: true };
-    return { open: false, shouldShowIcon: false };
-  });
-  const [itemOpen, setItemOpen] = useState(isOpenArray);
-
-  const toggleItem = (index, open) => {
-    const itemOpenCopy = [...itemOpen];
-    itemOpenCopy[index].open = open;
-    setItemOpen(itemOpenCopy);
-  };
-
-  const history = useHistory();
-
-  const nav = (path) => {
-    history.push(`/cat/${path}`);
-  };
-
-  const onSigninClick = (username, password) => {
-    store.dispatch(signin({ username, password }));
-  };
-
-  return (
-    <div className={classes.root}>
-      <CssBaseline />
-      <HideOnScroll >
-      <AppBar position="fixed" >
-        <Toolbar>
-         
-          <Typography className={classes.title} variant="h5" noWrap>
-            Ourdemy
-          </Typography>
-          <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              <SearchIcon />
-            </div>
-            <InputBase
-              placeholder="Search…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              inputProps={{ "aria-label": "search" }}
-            />
-          </div>
-          {!token ? (
-            <div>
-              <Button
-                className={classes.btn}
-                onClick={() => onSigninClick("a", "b")}
-                color="inherit"
-              >
-                Log In
-              </Button>
-              <Button className={classes.btn} color="inherit">
-                Sign Up
-              </Button>
-            </div>
-          ) : null}
-        </Toolbar>
-      </AppBar>
-      </HideOnScroll>
-      <Drawer
-        className={classes.drawer}
-        variant="permanent"
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-        anchor="left"
-      >
-        <div className={classes.toolbar} />
-        <Divider />
-        <List>
-          {dummyCat.map((cat, index) => (
-            <div key={cat.cid}>
-              <ListItem button>
-                <ListItemText
-                  primary={cat.cat_name}
-                  onClick={() => nav(cat.cat_name)}
-                />
-                <div
-                  role="button"
-                  onClick={(e) => toggleItem(index, !itemOpen[index].open)}
-                >
-                  {itemOpen[index].shouldShowIcon ? (
-                    itemOpen[index].open ? (
-                      <IconExpandLess />
-                    ) : (
-                      <IconExpandMore />
-                    )
-                  ) : null}
-                </div>
-              </ListItem>
-              {cat.subcat ? (
-                <Collapse
-                  in={itemOpen[index].open}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  <Divider />
-                  <List component="div" disablePadding>
-                    {cat.subcat.map((sub, index) => (
-                      <ListItem button key={sub.cid}>
-                        <ListItemText
-                          inset
-                          onClick={() =>
-                            nav(`${cat.cat_name}/${sub.subcat_name}`)
-                          }
-                          primary={sub.subcat_name}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Collapse>
-              ) : null}
-            </div>
-          ))}
-        </List>
-      </Drawer>
-      <main className={classes.content}>{children}</main>
-    </div>
-  );
-};
-
-const mapStateToProps = (state) => ({
-  token: state.authen.token,
-});
+const mapStateToProps = state => ({
+    token: state.authen.token,
+    categories: state.cat.category
+})
 
 export default connect(mapStateToProps)(PageFrame);

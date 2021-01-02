@@ -1,11 +1,12 @@
 import React from "react";
-import PageFrame from "../components/PageFrame";
+
 import "../pages/home.css";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 
 import { Paper } from "@material-ui/core";
 import ComplexCard from "../components/ComplexCard";
+import PageFrame from "../components/PageFrame";
 
 const dummyHigh = [
   {
@@ -51,7 +52,7 @@ const Home = () => {
   return (
     <div>
       <PageFrame>
-        <div>
+
           <h1>Highlights </h1>
           <Carousel
             // swipeable={false}
@@ -76,7 +77,7 @@ const Home = () => {
           <h1>Most Watches </h1>
           <h1>Newest</h1>
           <h1>Topic</h1>
-        </div>
+        
       </PageFrame>
     </div>
   );

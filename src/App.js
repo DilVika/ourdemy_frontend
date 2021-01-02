@@ -1,4 +1,4 @@
-import React, {createContext} from 'react';
+import React from 'react';
 import {
     BrowserRouter as Router,
     Switch,
@@ -10,6 +10,10 @@ import './App.css';
 import Home from "./pages/home";
 import store from "./store";
 import {Provider} from "react-redux";
+import NotFound from "./pages/NotFound";
+import AuthRoute from "./components/AuthRoute";
+import Profile from "./pages/Profile";
+import LecturerRoute from "./components/LecturerRoute";
 
 function App() {
     return (
@@ -18,6 +22,17 @@ function App() {
                 <Switch>
                     <Route exact path="/">
                         <Home/>
+                    </Route>
+                    <AuthRoute exact path="/profile">
+                        <Profile/>
+                    </AuthRoute>
+                    <LecturerRoute exact path={"/course/manage"}>
+                        <div>
+                            Lec manage courses
+                        </div>
+                    </LecturerRoute>
+                    <Route path="*">
+                        <NotFound/>
                     </Route>
                 </Switch>
             </Router>
