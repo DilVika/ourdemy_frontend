@@ -23,6 +23,7 @@ import {authenSlice, signin, signout} from "../store/authen";
 import store from "../store";
 import {connect} from "react-redux";
 import SignUpDialog from "./SignUpDialog";
+import SignInDialog from "./SignInDialog";
 
 const drawerWidth = 240;
 
@@ -111,6 +112,8 @@ const PageFrame = ({token, categories, children}) => {
 
     const [itemOpen, setItemOpen] = useState(isOpenArray);
     const [signUpDialogOpen, setSignUpDialogOpen] = useState(false);
+    const [signInDialogOpen, setSignInDialogOpen] = useState(false);
+
 
     const toggleItem = (index, open) => {
         const itemOpenCopy = [...itemOpen]
@@ -124,23 +127,12 @@ const PageFrame = ({token, categories, children}) => {
         history.push(`/cat/${path}`)
     }
 
-    const onSigninClick = (username, password) => {
-        store.dispatch(signin({username, password}))
-    }
-
     return (
         <div className={classes.root}>
             <CssBaseline/>
             <AppBar position="fixed">
                 <Toolbar>
-                    <IconButton
-                        edge="start"
-                        className={classes.menuButton}
-                        color="inherit"
-                        aria-label="open drawer"
-                    >
-                        <MenuIcon/>
-                    </IconButton>
+
                     <Typography className={classes.title} variant="h4" noWrap>
                         Ourdemy
                     </Typography>
@@ -159,7 +151,7 @@ const PageFrame = ({token, categories, children}) => {
                     </div>
                     {!token ? <div>
                         <Button className={classes.btn}
-                                onClick={() => onSigninClick("a", "b")}
+                                onClick={() => setSignInDialogOpen(true)}
                                 color="inherit">Log In</Button>
                         <Button className={classes.btn}
                                 color="inherit" onClick={() => setSignUpDialogOpen(true)}>Sign Up</Button>
@@ -215,6 +207,10 @@ const PageFrame = ({token, categories, children}) => {
             <SignUpDialog open={signUpDialogOpen} onClose={() => {
                 setSignUpDialogOpen(false)
                 store.dispatch(authenSlice.actions.resetSignUpState())
+            }}/>
+            <SignInDialog open={signInDialogOpen} onClose={() => {
+                setSignInDialogOpen(false)
+                store.dispatch(authenSlice.actions.resetSignInState())
             }}/>
         </div>
     );
