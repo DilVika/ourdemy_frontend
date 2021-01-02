@@ -3,10 +3,21 @@ import {
     createSlice,
     createAsyncThunk,
 } from '@reduxjs/toolkit';
+import jwtDecode from "jwt-decode";
 
 const initialState = {
     token: localStorage.getItem("token") || null,
     refresh: localStorage.getItem("refresh") || null,
+    isLec: (localStorage.getItem("isLec") === 'true') || false,
+    user: {
+        "username": "",
+        "fullname": "",
+        "password": "",
+        "email": "",
+        "isLec": false
+    },
+    favList: [],
+    updateErr: null,
     signingIn: false,
     signingUp: false,
     signUpErr: null,
@@ -128,6 +139,7 @@ export const authenSlice = createSlice({
         },
         [signin.fulfilled]: (state, action) => {
             state.token = action.payload.accessToken
+            state.isLec = jwtDecode(action.payload.accessToken).isLec
             state.refresh = action.payload.refreshToken
             state.signingIn = false
             state.signingInFinish = true
