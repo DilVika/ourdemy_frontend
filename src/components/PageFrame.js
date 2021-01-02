@@ -12,7 +12,6 @@ import ListItem from '@material-ui/core/ListItem';
 import Collapse from '@material-ui/core/Collapse'
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import IconExpandLess from '@material-ui/icons/ExpandLess'
 import IconExpandMore from '@material-ui/icons/ExpandMore'
@@ -96,7 +95,12 @@ const useStyles = makeStyles((theme) => ({
         width: drawerWidth,
     },
     content: {
+        flexGrow: 1,
         marginTop: '70px',
+        display: 'flex'
+    },
+    pageContent: {
+        flexGrow: 1,
     },
     btn: {
         marginLeft: '10px',
@@ -143,7 +147,6 @@ const PageFrame = ({token, categories, children}) => {
             <CssBaseline/>
             <AppBar position="fixed">
                 <Toolbar>
-
                     <Typography className={classes.title} variant="h4" noWrap>
                         Ourdemy
                     </Typography>
@@ -215,7 +218,9 @@ const PageFrame = ({token, categories, children}) => {
                 </List>
             </Drawer>
             <main className={classes.content}>
-                {children}
+                <div className={classes.pageContent}>
+                    {children}
+                </div>
             </main>
             <SignUpDialog open={signUpDialogOpen} onClose={() => {
                 setSignUpDialogOpen(false)
