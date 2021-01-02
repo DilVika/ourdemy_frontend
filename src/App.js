@@ -6,7 +6,7 @@ import {
     Link
 } from "react-router-dom";
 
-import './App.css';
+
 import Home from "./pages/home";
 import store from "./store";
 import {Provider} from "react-redux";
