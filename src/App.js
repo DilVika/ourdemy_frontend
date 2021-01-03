@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import AuthRoute from "./components/AuthRoute";
 import Profile from "./pages/Profile";
 import LecturerRoute from "./components/LecturerRoute";
+import CourseManage from "./pages/CourseManage";
 
 function App() {
     return (
@@ -27,9 +28,7 @@ function App() {
                         <Profile/>
                     </AuthRoute>
                     <LecturerRoute exact path={"/course/manage"}>
-                        <div>
-                            Lec manage courses
-                        </div>
+                        <CourseManage/>
                     </LecturerRoute>
                     <Route path="*">
                         <NotFound/>
