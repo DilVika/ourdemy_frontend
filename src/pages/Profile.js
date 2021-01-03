@@ -2,7 +2,6 @@ import React, {useRef, useState} from 'react';
 
 import PageFrame from "../components/PageFrame";
 import {
-    Box,
     Button,
     Divider,
     Grid, IconButton,
@@ -11,18 +10,15 @@ import {
     ListItem, ListItemSecondaryAction,
     ListItemText,
     Paper,
-    TextField,
     Typography
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import AutoSizer from "react-virtualized-auto-sizer";
-import {FixedSizeList} from "react-window";
 import {Delete} from "@material-ui/icons";
 import YesNoDialog from "../components/YesNoDialog";
 import {useHistory} from "react-router-dom";
 import {connect} from "react-redux";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     root: {
         display: 'block',
         width: '100%',
@@ -41,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-const Profile = ({user, favList, err}) => {
+const Profile = ({user, favList}) => {
     const classes = useStyles()
 
     const [updateMode, setUpdateMode] = useState(false);
