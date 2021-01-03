@@ -18,7 +18,10 @@ const initialState = {
     },
     favList: [],
     updateErr: null,
+    passwordErr: null,
     fetching: false,
+    updating: false,
+    updatingPassword: false,
     signingIn: false,
     signingUp: false,
     signUpErr: null,
@@ -28,6 +31,8 @@ const initialState = {
     shouldOtp: false,
     signingUpFinish: false,
     signingInFinish: false,
+    updatingFinish: false,
+    updatingPasswordFinish: false,
 };
 
 export const signin = createAsyncThunk(
@@ -42,6 +47,52 @@ export const signin = createAsyncThunk(
             return response.data
         } catch (err) {
             return thunkAPI.rejectWithValue("login failed: username or password mismatch")
+        }
+    },
+);
+
+export const updateProfile = createAsyncThunk(
+    'authen/updateProfile',
+    async (userData, thunkAPI) => {
+        if (userData.email === "") {
+            return thunkAPI.rejectWithValue("update failed: email is missing")
+        }
+        try {
+            thunkAPI.dispatch(authenSlice.actions.updating())
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/users/update`, {
+                "fullname": userData.fullname,
+                "email": userData.email,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${thunkAPI.getState().authen.token}`
+                }
+            });
+            return response.data
+        } catch (err) {
+            return thunkAPI.rejectWithValue("login failed: username or password mismatch")
+        }
+    },
+);
+
+export const updatePassword = createAsyncThunk(
+    'authen/updatePassword',
+    async (userData, thunkAPI) => {
+        if (userData.repeatPassword !== userData.password) {
+            return thunkAPI.rejectWithValue("password and repeat password not matched")
+        }
+        try {
+            thunkAPI.dispatch(authenSlice.actions.updatingPassword())
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/users/updatePassword`, {
+                "old_password": userData.oldPassword,
+                "new_password": userData.password,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${thunkAPI.getState().authen.token}`
+                }
+            });
+            return response.data
+        } catch (err) {
+            return thunkAPI.rejectWithValue(err.response.data.error)
         }
     },
 );
@@ -80,7 +131,7 @@ export const signup = createAsyncThunk(
             });
             return response.data
         } catch (err) {
-            return thunkAPI.rejectWithValue(err.response.error)
+            return thunkAPI.rejectWithValue(err.response.data.error)
         }
     },
 );
@@ -99,7 +150,7 @@ export const otpConfirm = createAsyncThunk(
             });
             return response.data
         } catch (err) {
-            return thunkAPI.rejectWithValue(err.response.error)
+            return thunkAPI.rejectWithValue(err.response.data.error)
         }
     },
 );
@@ -134,6 +185,12 @@ export const authenSlice = createSlice({
         loadingOtp: (state, _) => {
             state.otping = true
         },
+        updating: (state, _) => {
+            state.updating = true
+        },
+        updatingPassword: (state, _) => {
+            state.updatingPassword = true
+        },
         resetSignUpState: (state, _) => {
             state.signingIn = false
             state.signingUp = false
@@ -149,6 +206,11 @@ export const authenSlice = createSlice({
             state.signInErr = null
             state.signingOut = false
             state.signingInFinish = false
+        },
+        resetPasswordUpdateState: (state, _) => {
+            state.passwordErr = null
+            state.updatingPassword = false
+            state.updatingPasswordFinish = false
         }
     },
     extraReducers: {
@@ -192,6 +254,25 @@ export const authenSlice = createSlice({
         },
         [fetchProfile.rejected]: (state, action) => {
             state.updateErr = action.payload
+        },
+        [updateProfile.fulfilled]: (state, action) => {
+            state.user.fullname = action.payload.user
+            state.user.email = action.payload.email
+            state.updating = false
+            state.updatingFinish = true
+        },
+        [updateProfile.rejected]: (state, action) => {
+            state.updating = false
+            state.updateErr = action.payload
+        },
+        [updatePassword.fulfilled]: (state, action) => {
+            state.updatingPassword = false
+            state.updatingPasswordFinish = true
+        },
+        [updatePassword.rejected]: (state, action) => {
+            console.log(action.payload)
+            state.updatingPassword = false
+            state.passwordErr = action.payload
         }
     }
 })
