@@ -1,12 +1,8 @@
-.title {
+/* .title {
     padding: 20px;
-}
+} */
 
-.homeContainer {
-
-}
 
 .item {
-    padding-bottom: 10px;
-    padding-top: 10px;
+padding: 5px;
 }
