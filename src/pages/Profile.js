@@ -9,16 +9,17 @@ import {
     List,
     ListItem, ListItemSecondaryAction,
     ListItemText,
-    Paper,
+    Paper, Snackbar,
     Typography
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {Delete} from "@material-ui/icons";
+import {Close, Delete} from "@material-ui/icons";
 import YesNoDialog from "../components/YesNoDialog";
 import {useHistory} from "react-router-dom";
 import {connect} from "react-redux";
-import {fetchProfile} from "../store/authen";
+import {fetchProfile, updateProfile} from "../store/authen";
 import store from "../store";
+import UpdatePasswordDialog from "../components/UpdatePassword";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -48,28 +49,22 @@ const Profile = ({user, favList, fetching, err}) => {
 
     const [updateMode, setUpdateMode] = useState(false);
     const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+    const [updatePasswordDialogOpen, setUpdatePasswordDialogOpen] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
 
     useEffect(() => {
         store.dispatch(fetchProfile())
     }, [])
 
-
     const unameRef = useRef("")
     const nameRef = useRef("")
     const emailRef = useRef("")
-    const passwordRef = useRef("")
-    const rpasswordRef = useRef("")
-    const opasswordRef = useRef("")
-
     const history = useHistory();
 
-    const resetFields = () => {
+    const resetFieldsUpdate = () => {
         unameRef.current.value = user.username
         nameRef.current.value = user.fullname
         emailRef.current.value = user.email
-        opasswordRef.current.value = ""
-        passwordRef.current.value = ""
-        rpasswordRef.current.value = ""
     }
 
     return (
@@ -125,37 +120,6 @@ const Profile = ({user, favList, fetching, err}) => {
                                                    disabled={!updateMode}/>
                                         </Grid>
                                         {
-                                            updateMode ? <>
-                                                <Grid item xs={6}>
-                                                    <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                                        Old Password
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={6}>
-                                                    <Input inputRef={opasswordRef} defaultValue={""} type={"password"}
-                                                           disabled={!updateMode}/>
-                                                </Grid>
-                                            </> : null
-                                        }
-                                        <Grid item xs={6}>
-                                            <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                                Password
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Input inputRef={passwordRef} defaultValue={""} type={"password"}
-                                                   disabled={!updateMode}/>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                                Repeat Password
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Input inputRef={rpasswordRef} defaultValue={""} type={"password"}
-                                                   disabled={!updateMode}/>
-                                        </Grid>
-                                        {
                                             updateMode && !user.isLec ? <Grid item xs={12}>
                                                 <div className={classes.buttonBar}>
                                                     <Button variant={"outlined"} color={"secondary"}>
@@ -181,7 +145,7 @@ const Profile = ({user, favList, fetching, err}) => {
                                                             style={{marginRight: "5px"}}
                                                             onClick={() => {
                                                                 setUpdateMode(false)
-                                                                resetFields()
+                                                                resetFieldsUpdate()
                                                             }
                                                             }>
                                                         Cancel
@@ -190,10 +154,18 @@ const Profile = ({user, favList, fetching, err}) => {
                                                             onClick={() => setUpdateDialogOpen(true)}>
                                                         Submit
                                                     </Button>
-                                                </div> : <Button variant={"contained"} color={"primary"}
-                                                                 onClick={() => setUpdateMode(true)}>
-                                                    Update
-                                                </Button>}
+                                                </div> : <>
+                                                    <Button style={{marginRight: "5px"}} variant={"contained"}
+                                                            color={"secondary"}
+                                                            onClick={() => setUpdatePasswordDialogOpen(true)}
+                                                    >
+                                                        Update Password
+                                                    </Button>
+                                                    <Button variant={"contained"} color={"primary"}
+                                                            onClick={() => setUpdateMode(true)}>
+                                                        Update
+                                                    </Button>
+                                                </>}
                                             </div>
                                         </Grid>
                                     </> : <>
@@ -252,8 +224,35 @@ const Profile = ({user, favList, fetching, err}) => {
             </PageFrame>
             <YesNoDialog open={updateDialogOpen} onClose={() => setUpdateDialogOpen(false)} title={"Update"}
                          content={"Are you sure you want to update your information? Ò w Ó"}
-                         onConfirm={() => console.log("update")}
+                         onConfirm={() => {
+                             store.dispatch(updateProfile({
+                                 "fullname": nameRef.current.value,
+                                 "email": emailRef.current.value
+                             }))
+                             setUpdateDialogOpen(false)
+                         }
+
+                         }
                          onCancel={() => setUpdateDialogOpen(false)}
+            />
+            <UpdatePasswordDialog open={updatePasswordDialogOpen} onClose={() => setUpdatePasswordDialogOpen(false)}
+            />
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                }}
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={() => setSnackbarOpen(false)}
+                message="Update success"
+                action={
+                    <React.Fragment>
+                        <IconButton size="small" aria-label="close" color="inherit" onClick={() => setSnackbarOpen(false)}>
+                            <Close fontSize="small" />
+                        </IconButton>
+                    </React.Fragment>
+                }
             />
         </div>
     );
@@ -275,7 +274,7 @@ const mapStateToProps = state => ({
     user: state.authen.user,
     favList: state.authen.favList,
     err: state.authen.updateErr,
-    fetching: state.authen.fetching
+    fetching: state.authen.fetching,
 })
 
 export default connect(
