@@ -1,8 +1,8 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import PageFrame from "../components/PageFrame";
 import {
-    Button,
+    Button, CircularProgress,
     Divider,
     Grid, IconButton,
     Input,
@@ -17,6 +17,8 @@ import {Delete} from "@material-ui/icons";
 import YesNoDialog from "../components/YesNoDialog";
 import {useHistory} from "react-router-dom";
 import {connect} from "react-redux";
+import {fetchProfile} from "../store/authen";
+import store from "../store";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -34,14 +36,23 @@ const useStyles = makeStyles(() => ({
     },
     main: {
         width: '99%',
+    },
+    loadingCenter: {
+        display: 'flex',
+        justifyContent: 'center'
     }
 }))
 
-const Profile = ({user, favList}) => {
+const Profile = ({user, favList, fetching, err}) => {
     const classes = useStyles()
 
     const [updateMode, setUpdateMode] = useState(false);
     const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+
+    useEffect(() => {
+        store.dispatch(fetchProfile())
+    }, [])
+
 
     const unameRef = useRef("")
     const nameRef = useRef("")
@@ -76,101 +87,128 @@ const Profile = ({user, favList}) => {
                                 <Grid item xs={12}>
                                     <Divider/>
                                 </Grid>
-                                <Grid item xs={6}>
-                                    <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                        Username
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Input inputRef={unameRef} defaultValue={user.username} disabled={!updateMode}/>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                        Fullname
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Input inputRef={nameRef} defaultValue={user.fullname} disabled={!updateMode}/>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                        Email
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Input inputRef={emailRef} defaultValue={user.email} disabled={!updateMode}/>
-                                </Grid>
                                 {
-                                    updateMode ? <>
+                                    err ?
+                                        <Grid item xs={12}>
+                                            <Typography align={"center"} color={"error"}>
+                                                {err}
+                                            </Typography>
+                                        </Grid> : null
+                                }
+                                {
+                                    !fetching ? <>
                                         <Grid item xs={6}>
                                             <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                                Old Password
+                                                Username
                                             </Typography>
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <Input inputRef={opasswordRef} defaultValue={""} type={"password"}
+                                            <Input inputRef={unameRef} defaultValue={user.username}
+                                                   disabled/>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
+                                                Fullname
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Input inputRef={nameRef} defaultValue={user.fullname}
                                                    disabled={!updateMode}/>
                                         </Grid>
-                                    </> : null
+                                        <Grid item xs={6}>
+                                            <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
+                                                Email
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Input inputRef={emailRef} defaultValue={user.email}
+                                                   disabled={!updateMode}/>
+                                        </Grid>
+                                        {
+                                            updateMode ? <>
+                                                <Grid item xs={6}>
+                                                    <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
+                                                        Old Password
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item xs={6}>
+                                                    <Input inputRef={opasswordRef} defaultValue={""} type={"password"}
+                                                           disabled={!updateMode}/>
+                                                </Grid>
+                                            </> : null
+                                        }
+                                        <Grid item xs={6}>
+                                            <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
+                                                Password
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Input inputRef={passwordRef} defaultValue={""} type={"password"}
+                                                   disabled={!updateMode}/>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
+                                                Repeat Password
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Input inputRef={rpasswordRef} defaultValue={""} type={"password"}
+                                                   disabled={!updateMode}/>
+                                        </Grid>
+                                        {
+                                            updateMode && !user.isLec ? <Grid item xs={12}>
+                                                <div className={classes.buttonBar}>
+                                                    <Button variant={"outlined"} color={"secondary"}>
+                                                        Upgrade to Lecturer
+                                                    </Button>
+                                                </div>
+                                            </Grid> : null
+                                        }
+                                        {
+                                            !updateMode && user.isLec ? <Grid item xs={12}>
+                                                <div className={classes.buttonBar}>
+                                                    <Button variant={"outlined"} color={"primary"}
+                                                            onClick={() => history.push("/course/manage")}>
+                                                        Manage Courses
+                                                    </Button>
+                                                </div>
+                                            </Grid> : null
+                                        }
+                                        <Grid item xs={12}>
+                                            <div className={classes.buttonBar}>
+                                                {updateMode ? <div>
+                                                    <Button variant={"contained"} color={"secondary"}
+                                                            style={{marginRight: "5px"}}
+                                                            onClick={() => {
+                                                                setUpdateMode(false)
+                                                                resetFields()
+                                                            }
+                                                            }>
+                                                        Cancel
+                                                    </Button>
+                                                    <Button variant={"contained"} color={"primary"}
+                                                            onClick={() => setUpdateDialogOpen(true)}>
+                                                        Submit
+                                                    </Button>
+                                                </div> : <Button variant={"contained"} color={"primary"}
+                                                                 onClick={() => setUpdateMode(true)}>
+                                                    Update
+                                                </Button>}
+                                            </div>
+                                        </Grid>
+                                    </> : <>
+                                        <Grid item xs={12}>
+                                            <Typography align={"center"} color={"error"}>
+                                                {err}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <div className={classes.loadingCenter}>
+                                                <CircularProgress/>
+                                            </div>
+                                        </Grid>
+                                    </>
                                 }
-                                <Grid item xs={6}>
-                                    <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                        Password
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Input inputRef={passwordRef} defaultValue={""} type={"password"}
-                                           disabled={!updateMode}/>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                        Repeat Password
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Input inputRef={rpasswordRef} defaultValue={""} type={"password"}
-                                           disabled={!updateMode}/>
-                                </Grid>
-                                {
-                                    updateMode && !user.isLec ? <Grid item xs={12}>
-                                        <div className={classes.buttonBar}>
-                                            <Button variant={"outlined"} color={"secondary"}>
-                                                Upgrade to Lecturer
-                                            </Button>
-                                        </div>
-                                    </Grid> : null
-                                }
-                                {
-                                    !updateMode && user.isLec ? <Grid item xs={12}>
-                                        <div className={classes.buttonBar}>
-                                            <Button variant={"outlined"} color={"primary"} onClick={() => history.push("/course/manage")}>
-                                                Manage Courses
-                                            </Button>
-                                        </div>
-                                    </Grid> : null
-                                }
-                                <Grid item xs={12}>
-                                    <div className={classes.buttonBar}>
-                                        {updateMode ? <div>
-                                            <Button variant={"contained"} color={"secondary"}
-                                                    style={{marginRight: "5px"}}
-                                                    onClick={() => {
-                                                        setUpdateMode(false)
-                                                        resetFields()
-                                                    }
-                                                    }>
-                                                Cancel
-                                            </Button>
-                                            <Button variant={"contained"} color={"primary"}
-                                                    onClick={() => setUpdateDialogOpen(true)}>
-                                                Submit
-                                            </Button>
-                                        </div> : <Button variant={"contained"} color={"primary"}
-                                                         onClick={() => setUpdateMode(true)}>
-                                            Update
-                                        </Button>}
-                                    </div>
-                                </Grid>
                             </Grid>
                         </Grid>
                         <Grid item xs={6}>
@@ -229,64 +267,7 @@ Profile.defaultProps = {
         "email": "",
         "isLec": false
     },
-    favList: [
-        {
-            "cid": "1234",
-            "name": "How to pet rin rin"
-        },
-        {
-            "cid": "1235",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1236",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1237",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1238",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1239",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1240",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1241",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1242",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1243",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1244",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1245",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1246",
-            "name": "How to pet rin rin advance"
-        },
-        {
-            "cid": "1247",
-            "name": "How to pet rin rin advance"
-        }
-    ],
+    favList: [],
     err: null
 }
 
@@ -294,6 +275,7 @@ const mapStateToProps = state => ({
     user: state.authen.user,
     favList: state.authen.favList,
     err: state.authen.updateErr,
+    fetching: state.authen.fetching
 })
 
 export default connect(

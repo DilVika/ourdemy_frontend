@@ -20,7 +20,7 @@ import { Paper } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 300,
-    minWidth: 250,
+    // minWidth: 250,
   },
   media: {
     height: 0,
