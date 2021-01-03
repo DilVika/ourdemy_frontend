@@ -100,7 +100,9 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex'
     },
     pageContent: {
-        flexGrow: 1,
+        //flexGrow: 1,
+        width:`calc(100vw - ${drawerWidth}px - 20px )`,
+        padding: '20px'
     },
     btn: {
         marginLeft: '10px',

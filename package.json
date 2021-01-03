@@ -12,16 +12,17 @@
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
     "jwt-decode": "^3.1.2",
-    "pure-react-carousel": "^1.27.6",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-multi-carousel": "^2.6.1",
     "react-redux": "^7.2.2",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
+    "ua-parser-js": "^0.7.23",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "install & react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

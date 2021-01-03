@@ -19,8 +19,8 @@ import { Paper } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    maxWidth: 300,
-    // minWidth: 250,
+    maxWidth: 350,
+    minWidth: 250,
   },
   media: {
     height: 0,
@@ -46,7 +46,7 @@ export default function ComplexCard(props) {
 
   return (
     <div className={props.className}>
-      {/* <Paper elevation={0}> */}
+      <Paper elevation={2}>
         <Card className={classes.root}>
           <CardHeader
             avatar={
@@ -77,7 +77,7 @@ export default function ComplexCard(props) {
             </IconButton>
           </CardActions>
         </Card>
-      {/* </Paper> */}
+      </Paper>
     </div>
   );
 }
