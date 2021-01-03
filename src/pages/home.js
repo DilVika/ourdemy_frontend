@@ -2,6 +2,7 @@ import React from "react";
 import "../pages/home.css";
 
 import "react-multi-carousel/lib/styles.css";
+import PageFrame from "../components/PageFrame.js"
 
 import ComplexCard from "../components/ComplexCard";
 import CCarousel from "../components/CCarousel";
@@ -49,7 +50,7 @@ const dummyHigh = [
 ));
 const Home = () => {
   return (
-    <div>
+    <PageFrame>
       <div className="title">
         <h2>Highlights </h2>
         <CCarousel>{dummyHigh}</CCarousel>
@@ -66,7 +67,7 @@ const Home = () => {
         <h2>Topics</h2>
         <CCarousel>{dummyHigh}</CCarousel>
       </div>
-    </div>
+    </PageFrame>
   );
 };
 
