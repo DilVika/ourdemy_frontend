@@ -18,6 +18,7 @@ const initialState = {
     },
     favList: [],
     updateErr: null,
+    fetching: false,
     signingIn: false,
     signingUp: false,
     signUpErr: null,
@@ -41,6 +42,24 @@ export const signin = createAsyncThunk(
             return response.data
         } catch (err) {
             return thunkAPI.rejectWithValue("login failed: username or password mismatch")
+        }
+    },
+);
+
+export const fetchProfile = createAsyncThunk(
+    'authen/fetchProfile',
+    async (_, thunkAPI) => {
+        try {
+            thunkAPI.dispatch(authenSlice.actions.fetchingProfile())
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users/profile`, {
+                headers: {
+                    'Authorization': `Bearer ${thunkAPI.getState().authen.token}`
+                }
+            });
+
+            return response.data
+        } catch (err) {
+            return thunkAPI.rejectWithValue("profile fetching failed, something went wrong")
         }
     },
 );
@@ -97,6 +116,9 @@ export const authenSlice = createSlice({
     name: 'authen',
     initialState: initialState,
     reducers: {
+        fetchingProfile: (state, action) => {
+            state.fetching = true
+        },
         otpMode: (state, action) => {
             state.shouldOtp = true
         },
@@ -138,11 +160,11 @@ export const authenSlice = createSlice({
             state.signUpErr = action.payload
         },
         [signin.fulfilled]: (state, action) => {
+            state.signingIn = false
+            state.signingInFinish = true
             state.token = action.payload.accessToken
             state.isLec = jwtDecode(action.payload.accessToken).isLec
             state.refresh = action.payload.refreshToken
-            state.signingIn = false
-            state.signingInFinish = true
             localStorage.setItem("token", action.payload.accessToken)
             localStorage.setItem("refresh", action.payload.refreshToken)
         },
@@ -162,6 +184,14 @@ export const authenSlice = createSlice({
         },
         [otpConfirm.rejected]: (state, action) => {
             state.signUpErr = action.payload
+        },
+        [fetchProfile.fulfilled]: (state, action) => {
+            state.user = action.payload
+            state.fetching = false
+            state.updateErr = null
+        },
+        [fetchProfile.rejected]: (state, action) => {
+            state.updateErr = action.payload
         }
     }
 })
