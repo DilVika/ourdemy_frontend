@@ -9349,6 +9349,11 @@ react-scripts@4.0.1:
   optionalDependencies:
     fsevents "^2.1.3"
 
+react-star-review@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/react-star-review/-/react-star-review-1.2.0.tgz#2340ab003cd1419ad53f3f5e18bedca5d99064ab"
+  integrity sha512-YGKtpIysJTROs7du51R67VjPorAvbDg1Zw314AU7dDyEhJot/lX7otX8+2HQoz5JfzUGDMXbIrolvtYqd5rJ7g==
+
 react-transition-group@^4.4.0:
   version "4.4.1"
   resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-4.4.1.tgz#63868f9325a38ea5ee9535d828327f85773345c9"

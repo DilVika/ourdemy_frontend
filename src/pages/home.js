@@ -2,7 +2,7 @@ import React from "react";
 import "../pages/home.css";
 
 import "react-multi-carousel/lib/styles.css";
-
+import { Paper } from "@material-ui/core";
 import ComplexCard from "../components/ComplexCard";
 import CCarousel from "../components/CCarousel";
 import PageFrame from "../components/PageFrame";
@@ -10,51 +10,66 @@ import PageFrame from "../components/PageFrame";
 const dummyHigh = [
   {
     src: "https://picsum.photos/300/200",
-    name: "Java Code Giấy",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 5,
+    count: "700",
+    currentPrice: "50",
+    originPrice: "70",
     brief: "Java code giay",
   },
   {
     src: "https://picsum.photos/300/200",
-    name: "Java",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 5,
+    count: "700",
+    currentPrice: "50",
+    originPrice: "70",
     brief: "Java code giay",
   },
   {
     src: "https://picsum.photos/300/200",
-    name: "Java Code Giấy",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 5,
+    count: "700",
+    currentPrice: "50",
+    originPrice: "70",
     brief: "Java code giay",
   },
   {
-    src: "https://picsum.photos/500/301",
-    name: "Java Code Giấy zzzz",
+    src: "https://picsum.photos/300/200",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 5,
+    count: "700",
+    currentPrice: "50",
+    originPrice: "70",
     brief: "Java code giay",
   },
   {
-    src: "https://picsum.photos/300/300",
-    name: "Java",
-    brief: "Java code giay",
-  },
-  {
-    src: "https://picsum.photos/500/301",
-    name: "Java Code Giấy zz",
-    brief: "Java code giay",
-  },
-  {
-    src: "https://picsum.photos/500/301",
-    name: "Java Code Giấy zz",
-    brief: "Java code giay",
-  },
-  {
-    src: "https://picsum.photos/500/301",
-    name: "Java Code Giấy zz",
+    src: "https://picsum.photos/300/200",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 5,
+    count: "700",
+    currentPrice: "50",
+    originPrice: "70",
     brief: "Java code giay",
   },
 ].map((val, index) => (
   <ComplexCard
     key={index}
     className="item"
-    title={val.name}
-    detail={val.brief}
-    avatar={val.name[0]}
+    title={val.title}
+    price={val.currentPrice}
+    author={val.author}
     imagesrc={val.src}
   />
 ));
