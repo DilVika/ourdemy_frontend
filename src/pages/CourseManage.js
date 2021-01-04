@@ -5,10 +5,10 @@ import store from "../store";
 import {makeStyles} from "@material-ui/core/styles";
 import {
     Button,
-    Card,
+    Card, CardActions,
     CardContent,
     CardHeader,
-    CardMedia,
+    CardMedia, Checkbox,
     Chip,
     Fab,
     Grid,
@@ -16,9 +16,10 @@ import {
     Paper,
     Typography
 } from "@material-ui/core";
-import {Add} from "@material-ui/icons";
+import {Add, Edit} from "@material-ui/icons";
 import List from "@material-ui/core/List";
 import data from "../ava.json"
+import IconButton from "@material-ui/core/IconButton";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
         width: '80%',
     },
     card: {
-        width: '10%'
+        width: '90%'
     }
 
 }))
@@ -50,14 +51,33 @@ const CourseManage = ({courses}) => {
                                 <List>
                                     {courses.map((course, index) => (
                                         <ListItem key={course.cid}>
-                                            <Card raised className={classes.root}>
+                                            <Card raised className={classes.card}>
                                                 <CardHeader
                                                     title={course.title}
                                                     subheader={
-                                                        <Chip
-                                                            label={course.category}
-                                                            color={"primary"}
-                                                        />
+                                                        <>
+                                                            <Chip
+                                                                label={course.category}
+                                                                color={"primary"}
+                                                            />
+                                                            <Chip
+                                                                style={{marginLeft: "5px"}}
+                                                                label={course.review_score.toFixed(2) + "/5.00"}
+                                                                color={"secondary"}
+                                                            />
+                                                            <Chip
+                                                                style={{marginLeft: "5px"}}
+                                                                label={course.chapterCount + " chapters"}
+                                                                color={"default"}
+                                                            />
+                                                        </>
+                                                    }
+                                                    action={
+                                                        <>
+                                                            <IconButton>
+                                                                <Edit/>
+                                                            </IconButton>
+                                                        </>
                                                     }
                                                 />
                                                 <CardMedia
@@ -69,6 +89,7 @@ const CourseManage = ({courses}) => {
                                                         {course.shortDesc}
                                                     </Typography>
                                                 </CardContent>
+
                                             </Card>
                                         </ListItem>
                                     ))}
@@ -96,18 +117,20 @@ CourseManage.defaultProps = {
             "category": "Cyberpunk 2077",
             "title": "How to get all legendary weapons",
             "review_score": 5.0,
-            "ava": data.exampleAva,
+            "ava": data.exampleAva1,
             "shortDesc": "Locations of 500 legendary weapons",
             "chapterCount": 5,
+            "isDone": false,
         },
         {
             "cid": "124",
             "category": "Genshin",
             "title": "Best farming route guide",
             "review_score": 5.0,
-            "ava": data.exampleAva,
+            "ava": data.exampleAva2,
             "shortDesc": "Everyday route for f2p players",
             "chapterCount": 3,
+            "isDone": true
         }
     ]
 }

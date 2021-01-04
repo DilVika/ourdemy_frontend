@@ -149,7 +149,7 @@ const PageFrame = ({token, categories, children}) => {
             <CssBaseline/>
             <AppBar position="fixed">
                 <Toolbar>
-                    <Typography role={"button"} onClick={() => history.push("/")} className={classes.title} variant="h4" noWrap>
+                    <Typography role={"button   `1"} onClick={() => history.push("/")} className={classes.title} variant="h4" noWrap>
                         Ourdemy
                     </Typography>
                     <div className={classes.search}>
