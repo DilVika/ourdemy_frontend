@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import AuthRoute from "./components/AuthRoute";
 import Profile from "./pages/Profile";
 import LecturerRoute from "./components/LecturerRoute";
+import ViewVideo from "./pages/ViewVideo";
 
 function App() {
     return (
@@ -31,6 +32,9 @@ function App() {
                             Lec manage courses
                         </div>
                     </LecturerRoute>
+                    <Route exact path={"/course/view"}>
+                        <ViewVideo/>
+                    </Route>
                     <Route path="*">
                         <NotFound/>
                     </Route>
