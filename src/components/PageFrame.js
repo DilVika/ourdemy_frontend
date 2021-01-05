@@ -149,7 +149,7 @@ const PageFrame = ({token, categories, children}) => {
             <CssBaseline/>
             <AppBar position="fixed">
                 <Toolbar>
-                    <Typography className={classes.title} variant="h4" noWrap>
+                    <Typography onClick={() => history.push("/")} className={classes.title} variant="h4" noWrap>
                         Ourdemy
                     </Typography>
                     <div className={classes.search}>
@@ -177,6 +177,7 @@ const PageFrame = ({token, categories, children}) => {
                             <AccountCircle/>
                         </IconButton>
                     </div>}
+
                 </Toolbar>
             </AppBar>
             <Drawer
