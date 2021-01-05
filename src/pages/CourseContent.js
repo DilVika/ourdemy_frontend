@@ -21,6 +21,7 @@ import {connect} from "react-redux";
 import store from "../store";
 import {fetchCurrentCourse, lecCourseSlice} from "../store/course/lec";
 import {Route, useParams} from "react-router-dom";
+import UploadVideoDialog from "../components/UploadVideoDialog";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -43,6 +44,7 @@ const CourseContent = ({courseContent, itemOpen}) => {
     const {id} = useParams()
 
     const [createChapterDialogOpen, setCreateChapterDialogOpen] = useState(false);
+    const [uploadVideoDialogOpen, setUploadVideoDialogOpen] = useState(false);
 
     useEffect(() => {
         store.dispatch(fetchCurrentCourse(id))
@@ -91,7 +93,8 @@ const CourseContent = ({courseContent, itemOpen}) => {
                                                 </ListItem>
                                                 {
                                                     itemOpen[index].open ?
-                                                        <Collapse in={itemOpen[index].open} timeout="auto" unmountOnExit>
+                                                        <Collapse in={itemOpen[index].open} timeout="auto"
+                                                                  unmountOnExit>
                                                             <List disablePadding>
                                                                 {
                                                                     chapter.videos.map((video, vindex) => (
@@ -120,7 +123,8 @@ const CourseContent = ({courseContent, itemOpen}) => {
                                             onClick={() => setCreateChapterDialogOpen(true)}>
                                         Add Chapter
                                     </Button>
-                                    <Button style={{marginTop: '8px'}} variant={"contained"} color={"primary"}>
+                                    <Button style={{marginTop: '8px'}} variant={"contained"} color={"primary"}
+                                            onClick={() => setUploadVideoDialogOpen(true)}>
                                         Add Video
                                     </Button>
                                     {
@@ -144,6 +148,12 @@ const CourseContent = ({courseContent, itemOpen}) => {
             </PageFrame>
             <CreateChapterDialog open={createChapterDialogOpen}
                                  onClose={() => setCreateChapterDialogOpen(false)}/>
+            {
+                courseContent ?
+                    <UploadVideoDialog open={uploadVideoDialogOpen} onClose={() => setUploadVideoDialogOpen(false)}
+                                       chapters={courseContent.chapters}/>
+                    : null
+            }
         </div>
     )
 }
