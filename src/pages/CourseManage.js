@@ -20,6 +20,9 @@ import {Add, Edit} from "@material-ui/icons";
 import List from "@material-ui/core/List";
 import data from "../ava.json"
 import IconButton from "@material-ui/core/IconButton";
+import {
+     useHistory,
+} from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -37,8 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CourseManage = ({courses}) => {
     const classes = useStyles()
-
-    console.log(courses)
+    const history = useHistory()
 
     return (<>
         <div className={classes.root}>
@@ -74,7 +76,9 @@ const CourseManage = ({courses}) => {
                                                     }
                                                     action={
                                                         <>
-                                                            <IconButton>
+                                                            <IconButton onClick={() => (
+                                                                    history.push(`/course/update/${course.cid}`)
+                                                                )}>
                                                                 <Edit/>
                                                             </IconButton>
                                                         </>

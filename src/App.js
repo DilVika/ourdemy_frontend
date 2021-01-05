@@ -4,7 +4,7 @@ import {
     Switch,
     Route,
     Link,
-    useLocation
+    useParams,
 } from "react-router-dom";
 
 
@@ -18,6 +18,8 @@ import LecturerRoute from "./components/LecturerRoute";
 import CourseManage from "./pages/CourseManage";
 import CreateCourse from "./pages/CreateCourse";
 import UpdateCourse from "./pages/UpdateCourse";
+import CourseContent from "./pages/CourseContent";
+import {fetchCurrentCourse} from "./store/course/lec";
 
 function App() {
     return (
@@ -37,7 +39,10 @@ function App() {
                         <CreateCourse/>
                     </Route>
                     <Route exact path={"/course/update/:id"}>
-                        <UpdateCourse />
+                        <UpdateCourse/>
+                    </Route>
+                    <Route exact path={"/course/content/:id"}>
+                        <CourseContent/>
                     </Route>
                     <Route path="*">
                         <NotFound/>
