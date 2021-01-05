@@ -1,10 +1,24 @@
 import React, {useRef, useState} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import PageFrame from "../components/PageFrame";
-import {Button, Divider, Grid, InputLabel, MenuItem, Select, TextField, Typography} from "@material-ui/core";
+import {
+    Button,
+    CardMedia,
+    Divider,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    TextField,
+    Typography
+} from "@material-ui/core";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import ImageUploader from 'react-images-upload';
+import data from "../ava.json";
+
+import {useParams} from "react-router-dom"
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -21,6 +35,10 @@ const useStyles = makeStyles(() => ({
     loadingCenter: {
         display: 'flex',
         justifyContent: 'center'
+    },
+    media: {
+        width: '300px',
+        height: '300px'
     }
 }))
 
@@ -36,7 +54,7 @@ const quillModules = {
     clipboard: {
         // toggle to add extra line breaks when pasting HTML:
         matchVisual: false,
-    }
+    },
 }
 /*
  * Quill editor formats
@@ -50,15 +68,16 @@ const quillFormats = [
 ]
 
 
-const CreateCourse = ({cats, err}) => {
+const UpdateCourse = ({targetCourse, err}) => {
     const classes = useStyles()
+
+    let {id} = useParams();
+    console.log(id)
 
     const titleRef = useRef("")
     const shortDescRef = useRef("");
     const priceRef = useRef("")
-    const [category, setCategory] = useState("");
-    const [fullDesc, setFullDesc] = useState("");
-    const [ava, setAva] = useState(null);
+    const [fullDesc, setFullDesc] = useState(targetCourse.fullDesc);
 
     return (
         <div className={classes.root}>
@@ -67,7 +86,7 @@ const CreateCourse = ({cats, err}) => {
                     <Grid container spacing={3}>
                         <Grid item xs={12}>
                             <Typography variant={"h6"} color={"primary"}>
-                                Create course
+                                Update course info
                             </Typography>
                             <Divider/>
                         </Grid>
@@ -80,6 +99,8 @@ const CreateCourse = ({cats, err}) => {
                                         label={"Title"}
                                         type={"text"}
                                         inputRef={titleRef}
+                                        value={targetCourse.title}
+                                        disabled
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -87,26 +108,15 @@ const CreateCourse = ({cats, err}) => {
                                         Category
                                     </InputLabel>
                                     <Select
+                                        disabled
                                         labelId={"category-select-label"}
                                         id={"category-select"}
-                                        value={category}
+                                        value={targetCourse.category}
                                         native
-                                        onChange={(e) => setCategory(e.target.value)}
                                     >
-                                        {/*<option id={"none-option"} aria-label="None" value=""/>*/}
-                                        {
-                                            cats.map((cat) => (
-                                                <optgroup id={cat.cid} label={cat.cat_name}>
-                                                    {
-                                                        cat.subcats.map((subcat) => (
-                                                            <option id={subcat.scid} value={subcat.subcat_name}>
-                                                                {subcat.subcat_name}
-                                                            </option>
-                                                        ))
-                                                    }
-                                                </optgroup>
-                                            ))
-                                        }
+                                        <option>
+                                            {targetCourse.category}
+                                        </option>
                                     </Select>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -116,15 +126,18 @@ const CreateCourse = ({cats, err}) => {
                                         label={"Short Description"}
                                         type={"text"}
                                         inputRef={shortDescRef}
+                                        value={targetCourse.shortDesc}
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
                                     <TextField
+                                        disabled
                                         margin={"dense"}
                                         id={"price"}
                                         label={"Price"}
                                         type={"number"}
                                         inputRef={priceRef}
+                                        value={targetCourse.price}
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -136,6 +149,7 @@ const CreateCourse = ({cats, err}) => {
                                         }}
                                         onChange={(html) => setFullDesc(html)}
                                         value={fullDesc}
+                                        // defaultValue={targetCourse.fullDesc}
                                         modules={quillModules}
                                         formats={quillFormats}
                                     />
@@ -148,15 +162,13 @@ const CreateCourse = ({cats, err}) => {
                                     Course avatar
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <ImageUploader
-                                        withIcon
-                                        buttonText='Choose images'
-                                        withPreview
-                                        singleImage
-                                        onChange={(pic) => setAva(pic)}
-                                        imgExtension={['.jpg', '.png']}
-                                        maxFileSize={5242880}
-                                    />
+                                    <Paper elevation={3} className={classes.media}>
+                                        <CardMedia
+                                            className={classes.media}
+                                            component={"img"}
+                                            src={"data:image/png;base64," + targetCourse.ava}
+                                        />
+                                    </Paper>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -168,7 +180,7 @@ const CreateCourse = ({cats, err}) => {
                             </> : null}
                             <div className={classes.buttonBar}>
                                 <Button variant={"contained"} color={"primary"}>
-                                    Submit
+                                    Update
                                 </Button>
                                 <Button style={{marginLeft: '8px'}} variant={"contained"} color={"secondary"}>
                                     Cancel
@@ -182,45 +194,19 @@ const CreateCourse = ({cats, err}) => {
     )
 }
 
-CreateCourse.defaultProps = {
-    "cats": [
-        {
-            "cid": "c1",
-            "cat_name": "Games",
-            "subcats": [
-                {
-                    "scid": "sc01",
-                    "subcat_name": "Genshin"
-                },
-                {
-                    "scid": "sc02",
-                    "subcat_name": "TW3"
-                },
-                {
-                    "scid": "sc03",
-                    "subcat_name": "Kitty Cat"
-                }
-            ]
-        },
-        {
-            "cid": "c2",
-            "cat_name": "IT",
-            "subcats": [
-                {
-                    "scid": "sc21",
-                    "subcat_name": "C++"
-                },
-                {
-                    "scid": "sc22",
-                    "subcat_name": "Python"
-                },
-                {
-                    "scid": "sc23",
-                    "subcat_name": "Kotlin"
-                }
-            ]
-        }
-    ],
+UpdateCourse.defaultProps = {
+    "targetCourse": {
+        "cid": "124",
+        "category": "Genshin",
+        "title": "Best farming route guide",
+        "review_score": 5.0,
+        "price": "9.99",
+        "ava": data.exampleAva1,
+        "shortDesc": "Everyday route for f2p players",
+        "fullDesc": "<p>Hello</p>",
+        "chapterCount": 3,
+        "isDone": true
+    }
 }
 
-export default CreateCourse
+export default UpdateCourse
