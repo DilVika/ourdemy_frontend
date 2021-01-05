@@ -31,7 +31,7 @@ const CCarousel = (props,{ deviceType }) => {
       centerMode={true}
       responsive={responsive}
       infinite={true}
-      autoPlay={true}
+      autoPlay={true }
       autoPlaySpeed={2000}
       transitionDuration={500}
       keyBoardControl={true}
