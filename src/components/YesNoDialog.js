@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const YesNoDialog = ({open, onClose, onCancel, onConfirm, title, content, loading, success}) => {
+const YesNoDialog = ({open, onClose, onCancel, onConfirm, title, content}) => {
     const classes = useStyles()
 
     return (

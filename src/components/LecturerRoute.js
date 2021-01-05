@@ -7,6 +7,7 @@ import {
 import {connect} from "react-redux";
 
 const LecturerRoute = ({children, authed, isLec, ...rest}) => {
+    console.log(isLec)
     return (
         <Route
             {...rest}

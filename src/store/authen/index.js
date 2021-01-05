@@ -8,7 +8,7 @@ import jwtDecode from "jwt-decode";
 const initialState = {
     token: localStorage.getItem("token") || null,
     refresh: localStorage.getItem("refresh") || null,
-    isLec: (localStorage.getItem("isLec") === 'true') || false,
+    isLec: jwtDecode(localStorage.getItem("token")).IsLec || false,
     user: {
         "username": "",
         "fullname": "",
@@ -17,8 +17,13 @@ const initialState = {
         "isLec": false
     },
     favList: [],
+    favListErr: null,
     updateErr: null,
+    passwordErr: null,
     fetching: false,
+    fetchingFav: false,
+    updating: false,
+    updatingPassword: false,
     signingIn: false,
     signingUp: false,
     signUpErr: null,
@@ -28,6 +33,8 @@ const initialState = {
     shouldOtp: false,
     signingUpFinish: false,
     signingInFinish: false,
+    updatingFinish: false,
+    updatingPasswordFinish: false,
 };
 
 export const signin = createAsyncThunk(
@@ -42,6 +49,52 @@ export const signin = createAsyncThunk(
             return response.data
         } catch (err) {
             return thunkAPI.rejectWithValue("login failed: username or password mismatch")
+        }
+    },
+);
+
+export const updateProfile = createAsyncThunk(
+    'authen/updateProfile',
+    async (userData, thunkAPI) => {
+        if (userData.email === "") {
+            return thunkAPI.rejectWithValue("update failed: email is missing")
+        }
+        try {
+            thunkAPI.dispatch(authenSlice.actions.updating())
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/users/update`, {
+                "fullname": userData.fullname,
+                "email": userData.email,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${thunkAPI.getState().authen.token}`
+                }
+            });
+            return response.data
+        } catch (err) {
+            return thunkAPI.rejectWithValue("login failed: username or password mismatch")
+        }
+    },
+);
+
+export const updatePassword = createAsyncThunk(
+    'authen/updatePassword',
+    async (userData, thunkAPI) => {
+        if (userData.repeatPassword !== userData.password) {
+            return thunkAPI.rejectWithValue("password and repeat password not matched")
+        }
+        try {
+            thunkAPI.dispatch(authenSlice.actions.updatingPassword())
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/users/updatePassword`, {
+                "old_password": userData.oldPassword,
+                "new_password": userData.password,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${thunkAPI.getState().authen.token}`
+                }
+            });
+            return response.data
+        } catch (err) {
+            return thunkAPI.rejectWithValue(err.response.data.error)
         }
     },
 );
@@ -64,6 +117,24 @@ export const fetchProfile = createAsyncThunk(
     },
 );
 
+export const fetchFavList = createAsyncThunk(
+    'authen/fetchFavList',
+    async (_, thunkAPI) => {
+        try {
+            thunkAPI.dispatch(authenSlice.actions.fetchingFavList())
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/users/favList`, {
+                headers: {
+                    'Authorization': `Bearer ${thunkAPI.getState().authen.token}`
+                }
+            });
+
+            return response.data
+        } catch (err) {
+            return thunkAPI.rejectWithValue("favorite list fetching failed, something went wrong")
+        }
+    },
+);
+
 export const signup = createAsyncThunk(
     'authen/signup',
     async (userData, thunkAPI) => {
@@ -80,7 +151,7 @@ export const signup = createAsyncThunk(
             });
             return response.data
         } catch (err) {
-            return thunkAPI.rejectWithValue(err.response.error)
+            return thunkAPI.rejectWithValue(err.response.data.error)
         }
     },
 );
@@ -99,7 +170,7 @@ export const otpConfirm = createAsyncThunk(
             });
             return response.data
         } catch (err) {
-            return thunkAPI.rejectWithValue(err.response.error)
+            return thunkAPI.rejectWithValue(err.response.data.error)
         }
     },
 );
@@ -116,6 +187,9 @@ export const authenSlice = createSlice({
     name: 'authen',
     initialState: initialState,
     reducers: {
+        fetchingFavList: (state, action) => {
+            state.fetchingFav = true
+        },
         fetchingProfile: (state, action) => {
             state.fetching = true
         },
@@ -134,6 +208,12 @@ export const authenSlice = createSlice({
         loadingOtp: (state, _) => {
             state.otping = true
         },
+        updating: (state, _) => {
+            state.updating = true
+        },
+        updatingPassword: (state, _) => {
+            state.updatingPassword = true
+        },
         resetSignUpState: (state, _) => {
             state.signingIn = false
             state.signingUp = false
@@ -149,6 +229,11 @@ export const authenSlice = createSlice({
             state.signInErr = null
             state.signingOut = false
             state.signingInFinish = false
+        },
+        resetPasswordUpdateState: (state, _) => {
+            state.passwordErr = null
+            state.updatingPassword = false
+            state.updatingPasswordFinish = false
         }
     },
     extraReducers: {
@@ -163,7 +248,7 @@ export const authenSlice = createSlice({
             state.signingIn = false
             state.signingInFinish = true
             state.token = action.payload.accessToken
-            state.isLec = jwtDecode(action.payload.accessToken).isLec
+            state.isLec = jwtDecode(action.payload.accessToken).IsLec
             state.refresh = action.payload.refreshToken
             localStorage.setItem("token", action.payload.accessToken)
             localStorage.setItem("refresh", action.payload.refreshToken)
@@ -187,11 +272,38 @@ export const authenSlice = createSlice({
         },
         [fetchProfile.fulfilled]: (state, action) => {
             state.user = action.payload
+            state.isLec = action.payload.isLec
             state.fetching = false
             state.updateErr = null
         },
         [fetchProfile.rejected]: (state, action) => {
             state.updateErr = action.payload
+        },
+        [updateProfile.fulfilled]: (state, action) => {
+            state.user.fullname = action.payload.user
+            state.user.email = action.payload.email
+            state.updating = false
+            state.updatingFinish = true
+        },
+        [updateProfile.rejected]: (state, action) => {
+            state.updating = false
+            state.updateErr = action.payload
+        },
+        [updatePassword.fulfilled]: (state, action) => {
+            state.updatingPassword = false
+            state.updatingPasswordFinish = true
+        },
+        [updatePassword.rejected]: (state, action) => {
+            state.updatingPassword = false
+            state.passwordErr = action.payload
+        },
+        [fetchFavList.fulfilled]: (state, action) => {
+            state.fetchingFav = false
+            state.favList = action.payload
+        },
+        [fetchFavList.rejected]: (state, action) => {
+            state.fetchingFav = false
+            state.favListErr = action.payload
         }
     }
 })

@@ -42,64 +42,64 @@ const SignInDialog = ({open, onClose, err, loading, finish}) => {
                     </Button>
                 </DialogActions>
             </Dialog> :
-        <Dialog open={open} onClose={() => onClose()} aria-labelledby="form-dialog-title">
-            <AppBar className={classes.appBar}>
-                <Toolbar>
-                    <Typography variant="h6" className={classes.title}>
-                        Sign In
-                    </Typography>
-                </Toolbar>
-            </AppBar>
-            <DialogContent>
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    id="username"
-                    label="username"
-                    type="text"
-                    inputRef={unameRef}
-                    fullWidth
-                />
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    id="password"
-                    label="Password"
-                    type="password"
-                    inputRef={passRef}
-                    fullWidth
-                />
-                {err ? <DialogContentText>
-                    <Typography color='error' component={'span'}>
-                        {err}
-                    </Typography>
-                </DialogContentText> : null}
-            </DialogContent>
-            <DialogActions>
-                {!loading ? <div>
-                    <Button onClick={() => store.dispatch(authenSlice.actions.otpMode())} color="secondary">
-                        Reset Password
-                    </Button>
-                    <Button onClick={() => onClose()} color="primary">
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={
-                            () => store.dispatch(
-                                signin({
-                                    "username": unameRef.current.value,
-                                    "password": passRef.current.value,
-                                })
-                            )
-                        }
-                        color="primary">
-                        Sign In
-                    </Button>
-                </div> : <div>
-                    <CircularProgress/>
-                </div>}
-            </DialogActions>
-        </Dialog>
+            <Dialog open={open} onClose={() => onClose()} aria-labelledby="form-dialog-title">
+                <AppBar className={classes.appBar}>
+                    <Toolbar>
+                        <Typography variant="h6" className={classes.title}>
+                            Sign In
+                        </Typography>
+                    </Toolbar>
+                </AppBar>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="username"
+                        label="username"
+                        type="text"
+                        inputRef={unameRef}
+                        fullWidth
+                    />
+                    <TextField
+                        margin="dense"
+                        id="password"
+                        label="Password"
+                        type="password"
+                        inputRef={passRef}
+                        fullWidth
+                    />
+                    {err ? <DialogContentText>
+                        <Typography color='error' component={'span'}>
+                            {err}
+                        </Typography>
+                    </DialogContentText> : null}
+                </DialogContent>
+                <DialogActions>
+                    {!loading ? <div>
+                        <Button onClick={() => {
+                        }} color="secondary">
+                            Reset Password
+                        </Button>
+                        <Button onClick={() => onClose()} color="primary">
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={
+                                () => store.dispatch(
+                                    signin({
+                                        "username": unameRef.current.value,
+                                        "password": passRef.current.value,
+                                    })
+                                )
+                            }
+                            color="primary">
+                            Sign In
+                        </Button>
+                    </div> : <div>
+                        <CircularProgress/>
+                    </div>}
+                </DialogActions>
+            </Dialog>
     );
 }
 

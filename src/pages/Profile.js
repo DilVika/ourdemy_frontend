@@ -9,16 +9,17 @@ import {
     List,
     ListItem, ListItemSecondaryAction,
     ListItemText,
-    Paper,
+    Paper, Snackbar,
     Typography
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {Delete} from "@material-ui/icons";
+import {Close, Delete} from "@material-ui/icons";
 import YesNoDialog from "../components/YesNoDialog";
 import {useHistory} from "react-router-dom";
 import {connect} from "react-redux";
-import {fetchProfile} from "../store/authen";
+import {fetchFavList, fetchProfile, updateProfile} from "../store/authen";
 import store from "../store";
+import UpdatePasswordDialog from "../components/UpdatePassword";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -43,33 +44,27 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-const Profile = ({user, favList, fetching, err}) => {
+const Profile = ({user, favList, fetching, favListFetching, err, favErr}) => {
     const classes = useStyles()
 
     const [updateMode, setUpdateMode] = useState(false);
     const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+    const [updatePasswordDialogOpen, setUpdatePasswordDialogOpen] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
 
     useEffect(() => {
         store.dispatch(fetchProfile())
     }, [])
 
-
     const unameRef = useRef("")
     const nameRef = useRef("")
     const emailRef = useRef("")
-    const passwordRef = useRef("")
-    const rpasswordRef = useRef("")
-    const opasswordRef = useRef("")
-
     const history = useHistory();
 
-    const resetFields = () => {
+    const resetFieldsUpdate = () => {
         unameRef.current.value = user.username
         nameRef.current.value = user.fullname
         emailRef.current.value = user.email
-        opasswordRef.current.value = ""
-        passwordRef.current.value = ""
-        rpasswordRef.current.value = ""
     }
 
     return (
@@ -125,37 +120,6 @@ const Profile = ({user, favList, fetching, err}) => {
                                                    disabled={!updateMode}/>
                                         </Grid>
                                         {
-                                            updateMode ? <>
-                                                <Grid item xs={6}>
-                                                    <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                                        Old Password
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={6}>
-                                                    <Input inputRef={opasswordRef} defaultValue={""} type={"password"}
-                                                           disabled={!updateMode}/>
-                                                </Grid>
-                                            </> : null
-                                        }
-                                        <Grid item xs={6}>
-                                            <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                                Password
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Input inputRef={passwordRef} defaultValue={""} type={"password"}
-                                                   disabled={!updateMode}/>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Typography variant={"h6"} align={"right"} color={"textSecondary"}>
-                                                Repeat Password
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Input inputRef={rpasswordRef} defaultValue={""} type={"password"}
-                                                   disabled={!updateMode}/>
-                                        </Grid>
-                                        {
                                             updateMode && !user.isLec ? <Grid item xs={12}>
                                                 <div className={classes.buttonBar}>
                                                     <Button variant={"outlined"} color={"secondary"}>
@@ -181,7 +145,7 @@ const Profile = ({user, favList, fetching, err}) => {
                                                             style={{marginRight: "5px"}}
                                                             onClick={() => {
                                                                 setUpdateMode(false)
-                                                                resetFields()
+                                                                resetFieldsUpdate()
                                                             }
                                                             }>
                                                         Cancel
@@ -190,23 +154,28 @@ const Profile = ({user, favList, fetching, err}) => {
                                                             onClick={() => setUpdateDialogOpen(true)}>
                                                         Submit
                                                     </Button>
-                                                </div> : <Button variant={"contained"} color={"primary"}
-                                                                 onClick={() => setUpdateMode(true)}>
-                                                    Update
-                                                </Button>}
+                                                </div> : <>
+                                                    <Button style={{marginRight: "5px"}} variant={"contained"}
+                                                            color={"secondary"}
+                                                            onClick={() => setUpdatePasswordDialogOpen(true)}
+                                                    >
+                                                        Update Password
+                                                    </Button>
+                                                    <Button variant={"contained"} color={"primary"}
+                                                            onClick={() => setUpdateMode(true)}>
+                                                        Update
+                                                    </Button>
+                                                </>}
                                             </div>
                                         </Grid>
                                     </> : <>
-                                        <Grid item xs={12}>
-                                            <Typography align={"center"} color={"error"}>
-                                                {err}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <div className={classes.loadingCenter}>
-                                                <CircularProgress/>
-                                            </div>
-                                        </Grid>
+                                        {
+                                            !err ? <Grid item xs={12}>
+                                                <div className={classes.loadingCenter}>
+                                                    <CircularProgress/>
+                                                </div>
+                                            </Grid> : null
+                                        }
                                     </>
                                 }
                             </Grid>
@@ -222,38 +191,61 @@ const Profile = ({user, favList, fetching, err}) => {
                                     <Divider/>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12}>
-                                <div style={{maxHeight: '80vh', overflow: 'auto'}}>
-                                    <List>
-                                        {
-                                            favList.map((fav) => (
-                                                <Paper variant={"outlined"} className={classes.coursePaper}
-                                                       key={fav.cid}
-                                                       elevation={1}>
-                                                    <ListItem>
-                                                        <ListItemText>
-                                                            {fav.name}
-                                                        </ListItemText>
-                                                        <ListItemSecondaryAction>
-                                                            <IconButton edge="end" aria-label="comments">
-                                                                <Delete/>
-                                                            </IconButton>
-                                                        </ListItemSecondaryAction>
-                                                    </ListItem>
-                                                </Paper>
-                                            ))
-                                        }
-                                    </List>
-                                </div>
-                            </Grid>
+                            {
+                                favListFetching ? <></> : <>
+                                    {
+                                        !favErr ? <Grid item xs={12}>
+                                                <div style={{maxHeight: '80vh', overflow: 'auto'}}>
+                                                    <List>
+                                                        {
+                                                            favList.map((fav) => (
+                                                                <Paper variant={"outlined"} className={classes.coursePaper}
+                                                                       key={fav.cid}
+                                                                       elevation={1}>
+                                                                    <ListItem>
+                                                                        <ListItemText>
+                                                                            {fav.name}
+                                                                        </ListItemText>
+                                                                        <ListItemSecondaryAction>
+                                                                            <IconButton edge="end" aria-label="comments">
+                                                                                <Delete/>
+                                                                            </IconButton>
+                                                                        </ListItemSecondaryAction>
+                                                                    </ListItem>
+                                                                </Paper>
+                                                            ))
+                                                        }
+                                                    </List>
+                                                </div>
+                                            </Grid> :
+                                            <Grid item xs={12}>
+                                                <Typography align={"center"} color={"error"}>
+                                                    {favErr}
+                                                </Typography>
+                                            </Grid>
+
+                                    }
+                                </>
+
+                            }
                         </Grid>
                     </Grid>
                 </div>
             </PageFrame>
             <YesNoDialog open={updateDialogOpen} onClose={() => setUpdateDialogOpen(false)} title={"Update"}
                          content={"Are you sure you want to update your information? Ò w Ó"}
-                         onConfirm={() => console.log("update")}
+                         onConfirm={() => {
+                             store.dispatch(updateProfile({
+                                 "fullname": nameRef.current.value,
+                                 "email": emailRef.current.value
+                             }))
+                             setUpdateDialogOpen(false)
+                         }
+
+                         }
                          onCancel={() => setUpdateDialogOpen(false)}
+            />
+            <UpdatePasswordDialog open={updatePasswordDialogOpen} onClose={() => setUpdatePasswordDialogOpen(false)}
             />
         </div>
     );
@@ -275,7 +267,9 @@ const mapStateToProps = state => ({
     user: state.authen.user,
     favList: state.authen.favList,
     err: state.authen.updateErr,
-    fetching: state.authen.fetching
+    fetching: state.authen.fetching,
+    favListFetching: state.authen.fetchingFav,
+    favErr: state.authen.favListErr
 })
 
 export default connect(
