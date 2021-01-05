@@ -15,6 +15,7 @@ import AuthRoute from "./components/AuthRoute";
 import Profile from "./pages/Profile";
 import LecturerRoute from "./components/LecturerRoute";
 import CourseManage from "./pages/CourseManage";
+import CreateCourse from "./pages/CreateCourse";
 
 function App() {
     return (
@@ -30,6 +31,9 @@ function App() {
                     <LecturerRoute exact path={"/course/manage"}>
                         <CourseManage/>
                     </LecturerRoute>
+                    <Route exact path={"/course/create"}>
+                        <CreateCourse/>
+                    </Route>
                     <Route path="*">
                         <NotFound/>
                     </Route>
