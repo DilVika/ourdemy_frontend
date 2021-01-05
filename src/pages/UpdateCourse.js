@@ -7,7 +7,6 @@ import {
     Divider,
     Grid,
     InputLabel,
-    MenuItem,
     Paper,
     Select,
     TextField,
@@ -15,7 +14,6 @@ import {
 } from "@material-ui/core";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import ImageUploader from 'react-images-upload';
 import data from "../ava.json";
 
 import {useParams} from "react-router-dom"
