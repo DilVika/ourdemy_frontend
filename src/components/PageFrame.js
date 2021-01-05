@@ -177,6 +177,7 @@ const PageFrame = ({token, categories, children}) => {
                             <AccountCircle/>
                         </IconButton>
                     </div>}
+
                 </Toolbar>
             </AppBar>
             <Drawer

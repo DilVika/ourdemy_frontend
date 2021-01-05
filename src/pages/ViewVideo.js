@@ -9,6 +9,8 @@ import IconExpandLess from '@material-ui/icons/ExpandLess'
 import IconExpandMore from '@material-ui/icons/ExpandMore'
 import Collapse from '@material-ui/core/Collapse'
 import Divider from "@material-ui/core/Divider";
+import {useHistory} from "react-router-dom";
+import {useParams} from "react-router"
 
 const useStyle = makeStyles((theme) => {
 
@@ -21,17 +23,28 @@ const ViewVideo = ({courseContents}) => {
     })
 
     const [itemOpen, setItemOpen] = useState(isOpenArray);
+
+    const history = useHistory();
+
     const toggleItem = (index, open) => {
         const itemOpenCopy = [...itemOpen]
         itemOpenCopy[index] = open
         setItemOpen(itemOpenCopy)
     }
 
+    const navChapter = (vid) => {
+        history.push(`/course/view/${vid}`)
+    }
+
+    const { vid } = useParams()
+    console.log(vid)
+
     return (
         <div>
             <PageFrame>
                 <Grid container spacing={3}>
                     <Grid item xs={9}>
+                        <h2>{ vid }</h2>
                         <ReactPlayer url='https://www.youtube.com/watch?v=AmJv8yx57dM' width={'100%'} height={'80vh'}/>
 
                     </Grid>
@@ -40,9 +53,9 @@ const ViewVideo = ({courseContents}) => {
                             {
                                 courseContents.map((chapter, index) => (
                                     <div key={chapter.ccid}>
-                                        <ListItem button>
+                                        <ListItem button onClick={(e) => toggleItem(index, !itemOpen[index])}>
                                             <ListItemText primary={chapter.name}/>
-                                            <div role="button" onClick={(e) => toggleItem(index, !itemOpen[index])}>
+                                            <div role="button" >
                                                 {itemOpen[index] ? <IconExpandLess/> :
                                                 <IconExpandMore/>}
                                             </div>
@@ -55,6 +68,7 @@ const ViewVideo = ({courseContents}) => {
                                                         {chapter.video.map((video, index) => (
                                                             <ListItem button key={video.vid}>
                                                                 <ListItemText inset
+                                                                              onClick={() => navChapter(video.vid)}
                                                                               primary={video.title}/>
                                                             </ListItem>
                                                         ))}
@@ -81,15 +95,18 @@ ViewVideo.defaultProps = {
             "video": [
                 {
                     "vid": "v01",
-                    "title": "Getting Started"
+                    "title": "Getting Started",
+                    "url": "https://www.youtube.com/watch?v=uNT_AxXrUGs"
                 },
                 {
                     "vid": "v02",
-                    "title": "Basic"
+                    "title": "Basic",
+                    "url": "https://www.youtube.com/watch?v=WxiYbLw55cE"
                 },
                 {
                     "vid": "v03",
-                    "title": "Advance"
+                    "title": "Advance",
+                    "url": "https://www.youtube.com/watch?v=4oa8tKm04wE"
                 }
             ]
         },

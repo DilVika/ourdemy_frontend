@@ -35,6 +35,9 @@ function App() {
                     <Route exact path={"/course/view"}>
                         <ViewVideo/>
                     </Route>
+                    <Route exact path={"/course/view/:vid"}>
+                        <ViewVideo/>
+                    </Route>
                     <Route path="*">
                         <NotFound/>
                     </Route>
