@@ -24,9 +24,20 @@ const dummyHigh = [
     title: "Java Code Giấy",
     kind: "Web Devevlopment",
     author: "Ba Tê",
-    rate: 5,
+    rate: 1,
     count: "700",
-    currentPrice: "50",
+    currentPrice: "1",
+    originPrice: "70",
+    brief: "Java code giay",
+  },
+  {
+    src: "https://picsum.photos/300/200",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 2,
+    count: "700",
+    currentPrice: "1",
     originPrice: "70",
     brief: "Java code giay",
   },
@@ -36,8 +47,8 @@ const dummyHigh = [
     kind: "Web Devevlopment",
     author: "Ba Tê",
     rate: 5,
-    count: "700",
-    currentPrice: "50",
+    count: "1",
+    currentPrice: "0",
     originPrice: "70",
     brief: "Java code giay",
   },
@@ -46,20 +57,9 @@ const dummyHigh = [
     title: "Java Code Giấy",
     kind: "Web Devevlopment",
     author: "Ba Tê",
-    rate: 5,
-    count: "700",
-    currentPrice: "50",
-    originPrice: "70",
-    brief: "Java code giay",
-  },
-  {
-    src: "https://picsum.photos/300/200",
-    title: "Java Code Giấy",
-    kind: "Web Devevlopment",
-    author: "Ba Tê",
-    rate: 5,
-    count: "700",
-    currentPrice: "50",
+    rate: 4.5,
+    count: "1",
+    currentPrice: "0",
     originPrice: "70",
     brief: "Java code giay",
   },
@@ -69,8 +69,13 @@ const dummyHigh = [
     className="item"
     title={val.title}
     price={val.currentPrice}
+    originPrice={val.originPrice}
+    kind={val.kind}
+    rate={val.rate}
+    count={val.count}
     author={val.author}
     imagesrc={val.src}
+    
   />
 ));
 

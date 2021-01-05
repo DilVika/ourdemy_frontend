@@ -30,12 +30,12 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
   },
   topPadding: {
-    paddingTop: "5px"
+    paddingTop: "5px",
   },
   content: {
-    paddingLeft: "20px"   ,
+    paddingLeft: "20px",
   },
-  
+
   subheader: {
     fontSize: "0.8rem",
   },
@@ -45,7 +45,9 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: "56.25%", // 16:9
   },
 
-
+  alignText: {
+    alignSelf:"center"
+  }
   // expand: {
   //   transform: "rotate(0deg)",
   //   marginLeft: "auto",
@@ -64,31 +66,76 @@ export default function ComplexCard(props) {
   return (
     <div className={props.className}>
       <Paper elevation={2}>
-        <Card  >
+        <Card>
           <CardMedia
             className={classes.media}
             image={props.imagesrc ?? "https://picsum.photos/300/300"}
             title={props.title}
           />
-          <CardHeader 
+          <CardHeader
             //className={classes.topPadding}
             classes={{ title: classes.title, subheader: classes.subheader }}
             title={props.title ?? "The Course Name"}
             subheader={props.author}
           />
           <CardContent className={classes.topPadding}>
-            <Typography variant="h6" style={{ fontWeight: "bold" }}>
-              {"$" + (props.price ?? "$10")}
-            </Typography>
+            <Grid
+              container
+              direction="row"
+              justify="start"
+              alignContent="center"
+            >
+              <Typography variant="h6" style={{ fontWeight: "bold" }}>
+                {"$" + (props.price ?? "$10")}
+              </Typography>
+              <Typography className={classes.alignText}
+                variant="subtitle"
+                style={{
+                  textDecoration: "line-through",
+                  // fontWeight: "lighter",
+                  // fontSize:"1rem",
+                  opacity: "0.5",
+                  paddingInline: "5px",
+                }}
+              >
+                {"$" + (props.originPrice ?? "$10")}
+              </Typography>
+            </Grid>
+
             <Grid container direction="row" justify="start">
               <Rating size={15} rating={props.rate ?? 1} />
-              <p className={classes.content} style={{margin:0}} >( {props.count}  )</p>
+              <p className={classes.content} style={{ margin: 0, opacity:"0.5", }}>
+                ( {props.count} )
+              </p>
             </Grid>
           </CardContent>
           <CardActions disableSpacing className={classes.topPadding}>
-            <IconButton aria-label="add to favorites">
-              <FavoriteIcon />
-            </IconButton>
+            <Grid
+              container
+              direction="row"
+              justify="stretch"
+              
+            >
+              <IconButton aria-label="add to favorites">
+                <FavoriteIcon />
+              </IconButton>
+              <Typography
+              className={classes.alignText}
+                variant="subtitle"
+                style={{
+                  // textDecoration: "line-through",
+                  // fontWeight: "lighter",
+                  // fontSize:"1rem",
+                  color: "white",
+                  background:"#ed730e",
+                  borderRadius: "7px",
+                  //opacity: "0.5",
+                  paddingInline: "5px",
+                }}
+              >
+                { (props.kind ?? "Web Dev")}
+              </Typography>
+            </Grid>
           </CardActions>
         </Card>
       </Paper>
