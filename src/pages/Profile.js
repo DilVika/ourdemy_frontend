@@ -17,7 +17,7 @@ import {Close, Delete} from "@material-ui/icons";
 import YesNoDialog from "../components/YesNoDialog";
 import {useHistory} from "react-router-dom";
 import {connect} from "react-redux";
-import {fetchProfile, updateProfile} from "../store/authen";
+import {fetchFavList, fetchProfile, updateProfile} from "../store/authen";
 import store from "../store";
 import UpdatePasswordDialog from "../components/UpdatePassword";
 
@@ -44,7 +44,7 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-const Profile = ({user, favList, fetching, err}) => {
+const Profile = ({user, favList, fetching, favListFetching, err, favErr}) => {
     const classes = useStyles()
 
     const [updateMode, setUpdateMode] = useState(false);
@@ -169,16 +169,13 @@ const Profile = ({user, favList, fetching, err}) => {
                                             </div>
                                         </Grid>
                                     </> : <>
-                                        <Grid item xs={12}>
-                                            <Typography align={"center"} color={"error"}>
-                                                {err}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <div className={classes.loadingCenter}>
-                                                <CircularProgress/>
-                                            </div>
-                                        </Grid>
+                                        {
+                                            !err ? <Grid item xs={12}>
+                                                <div className={classes.loadingCenter}>
+                                                    <CircularProgress/>
+                                                </div>
+                                            </Grid> : null
+                                        }
                                     </>
                                 }
                             </Grid>
@@ -194,30 +191,43 @@ const Profile = ({user, favList, fetching, err}) => {
                                     <Divider/>
                                 </Grid>
                             </Grid>
-                            <Grid item xs={12}>
-                                <div style={{maxHeight: '80vh', overflow: 'auto'}}>
-                                    <List>
-                                        {
-                                            favList.map((fav) => (
-                                                <Paper variant={"outlined"} className={classes.coursePaper}
-                                                       key={fav.cid}
-                                                       elevation={1}>
-                                                    <ListItem>
-                                                        <ListItemText>
-                                                            {fav.name}
-                                                        </ListItemText>
-                                                        <ListItemSecondaryAction>
-                                                            <IconButton edge="end" aria-label="comments">
-                                                                <Delete/>
-                                                            </IconButton>
-                                                        </ListItemSecondaryAction>
-                                                    </ListItem>
-                                                </Paper>
-                                            ))
-                                        }
-                                    </List>
-                                </div>
-                            </Grid>
+                            {
+                                favListFetching ? <></> : <>
+                                    {
+                                        !favErr ? <Grid item xs={12}>
+                                                <div style={{maxHeight: '80vh', overflow: 'auto'}}>
+                                                    <List>
+                                                        {
+                                                            favList.map((fav) => (
+                                                                <Paper variant={"outlined"} className={classes.coursePaper}
+                                                                       key={fav.cid}
+                                                                       elevation={1}>
+                                                                    <ListItem>
+                                                                        <ListItemText>
+                                                                            {fav.name}
+                                                                        </ListItemText>
+                                                                        <ListItemSecondaryAction>
+                                                                            <IconButton edge="end" aria-label="comments">
+                                                                                <Delete/>
+                                                                            </IconButton>
+                                                                        </ListItemSecondaryAction>
+                                                                    </ListItem>
+                                                                </Paper>
+                                                            ))
+                                                        }
+                                                    </List>
+                                                </div>
+                                            </Grid> :
+                                            <Grid item xs={12}>
+                                                <Typography align={"center"} color={"error"}>
+                                                    {favErr}
+                                                </Typography>
+                                            </Grid>
+
+                                    }
+                                </>
+
+                            }
                         </Grid>
                     </Grid>
                 </div>
@@ -236,23 +246,6 @@ const Profile = ({user, favList, fetching, err}) => {
                          onCancel={() => setUpdateDialogOpen(false)}
             />
             <UpdatePasswordDialog open={updatePasswordDialogOpen} onClose={() => setUpdatePasswordDialogOpen(false)}
-            />
-            <Snackbar
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-                open={snackbarOpen}
-                autoHideDuration={6000}
-                onClose={() => setSnackbarOpen(false)}
-                message="Update success"
-                action={
-                    <React.Fragment>
-                        <IconButton size="small" aria-label="close" color="inherit" onClick={() => setSnackbarOpen(false)}>
-                            <Close fontSize="small" />
-                        </IconButton>
-                    </React.Fragment>
-                }
             />
         </div>
     );
@@ -275,6 +268,8 @@ const mapStateToProps = state => ({
     favList: state.authen.favList,
     err: state.authen.updateErr,
     fetching: state.authen.fetching,
+    favListFetching: state.authen.fetchingFav,
+    favErr: state.authen.favListErr
 })
 
 export default connect(

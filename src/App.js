@@ -3,7 +3,8 @@ import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link
+    Link,
+    useParams,
 } from "react-router-dom";
 
 
@@ -15,6 +16,11 @@ import AuthRoute from "./components/AuthRoute";
 import Profile from "./pages/Profile";
 import LecturerRoute from "./components/LecturerRoute";
 import ViewVideo from "./pages/ViewVideo";
+import CourseManage from "./pages/CourseManage";
+import CreateCourse from "./pages/CreateCourse";
+import UpdateCourse from "./pages/UpdateCourse";
+import CourseContent from "./pages/CourseContent";
+import {fetchCurrentCourse} from "./store/course/lec";
 
 function App() {
     return (
@@ -28,10 +34,17 @@ function App() {
                         <Profile/>
                     </AuthRoute>
                     <LecturerRoute exact path={"/course/manage"}>
-                        <div>
-                            Lec manage courses
-                        </div>
+                        <CourseManage/>
                     </LecturerRoute>
+                    <Route exact path={"/course/create"}>
+                        <CreateCourse/>
+                    </Route>
+                    <Route exact path={"/course/update/:id"}>
+                        <UpdateCourse/>
+                    </Route>
+                    <Route exact path={"/course/content/:id"}>
+                        <CourseContent/>
+                    </Route>
                     <Route exact path={"/course/view"}>
                         <ViewVideo/>
                     </Route>
