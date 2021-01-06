@@ -101,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
     },
     pageContent: {
         //flexGrow: 1,
-        width:`calc(100vw - ${drawerWidth}px - 20px )`,
+        width: `calc(100vw - ${drawerWidth}px - 20px )`,
         padding: '20px'
     },
     btn: {
@@ -149,7 +149,7 @@ const PageFrame = ({token, categories, children}) => {
             <CssBaseline/>
             <AppBar position="fixed">
                 <Toolbar>
-                    <Typography onClick={() => history.push("/")} className={classes.title} variant="h4" noWrap>
+                    <Typography role={"button   `1"} onClick={() => history.push("/")} className={classes.title} variant="h4" noWrap>
                         Ourdemy
                     </Typography>
                     <div className={classes.search}>

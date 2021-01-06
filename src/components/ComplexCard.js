@@ -1,44 +1,63 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import clsx from "clsx";
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardMedia from "@material-ui/core/CardMedia";
 import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
-import Collapse from "@material-ui/core/Collapse";
-import Avatar from "@material-ui/core/Avatar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import { red } from "@material-ui/core/colors";
 import FavoriteIcon from "@material-ui/icons/Favorite";
-import ShareIcon from "@material-ui/icons/Share";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Paper } from "@material-ui/core";
+import Rating from "react-star-review";
+import Grid from "@material-ui/core/Grid";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    maxWidth: 350,
+    // maxWidth: 350,
     minWidth: 250,
+    height: 350,
   },
+  // header
+  title: {
+    display: "-webkit-box !important",
+    "-webkit-line-clamp": 1,
+    "-webkit-box-orient": "vertical",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "normal",
+    fontSize: "1.3rem",
+    fontWeight: "bold",
+  },
+  topPadding: {
+    paddingTop: "5px",
+  },
+  content: {
+    paddingLeft: "20px",
+  },
+
+  subheader: {
+    fontSize: "0.8rem",
+  },
+
   media: {
     height: 0,
     paddingTop: "56.25%", // 16:9
   },
-  expand: {
-    transform: "rotate(0deg)",
-    marginLeft: "auto",
-    transition: theme.transitions.create("transform", {
-      duration: theme.transitions.duration.shortest,
-    }),
-  },
-  expandOpen: {
-    transform: "rotate(180deg)",
-  },
-  avatar: {
-    backgroundColor: red[500],
-  },
+
+  alignText: {
+    alignSelf:"center"
+  }
+  // expand: {
+  //   transform: "rotate(0deg)",
+  //   marginLeft: "auto",
+  //   transition: theme.transitions.create("transform", {
+  //     duration: theme.transitions.duration.shortest,
+  //   }),
+  // },
+  // expandOpen: {
+  //   transform: "rotate(180deg)",
+  // },
 }));
 
 export default function ComplexCard(props) {
@@ -47,34 +66,76 @@ export default function ComplexCard(props) {
   return (
     <div className={props.className}>
       <Paper elevation={2}>
-        <Card className={classes.root}>
-          <CardHeader
-            avatar={
-              <Avatar aria-label="recipe" className={classes.avatar}>
-                {props.avatar ?? "R"}
-              </Avatar>
-            }
-            action={
-              <IconButton aria-label="settings">
-                <MoreVertIcon />
-              </IconButton>
-            }
-            title={props.title ?? "The Course Name"}
-          />
+        <Card>
           <CardMedia
             className={classes.media}
             image={props.imagesrc ?? "https://picsum.photos/300/300"}
             title={props.title}
           />
-          <CardContent>
-            <Typography variant="body2" color="textSecondary" component="p">
-              {props.detail ?? "Brief Details."}
-            </Typography>
+          <CardHeader
+            //className={classes.topPadding}
+            classes={{ title: classes.title, subheader: classes.subheader }}
+            title={props.title ?? "The Course Name"}
+            subheader={props.author}
+          />
+          <CardContent className={classes.topPadding}>
+            <Grid
+              container
+              direction="row"
+              justify="start"
+              alignContent="center"
+            >
+              <Typography variant="h6" style={{ fontWeight: "bold" }}>
+                {"$" + (props.price ?? "$10")}
+              </Typography>
+              <Typography className={classes.alignText}
+                variant="subtitle"
+                style={{
+                  textDecoration: "line-through",
+                  // fontWeight: "lighter",
+                  // fontSize:"1rem",
+                  opacity: "0.5",
+                  paddingInline: "5px",
+                }}
+              >
+                {"$" + (props.originPrice ?? "$10")}
+              </Typography>
+            </Grid>
+
+            <Grid container direction="row" justify="start">
+              <Rating size={15} rating={props.rate ?? 1} />
+              <p className={classes.content} style={{ margin: 0, opacity:"0.5", }}>
+                ( {props.count} )
+              </p>
+            </Grid>
           </CardContent>
-          <CardActions disableSpacing>
-            <IconButton aria-label="add to favorites">
-              <FavoriteIcon />
-            </IconButton>
+          <CardActions disableSpacing className={classes.topPadding}>
+            <Grid
+              container
+              direction="row"
+              justify="stretch"
+              
+            >
+              <IconButton aria-label="add to favorites">
+                <FavoriteIcon />
+              </IconButton>
+              <Typography
+              className={classes.alignText}
+                variant="subtitle"
+                style={{
+                  // textDecoration: "line-through",
+                  // fontWeight: "lighter",
+                  // fontSize:"1rem",
+                  color: "white",
+                  background:"#ed730e",
+                  borderRadius: "7px",
+                  //opacity: "0.5",
+                  paddingInline: "5px",
+                }}
+              >
+                { (props.kind ?? "Web Dev")}
+              </Typography>
+            </Grid>
           </CardActions>
         </Card>
       </Paper>

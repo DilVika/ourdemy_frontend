@@ -5,6 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {fetchCategories} from "./store/category";
 import store from "./store";
+import {initialState} from "./store/authen";
+import jwtDecode from "jwt-decode";
 
 require('dotenv').config()
 ReactDOM.render(

@@ -4,7 +4,6 @@ import {
     createAsyncThunk,
 } from '@reduxjs/toolkit';
 import {signin} from "../authen";
-import {act} from "@testing-library/react";
 
 const initialState = {
     category: [],
