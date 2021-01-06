@@ -5,6 +5,9 @@ import {
 } from '@reduxjs/toolkit';
 
 const initialState = {
+    myCourses: null,
+    fetchingMyCourses: false,
+    fetchingMyCoursesErr: null,
     currentCourse: null,
     currentCourseFetching: false,
     currentCourseErr: null,
@@ -14,6 +17,9 @@ const initialState = {
     uploadingVideo: false,
     uploadingVideoErr: null,
     progress: 0,
+    creatingCourse: false,
+    creatingCourseErr: null,
+    creatingCourseDone: false,
 }
 
 export const fetchCurrentCourse = createAsyncThunk(
@@ -112,15 +118,71 @@ export const uploadVideo = createAsyncThunk(
     }
 )
 
+export const createCourse = createAsyncThunk(
+    'leccourse/createCourse',
+    async (courseInfo, thunkApi) => {
+        try {
+            const formData = new FormData()
+            if (!courseInfo.ava) {
+                return thunkApi.rejectWithValue("missing avatar")
+            }
+            formData.append("ava", courseInfo.ava[0])
+            formData.append("cid", courseInfo.cid)
+            formData.append("name", courseInfo.name)
+            formData.append("short_desc", courseInfo.short_desc)
+            formData.append("full_desc", courseInfo.full_desc)
+            formData.append("fee", courseInfo.fee)
+
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/course/create`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
+export const fetchAllCoursesByMe = createAsyncThunk(
+    'leccourse/fetchAllCourseByMe',
+    async (_, thunkApi) => {
+        try {
+            const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/course/allByMe`, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return e.response.data.error
+        }
+    }
+)
+
 export const lecCourseSlice = createSlice({
     name: 'leccourse',
     initialState: initialState,
     reducers: {
+        fetchingMyCourses: (state, action) => {
+            state.fetchingMyCourses = true
+        },
         fetchingCurrentCourse: (state, action) => {
             state.currentCourseFetching = true
         },
         addingChapter: (state, action) => {
             state.addingChapter = true
+        },
+        creatingCourse: (state, action) => {
+            state.creatingCourse = true
+        },
+        resetCreatingCourseState: (state, action) => {
+            state.creatingCourse = false
+            state.creatingCourseErr = null
+            state.creatingCourseDone = false
         },
         uploadingVideo: (state, action) => {
             state.uploadingVideo = true
@@ -177,6 +239,22 @@ export const lecCourseSlice = createSlice({
         [uploadVideo.rejected]: (state, action) => {
             state.uploadingVideo = false
             state.uploadingVideoErr = action.payload
-        }
+        },
+        [createCourse.fulfilled]: (state, action) => {
+            state.creatingCourse = false
+            state.creatingCourseDone = true
+        },
+        [createCourse.rejected]: (state, action) => {
+            state.creatingCourse = false
+            state.creatingCourseErr = action.payload
+        },
+        [fetchAllCoursesByMe.fulfilled]: (state, action) => {
+            state.fetchingMyCourses = false
+            state.myCourses = action.payload
+        },
+        [fetchAllCoursesByMe.rejected]: (state, action) => {
+            state.fetchingMyCourses = false
+            state.fetchingMyCoursesErr = action.payload
+        },
     }
 })
