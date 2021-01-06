@@ -15,6 +15,7 @@ import AuthRoute from "./components/AuthRoute";
 import Profile from "./pages/Profile";
 import LecturerRoute from "./components/LecturerRoute";
 import ViewVideo from "./pages/ViewVideo";
+import AdminPage from "./pages/Admin";
 
 function App() {
     return (
@@ -37,6 +38,9 @@ function App() {
                     </Route>
                     <Route exact path={"/course/view/:vid"}>
                         <ViewVideo/>
+                    </Route>
+                    <Route exact path={"/admin"}>
+                        <AdminPage/>
                     </Route>
                     <Route path="*">
                         <NotFound/>
