@@ -37,7 +37,6 @@ const ViewVideo = ({courseContents}) => {
     }
 
     const { vid } = useParams()
-    console.log(vid)
 
     return (
         <div>
