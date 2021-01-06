@@ -1,15 +1,17 @@
-import React, {useRef} from "react";
+import React, {useRef, useState} from "react";
 import {
-    AppBar, Button,
+    AppBar, Button, Checkbox,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
+    FormControlLabel,
     makeStyles,
     TextField
 } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
+import store from "../store";
+import {addChapter, lecCourseSlice} from "../store/course/lec";
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -20,10 +22,11 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const CreateChapterDialog = ({open, onClose}) => {
+const CreateChapterDialog = ({open, onClose, cid}) => {
     const classes = useStyles()
 
     const nameRef = useRef('');
+    const [isPreviewable, setIsPreviewable] = useState(false);
 
     return (
         <>
@@ -44,12 +47,32 @@ const CreateChapterDialog = ({open, onClose}) => {
                         inputRef={nameRef}
                         fullWidth
                     />
+                    <FormControlLabel
+                        onChange={(e) => setIsPreviewable(e.target.checked)}
+                        checked={isPreviewable}
+                        control={
+                            <Checkbox
+                                name="checkedB"
+                                color="primary"
+                            />
+                        }
+                        label="Previewable"
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => onClose()} variant={"contained"} color={"secondary"}>
                         Cancel
                     </Button>
-                    <Button variant={"contained"} color={"primary"}>
+                    <Button variant={"contained"} color={"primary"} onClick={
+                        () => {
+                            store.dispatch(addChapter({
+                                "cid": cid,
+                                "title": nameRef.current.value,
+                                "previewable": isPreviewable
+                            }))
+                            onClose()
+                        }
+                    }>
                         Create
                     </Button>
                 </DialogActions>

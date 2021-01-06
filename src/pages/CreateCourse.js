@@ -1,4 +1,7 @@
 import React, {useRef, useState} from "react";
+import {
+    useHistory
+} from 'react-router-dom'
 import {makeStyles} from "@material-ui/core/styles";
 import PageFrame from "../components/PageFrame";
 import {Button, Divider, Grid, InputLabel, MenuItem, Select, TextField, Typography} from "@material-ui/core";
@@ -59,6 +62,8 @@ const CreateCourse = ({cats, err}) => {
     const [category, setCategory] = useState("");
     const [fullDesc, setFullDesc] = useState("");
     const [ava, setAva] = useState(null);
+
+    const history = useHistory()
 
     return (
         <div className={classes.root}>
@@ -170,7 +175,9 @@ const CreateCourse = ({cats, err}) => {
                                 <Button variant={"contained"} color={"primary"}>
                                     Submit
                                 </Button>
-                                <Button style={{marginLeft: '8px'}} variant={"contained"} color={"secondary"}>
+                                <Button style={{marginLeft: '8px'}} variant={"contained"} color={"secondary"}
+                                    onClick={() => history.push("/course/manage")}
+                                >
                                     Cancel
                                 </Button>
                             </div>

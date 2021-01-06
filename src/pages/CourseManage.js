@@ -16,12 +16,12 @@ import {
     Paper,
     Typography
 } from "@material-ui/core";
-import {Add, Edit} from "@material-ui/icons";
+import {Add, Edit, VideoCall} from "@material-ui/icons";
 import List from "@material-ui/core/List";
 import data from "../ava.json"
 import IconButton from "@material-ui/core/IconButton";
 import {
-     useHistory,
+    useHistory,
 } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
@@ -77,8 +77,13 @@ const CourseManage = ({courses}) => {
                                                     action={
                                                         <>
                                                             <IconButton onClick={() => (
-                                                                    history.push(`/course/update/${course.cid}`)
-                                                                )}>
+                                                                history.push(`/course/content/${course.cid}`)
+                                                            )}>
+                                                                <VideoCall/>
+                                                            </IconButton>
+                                                            <IconButton onClick={() => (
+                                                                history.push(`/course/update/${course.cid}`)
+                                                            )}>
                                                                 <Edit/>
                                                             </IconButton>
                                                         </>
@@ -93,7 +98,6 @@ const CourseManage = ({courses}) => {
                                                         {course.shortDesc}
                                                     </Typography>
                                                 </CardContent>
-
                                             </Card>
                                         </ListItem>
                                     ))}
@@ -102,10 +106,10 @@ const CourseManage = ({courses}) => {
                         </Grid>
                         {/*controls*/}
                         <Grid item xs={3}>
-                            <Button variant={"outlined"} color={"primary"}>
+                            <Button variant={"outlined"} color={"primary"}
+                                    onClick={() => history.push("/course/create")}>
                                 Create Course
                             </Button>
-
                         </Grid>
                     </Grid>
                 </div>
