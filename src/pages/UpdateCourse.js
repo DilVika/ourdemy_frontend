@@ -12,6 +12,9 @@ import {
     TextField,
     Typography
 } from "@material-ui/core";
+
+import {useHistory} from 'react-router-dom';
+
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import data from "../ava.json";
@@ -70,12 +73,13 @@ const UpdateCourse = ({targetCourse, err}) => {
     const classes = useStyles()
 
     let {id} = useParams();
-    console.log(id)
 
     const titleRef = useRef("")
     const shortDescRef = useRef("");
     const priceRef = useRef("")
     const [fullDesc, setFullDesc] = useState(targetCourse.fullDesc);
+
+    const history = useHistory()
 
     return (
         <div className={classes.root}>
@@ -180,7 +184,8 @@ const UpdateCourse = ({targetCourse, err}) => {
                                 <Button variant={"contained"} color={"primary"}>
                                     Update
                                 </Button>
-                                <Button style={{marginLeft: '8px'}} variant={"contained"} color={"secondary"}>
+                                <Button style={{marginLeft: '8px'}} variant={"contained"} color={"secondary"}
+                                        onClick={() => history.push("/course/manage")}>
                                     Cancel
                                 </Button>
                             </div>

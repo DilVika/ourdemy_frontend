@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import PageFrame from "../components/PageFrame";
 import {
-    Button, CircularProgress,
+    Button, Chip, CircularProgress,
     Collapse,
     Grid,
     Icon,
@@ -13,6 +13,9 @@ import {
     ListItemText,
     Paper
 } from "@material-ui/core";
+import {
+    useHistory
+} from 'react-router-dom'
 import {Delete} from "@material-ui/icons";
 import IconExpandLess from "@material-ui/icons/ExpandLess";
 import IconExpandMore from "@material-ui/icons/ExpandMore";
@@ -43,6 +46,8 @@ const CourseContent = ({courseContent, itemOpen}) => {
     const classes = useStyles()
     const {id} = useParams()
 
+    const history = useHistory()
+
     const [createChapterDialogOpen, setCreateChapterDialogOpen] = useState(false);
     const [uploadVideoDialogOpen, setUploadVideoDialogOpen] = useState(false);
 
@@ -70,8 +75,14 @@ const CourseContent = ({courseContent, itemOpen}) => {
                                             <Paper elevation={3} key={chapter.ccid} style={{marginBottom: '8px'}}>
                                                 <ListItem button>
                                                     <ListItemText>
-                                                        {chapter.name}
+                                                        {chapter.title}
                                                     </ListItemText>
+                                                    {
+                                                        chapter.previewable ? <Chip
+                                                            label={"Previewable"}
+                                                            color={"primary"}
+                                                        /> : null
+                                                    }
                                                     {
                                                         itemOpen[index].expandable ?
                                                             <>
@@ -138,6 +149,10 @@ const CourseContent = ({courseContent, itemOpen}) => {
                                                 Mark Done
                                             </Button>
                                     }
+                                    <Button style={{marginTop: '8px'}} variant={"contained"} color={"default"}
+                                            onClick={() => history.push("/course/manage")}>
+                                        {'< Return'}
+                                    </Button>
                                 </div>
                             </Grid>
                         </Grid> : <Grid container spacing={3}>
@@ -146,13 +161,17 @@ const CourseContent = ({courseContent, itemOpen}) => {
                     }
                 </div>
             </PageFrame>
-            <CreateChapterDialog open={createChapterDialogOpen}
-                                 onClose={() => setCreateChapterDialogOpen(false)}/>
+
             {
                 courseContent ?
-                    <UploadVideoDialog open={uploadVideoDialogOpen} onClose={() => setUploadVideoDialogOpen(false)}
-                                       chapters={courseContent.chapters}/>
-                    : null
+                    <>
+                        <CreateChapterDialog open={createChapterDialogOpen}
+                                             onClose={() => setCreateChapterDialogOpen(false)}
+                                             cid={courseContent.cid}
+                        />
+                        <UploadVideoDialog open={uploadVideoDialogOpen} onClose={() => setUploadVideoDialogOpen(false)}
+                                           chapters={courseContent.chapters} cid={courseContent.cid}/>
+                    </> : null
             }
         </div>
     )

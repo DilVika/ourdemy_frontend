@@ -1,22 +1,27 @@
-import React, {useRef, useState} from "react";
+import React, {useCallback, useRef, useState} from "react";
 import {
     AppBar, Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText, Grid, InputLabel,
-    makeStyles, Select,
+    makeStyles, MenuItem, Select,
     TextField
 } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
+import store from "../store";
+import {uploadVideo} from "../store/course/lec";
 import 'react-dropzone-uploader/dist/styles.css'
 import Dropzone from 'react-dropzone-uploader'
 
 
 const useStyles = makeStyles((theme) => ({
     root: {},
-    content: {},
+    content: {
+        width: '40vw',
+        height: '30vh',
+    },
     appBar: {
         position: 'relative',
     },
@@ -24,18 +29,19 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
     },
     dropzone: {
-        width: '30vw',
+        width: '20vw',
+        height: '20vh',
         marginTop: '16px'
     }
 }));
 
-const UploadVideoDialog = ({open, onClose, chapters}) => {
+const UploadVideoDialog = ({open, onClose, chapters, progress, cid}) => {
     const classes = useStyles()
 
     const [selectedChapter, setSelectedChapter] = useState(chapters[0]);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const titleRef = useRef("");
-
     return (
         <div className={classes.root}>
             <Dialog open={open} onClose={() => onClose()}>
@@ -50,21 +56,20 @@ const UploadVideoDialog = ({open, onClose, chapters}) => {
                     <div className={classes.content}>
                         <Grid container spacing={0}>
                             <Grid item xs={12}>
-                                <InputLabel id={"category-select-chapter-label"}>
+                                <InputLabel id={"chapter-video-select"}>
                                     Chapter
                                 </InputLabel>
                                 <Select
-                                    labelId={"category-select-chapter-label"}
+                                    labelId={"chapter-video-select"}
+                                    id={"chapter-selector"}
                                     value={selectedChapter}
                                     onChange={(e) => setSelectedChapter(e.target.value)}
                                 >
                                     {
                                         chapters.map((chapter, index) => (
-                                            <option ket={chapter.ccid}>
-                                                {
-                                                    chapter.name
-                                                }
-                                            </option>
+                                            <MenuItem key={chapter.ccid} value={chapter}>
+                                                {chapter.title}
+                                            </MenuItem>
                                         ))
                                     }
                                 </Select>
@@ -79,13 +84,18 @@ const UploadVideoDialog = ({open, onClose, chapters}) => {
                                 />
                             </Grid>
                             <Grid item xs={12}>
-                                <div className={classes.dropzone}>
-                                    <Dropzone
-                                        inputContent={"Drop your video here"}
-                                        maxFiles={1}
-                                        submitButtonDisabled={true}
-                                    />
-                                </div>
+                                <Dropzone
+                                    styles={classes.dropzone}
+                                    onChangeStatus={(file, status) => {
+                                        if (status === 'done') {
+                                            setSelectedFile(file.file)
+                                        }
+                                    }}
+                                    accept="video/*"
+                                    submitButtonDisabled={true}
+                                    maxFiles={1}
+                                    multiple={false}
+                                />
                             </Grid>
                         </Grid>
                     </div>
@@ -94,7 +104,15 @@ const UploadVideoDialog = ({open, onClose, chapters}) => {
                     <Button onClick={() => onClose()} variant={"contained"} color={"secondary"}>
                         Cancel
                     </Button>
-                    <Button variant={"contained"} color={"primary"}>
+                    <Button variant={"contained"} color={"primary"} onClick={() => {
+                        store.dispatch(uploadVideo({
+                            "title": titleRef.current.value,
+                            "file": selectedFile,
+                            "cid": cid,
+                            "chap_id": selectedChapter.ccid
+                        }))
+                        onClose()
+                    }}>
                         Upload
                     </Button>
                 </DialogActions>
