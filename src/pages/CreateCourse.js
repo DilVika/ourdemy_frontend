@@ -63,7 +63,7 @@ const CreateCourse = ({cats, err, finish}) => {
     const titleRef = useRef("")
     const shortDescRef = useRef("");
     const priceRef = useRef("")
-    const [category, setCategory] = useState(0);
+    const [category, setCategory] = useState();
     const [fullDesc, setFullDesc] = useState("");
     const [ava, setAva] = useState(null);
 
@@ -74,6 +74,15 @@ const CreateCourse = ({cats, err, finish}) => {
             store.dispatch(lecCourseSlice.actions.resetCreatingCourseState())
         }
     }, [])
+
+    useEffect(() => {
+        for (const cat of cats) {
+            if (cat.subcats && cat.subcats.length > 0) {
+                setCategory(cat.subcats[0].scid)
+                return
+            }
+        }
+    }, [cats])
 
     return (
         <>

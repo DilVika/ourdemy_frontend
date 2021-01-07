@@ -37,18 +37,18 @@ function App() {
                     <LecturerRoute exact path={"/course/manage"}>
                         <CourseManage/>
                     </LecturerRoute>
-                    <Route exact path={"/course/create"}>
+                    <LecturerRoute exact path={"/course/create"}>
                         <CreateCourse/>
-                    </Route>
-                    <Route exact path={"/course/update/:id"}>
+                    </LecturerRoute>
+                    <LecturerRoute exact path={"/course/update/:id"}>
                         <UpdateCourse/>
-                    </Route>
-                    <Route exact path={"/course/content/:id"}>
+                    </LecturerRoute>
+                    <LecturerRoute exact path={"/course/content/:id"}>
                         <CourseContent/>
-                    </Route>
-                    <Route exact path={"/course/view"}>
-                        <ViewVideo/>
-                    </Route>
+                    </LecturerRoute>
+                    {/*<Route exact path={"/course/view"}>*/}
+                    {/*    <ViewVideo/>*/}
+                    {/*</Route>*/}
                     <Route exact path={"/course/view/:vid"}>
                         <ViewVideo/>
                     </Route>

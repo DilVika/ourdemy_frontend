@@ -1,11 +1,11 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import PageFrame from "../components/PageFrame";
 import {
     Button,
-    CardMedia,
+    CardMedia, CircularProgress,
     Divider,
-    Grid,
+    Grid, InputAdornment,
     InputLabel,
     Paper,
     Select,
@@ -20,6 +20,10 @@ import 'react-quill/dist/quill.snow.css';
 import data from "../ava.json";
 
 import {useParams} from "react-router-dom"
+import {connect} from "react-redux";
+import store from "../store";
+import {fetchCurrentCourse, lecCourseSlice, updateCourse} from "../store/course/lec";
+import AnnounceDialog from "../components/AnnounceDialog";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -69,147 +73,197 @@ const quillFormats = [
 ]
 
 
-const UpdateCourse = ({targetCourse, err}) => {
+const UpdateCourse = ({targetCourse, loading, err, updateErr, updating, success}) => {
     const classes = useStyles()
 
     let {id} = useParams();
 
-    const titleRef = useRef("")
-    const shortDescRef = useRef("");
-    const priceRef = useRef("")
-    const [fullDesc, setFullDesc] = useState(targetCourse.fullDesc);
+    useEffect(() => {
+        store.dispatch(fetchCurrentCourse(id))
+
+        return () => {
+            store.dispatch(lecCourseSlice.actions.clearUpdateCourseState())
+        }
+    }, [])
+
+    const shortDescRef = useRef();
+    const discountRef = useRef();
+    const [fullDesc, setFullDesc] = useState();
+
+    useEffect(() => {
+        if (targetCourse) {
+            setFullDesc(targetCourse.full_desc)
+        }
+    }, [targetCourse])
 
     const history = useHistory()
 
     return (
         <div className={classes.root}>
             <PageFrame>
-                <div className={classes.main}>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                            <Typography variant={"h6"} color={"primary"}>
-                                Update course info
-                            </Typography>
-                            <Divider/>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        margin={"dense"}
-                                        id={"title"}
-                                        label={"Title"}
-                                        type={"text"}
-                                        inputRef={titleRef}
-                                        value={targetCourse.title}
-                                        disabled
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <InputLabel id={"category-select-label"}>
-                                        Category
-                                    </InputLabel>
-                                    <Select
-                                        disabled
-                                        labelId={"category-select-label"}
-                                        id={"category-select"}
-                                        value={targetCourse.category}
-                                        native
-                                    >
-                                        <option>
-                                            {targetCourse.category}
-                                        </option>
-                                    </Select>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        margin={"dense"}
-                                        id={"shortDesc"}
-                                        label={"Short Description"}
-                                        type={"text"}
-                                        inputRef={shortDescRef}
-                                        value={targetCourse.shortDesc}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        disabled
-                                        margin={"dense"}
-                                        id={"price"}
-                                        label={"Price"}
-                                        type={"number"}
-                                        inputRef={priceRef}
-                                        value={targetCourse.price}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <ReactQuill
-                                        theme={"snow"}
-                                        style={{
-                                            height: "20vh",
-                                            width: "40vw"
-                                        }}
-                                        onChange={(html) => setFullDesc(html)}
-                                        value={fullDesc}
-                                        // defaultValue={targetCourse.fullDesc}
-                                        modules={quillModules}
-                                        formats={quillFormats}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
-                                    Course avatar
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Paper elevation={3} className={classes.media}>
-                                        <CardMedia
-                                            className={classes.media}
-                                            component={"img"}
-                                            src={"data:image/png;base64," + targetCourse.ava}
-                                        />
-                                    </Paper>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={12} style={{marginTop: "48px"}}>
-                            {err ? <>
-                                <Typography component={"p"} color={"error"} style={{marginBottom: '16px'}}>
-                                    {err}
-                                </Typography>
-                            </> : null}
-                            <div className={classes.buttonBar}>
-                                <Button variant={"contained"} color={"primary"}>
-                                    Update
-                                </Button>
-                                <Button style={{marginLeft: '8px'}} variant={"contained"} color={"secondary"}
-                                        onClick={() => history.push("/course/manage")}>
-                                    Cancel
-                                </Button>
-                            </div>
-                        </Grid>
-                    </Grid>
-                </div>
+                {
+                    !targetCourse || loading ?
+                        <div className={classes.loadingCenter}>
+                            <CircularProgress/>
+                        </div> :
+                        <>
+                            {
+                                err ?
+                                    <Typography variant={"body2"} color={"error"}>
+                                        {err}
+                                    </Typography> :
+                                    <div className={classes.main}>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={12}>
+                                                <Typography variant={"h6"} color={"primary"}>
+                                                    Update course info
+                                                </Typography>
+                                                <Divider/>
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Grid container spacing={3}>
+                                                    <Grid item xs={12}>
+                                                        <TextField
+                                                            margin={"dense"}
+                                                            id={"title"}
+                                                            label={"Title"}
+                                                            type={"text"}
+                                                            value={targetCourse.title}
+                                                            disabled
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <InputLabel id={"category-select-label"}>
+                                                            Category
+                                                        </InputLabel>
+                                                        <Select
+                                                            disabled
+                                                            labelId={"category-select-label"}
+                                                            id={"category-select"}
+                                                            value={targetCourse.category}
+                                                            native
+                                                        >
+                                                            <option>
+                                                                {targetCourse.category}
+                                                            </option>
+                                                        </Select>
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <TextField
+                                                            margin={"dense"}
+                                                            id={"shortDesc"}
+                                                            label={"Short Description"}
+                                                            type={"text"}
+                                                            inputRef={shortDescRef}
+                                                            defaultValue={targetCourse.short_desc}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <TextField
+                                                            disabled
+                                                            margin={"dense"}
+                                                            id={"price"}
+                                                            label={"Price"}
+                                                            type={"number"}
+                                                            defaultValue={targetCourse.price}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <TextField
+                                                            margin={"dense"}
+                                                            id={"discount"}
+                                                            label={"Discount (%)"}
+                                                            type={"number"}
+                                                            inputRef={discountRef}
+                                                            defaultValue={targetCourse.discount * 100}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <ReactQuill
+                                                            theme={"snow"}
+                                                            style={{
+                                                                height: "20vh",
+                                                                width: "40vw"
+                                                            }}
+                                                            onChange={(html) => setFullDesc(html)}
+                                                            defaultValue={targetCourse.full_desc}
+                                                            // defaultValue={targetCourse.fullDesc}
+                                                            modules={quillModules}
+                                                            formats={quillFormats}
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <Grid container spacing={3}>
+                                                    <Grid item xs={12}>
+                                                        Course avatar
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <Paper elevation={3} className={classes.media}>
+                                                            <CardMedia
+                                                                className={classes.media}
+                                                                component={"img"}
+                                                                src={"data:image/png;base64," + targetCourse.ava}
+                                                            />
+                                                        </Paper>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid item xs={12} style={{marginTop: "48px"}}>
+                                                {updateErr ? <>
+                                                    <Typography component={"p"} color={"error"}
+                                                                style={{marginBottom: '16px'}}>
+                                                        {updateErr}
+                                                    </Typography>
+                                                </> : null}
+                                                {
+                                                    updating ? <>
+                                                        <div className={classes.loadingCenter}>
+                                                            <CircularProgress/>
+                                                        </div>
+                                                    </> : <div className={classes.buttonBar}>
+                                                        <Button variant={"contained"} color={"primary"} onClick={() => {
+                                                            store.dispatch(updateCourse({
+                                                                "cid": id,
+                                                                "short_desc": shortDescRef.current.value,
+                                                                "full_desc": fullDesc,
+                                                                "discount": discountRef.current.value,
+                                                            }))
+                                                        }
+                                                        }>
+                                                            Update
+                                                        </Button>
+                                                        <Button style={{marginLeft: '8px'}} variant={"contained"}
+                                                                color={"secondary"}
+                                                                onClick={() => history.push("/course/manage")}>
+                                                            Cancel
+                                                        </Button>
+                                                    </div>
+                                                }
+                                            </Grid>
+                                        </Grid>
+                                    </div>
+                            }
+                        </>
+                }
             </PageFrame>
+            <AnnounceDialog open={success} title={"Update success"} content={"Successfully updated"} onClose={() => {
+                history.push("/course/manage")
+            }}/>
         </div>
     )
 }
 
-UpdateCourse.defaultProps = {
-    "targetCourse": {
-        "cid": "124",
-        "category": "Genshin",
-        "title": "Best farming route guide",
-        "review_score": 5.0,
-        "price": "9.99",
-        "ava": data.exampleAva1,
-        "shortDesc": "Everyday route for f2p players",
-        "fullDesc": "<p>Hello</p>",
-        "chapterCount": 3,
-        "isDone": true
-    }
-}
+const mapStateToProps = state => ({
+    targetCourse: state.lecCourse.currentCourse,
+    loading: state.lecCourse.currentCourseFetching,
+    err: state.lecCourse.currentCourseErr,
+    updateErr: state.lecCourse.updatingErr,
+    updating: state.lecCourse.updatingCourse,
+    success: state.lecCourse.updatingCourseDone,
+})
 
-export default UpdateCourse
+export default connect(
+    mapStateToProps
+)(UpdateCourse)
