@@ -1,9 +1,9 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {
     AppBar, Button, Checkbox,
     Dialog,
     DialogActions,
-    DialogContent,
+    DialogContent, DialogContentText,
     FormControlLabel,
     makeStyles,
     TextField
@@ -12,6 +12,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import store from "../store";
 import {addChapter, lecCourseSlice} from "../store/course/lec";
+import {connect} from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -22,11 +23,24 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const CreateChapterDialog = ({open, onClose, cid}) => {
+const CreateChapterDialog = ({open, onClose, cid, err, success}) => {
     const classes = useStyles()
 
     const nameRef = useRef('');
     const [isPreviewable, setIsPreviewable] = useState(false);
+
+    useEffect(() => {
+        return () => {
+            store.dispatch(lecCourseSlice.actions.clearAddingChapterState())
+        }
+    }, [])
+
+    useEffect(() => {
+        if (success) {
+            store.dispatch(lecCourseSlice.actions.clearAddingChapterState())
+            onClose()
+        }
+    }, [success])
 
     return (
         <>
@@ -58,9 +72,17 @@ const CreateChapterDialog = ({open, onClose, cid}) => {
                         }
                         label="Previewable"
                     />
+                    {
+                        err ? <DialogContentText color={"error"}>
+                            {err}
+                        </DialogContentText> : null
+                    }
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => onClose()} variant={"contained"} color={"secondary"}>
+                    <Button onClick={() => {
+                        store.dispatch(lecCourseSlice.actions.clearAddingChapterState())
+                        onClose()
+                    }} variant={"contained"} color={"secondary"}>
                         Cancel
                     </Button>
                     <Button variant={"contained"} color={"primary"} onClick={
@@ -70,7 +92,6 @@ const CreateChapterDialog = ({open, onClose, cid}) => {
                                 "title": nameRef.current.value,
                                 "previewable": isPreviewable
                             }))
-                            onClose()
                         }
                     }>
                         Create
@@ -82,4 +103,12 @@ const CreateChapterDialog = ({open, onClose, cid}) => {
 
 }
 
-export default CreateChapterDialog
+const mapStateToProps = state => ({
+    creating: state.lecCourse.addingChapter,
+    err: state.lecCourse.addChapterErr,
+    success: state.lecCourse.addingChapterDone
+})
+
+export default connect(
+    mapStateToProps
+)(CreateChapterDialog)

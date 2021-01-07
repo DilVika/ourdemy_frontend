@@ -22,7 +22,7 @@ import IconExpandMore from "@material-ui/icons/ExpandMore";
 import CreateChapterDialog from "../components/CreateChapterDialog";
 import {connect} from "react-redux";
 import store from "../store";
-import {fetchCurrentCourse, lecCourseSlice} from "../store/course/lec";
+import {changeStatus, deleteVideo, fetchCurrentCourse, lecCourseSlice} from "../store/course/lec";
 import {Route, useParams} from "react-router-dom";
 import UploadVideoDialog from "../components/UploadVideoDialog";
 
@@ -53,13 +53,13 @@ const CourseContent = ({courseContent, itemOpen}) => {
 
     useEffect(() => {
         store.dispatch(fetchCurrentCourse(id))
+        return () => {
+            store.dispatch(lecCourseSlice.actions.clearCourseContentState())
+        }
     }, [])
 
     const toggleItem = (index, open) => {
         store.dispatch(lecCourseSlice.actions.toggleItem({index, open}))
-        // const itemOpenCopy = [...itemOpen]
-        // itemOpenCopy[index].open = open
-        // setItemOpen(itemOpenCopy)
     }
 
     return (
@@ -72,7 +72,7 @@ const CourseContent = ({courseContent, itemOpen}) => {
                                 <List>
                                     {
                                         courseContent.chapters.map((chapter, index) => (
-                                            <Paper elevation={3} key={chapter.ccid} style={{marginBottom: '8px'}}>
+                                            <Paper elevation={3} key={chapter.Id} style={{marginBottom: '8px'}}>
                                                 <ListItem button>
                                                     <ListItemText>
                                                         {chapter.title}
@@ -109,12 +109,19 @@ const CourseContent = ({courseContent, itemOpen}) => {
                                                             <List disablePadding>
                                                                 {
                                                                     chapter.videos.map((video, vindex) => (
-                                                                        <ListItem key={video.vid} button>
+                                                                        <ListItem key={video.Id} button>
                                                                             <ListItemText
                                                                                 inset
                                                                                 primary={`${vindex + 1}. ${video.title}`}
                                                                             />
-                                                                            <IconButton>
+                                                                            <IconButton onClick={() => {
+                                                                                store.dispatch(deleteVideo({
+                                                                                    "cid": id,
+                                                                                    "chap_id": chapter.Id,
+                                                                                    "vid": video.Id,
+                                                                                }))
+                                                                            }
+                                                                            }>
                                                                                 <Delete/>
                                                                             </IconButton>
                                                                         </ListItem>
@@ -139,13 +146,29 @@ const CourseContent = ({courseContent, itemOpen}) => {
                                         Add Video
                                     </Button>
                                     {
-                                        courseContent.isDone ?
+                                        courseContent.is_done ?
                                             <Button style={{marginTop: '8px'}} variant={"contained"}
-                                                    color={"secondary"}>
+                                                    color={"secondary"} onClick={() => {
+                                                store.dispatch(changeStatus(
+                                                    {
+                                                        "cid": id,
+                                                        "changeOption": "markUndone",
+                                                    }
+                                                ))
+                                            }
+                                            }>
                                                 Mark Undone
                                             </Button> :
                                             <Button style={{marginTop: '8px'}} variant={"contained"}
-                                                    color={"secondary"}>
+                                                    color={"secondary"} onClick={() => {
+                                                store.dispatch(changeStatus(
+                                                    {
+                                                        "cid": id,
+                                                        "changeOption": "markDone",
+                                                    }
+                                                ))
+                                            }
+                                            }>
                                                 Mark Done
                                             </Button>
                                     }
@@ -167,10 +190,10 @@ const CourseContent = ({courseContent, itemOpen}) => {
                     <>
                         <CreateChapterDialog open={createChapterDialogOpen}
                                              onClose={() => setCreateChapterDialogOpen(false)}
-                                             cid={courseContent.cid}
+                                             cid={id}
                         />
                         <UploadVideoDialog open={uploadVideoDialogOpen} onClose={() => setUploadVideoDialogOpen(false)}
-                                           chapters={courseContent.chapters} cid={courseContent.cid}/>
+                                           cid={id}/>
                     </> : null
             }
         </div>

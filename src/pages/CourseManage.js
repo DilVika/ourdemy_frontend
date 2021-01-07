@@ -51,8 +51,6 @@ const CourseManage = ({courses, err, loading}) => {
         store.dispatch(fetchAllCoursesByMe())
     }, [])
 
-    console.log(courses)
-
     return (<>
         <div className={classes.root}>
             <PageFrame>
@@ -95,7 +93,7 @@ const CourseManage = ({courses, err, loading}) => {
                                                                         />
                                                                         <Chip
                                                                             style={{marginLeft: "5px"}}
-                                                                            label={course.chapterCount + " chapters"}
+                                                                            label={course.chapters.length + " chapters"}
                                                                             color={"default"}
                                                                         />
                                                                     </>
