@@ -22,6 +22,7 @@ import CreateCourse from "./pages/CreateCourse";
 import UpdateCourse from "./pages/UpdateCourse";
 import CourseContent from "./pages/CourseContent";
 import {fetchCurrentCourse} from "./store/course/lec";
+import SearchPage from "./pages/Search";
 
 function App() {
     return (
@@ -54,6 +55,9 @@ function App() {
                     </Route>
                     <Route exact path={"/admin"}>
                         <AdminPage/>
+                    </Route>
+                    <Route exact path={"/search"}>
+                        <SearchPage/>
                     </Route>
                     <Route path="*">
                         <NotFound/>
