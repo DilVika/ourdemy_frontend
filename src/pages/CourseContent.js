@@ -22,7 +22,7 @@ import IconExpandMore from "@material-ui/icons/ExpandMore";
 import CreateChapterDialog from "../components/CreateChapterDialog";
 import {connect} from "react-redux";
 import store from "../store";
-import {changeStatus, deleteVideo, fetchCurrentCourse, lecCourseSlice} from "../store/course/lec";
+import {changeStatus, deleteChapter, deleteVideo, fetchCurrentCourse, lecCourseSlice} from "../store/course/lec";
 import {Route, useParams} from "react-router-dom";
 import UploadVideoDialog from "../components/UploadVideoDialog";
 
@@ -42,7 +42,7 @@ const useStyles = makeStyles(() => ({
     },
 }))
 
-const CourseContent = ({courseContent, itemOpen}) => {
+const CourseContent = ({courseContent, itemOpen, deletingErr, err, fetching}) => {
     const classes = useStyles()
     const {id} = useParams()
 
@@ -97,7 +97,12 @@ const CourseContent = ({courseContent, itemOpen}) => {
                                                                     </IconButton>
                                                                 }
                                                             </> :
-                                                            <IconButton>
+                                                            <IconButton onClick={() => {
+                                                                store.dispatch(deleteChapter({
+                                                                    "chap_id": chapter.Id,
+                                                                }))
+                                                            }
+                                                            }>
                                                                 <Delete/>
                                                             </IconButton>
                                                     }
@@ -205,6 +210,7 @@ const mapStateToProps = state => ({
     fetching: state.lecCourse.currentCourseFetching,
     courseContent: state.lecCourse.currentCourse,
     itemOpen: state.lecCourse.currentCourseIsExpand,
+    deletingErr: state.lecCourse.deletingErr
 })
 export default connect(
     mapStateToProps

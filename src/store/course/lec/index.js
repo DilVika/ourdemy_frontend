@@ -71,6 +71,23 @@ export const addChapter = createAsyncThunk(
     }
 )
 
+export const deleteChapter = createAsyncThunk(
+    'leccourse/deleteChapter',
+    async (chapterData, thunkApi) => {
+        try {
+            const res = await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/course/chapter/${chapterData.chap_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
 export const uploadVideo = createAsyncThunk(
     'leccourse/uploadVideo',
     async (videoInfo, thunkApi) => {
@@ -337,7 +354,7 @@ export const lecCourseSlice = createSlice({
 
             state.currentCourse.chapters[index].videos.push(
                 {
-                    "vid": action.payload.id,
+                    "Id": action.payload.Id,
                     "title": action.payload.title
                 }
             )
@@ -383,6 +400,18 @@ export const lecCourseSlice = createSlice({
             state.changingStatus = false
             state.courseContentErr = action.payload
         },
+        [deleteChapter.fulfilled]: (state, action) => {
+            state.deletingErr = null
+            const index = state.currentCourse.chapters.findIndex(chap => {
+                return chap.Id === action.payload.Id
+            })
+
+            state.currentCourse.chapters.splice(index, 1)
+            // store.dispatch(lecCourseSlice.actions.updateExpandState())
+        },
+        [deleteChapter.rejected]: (state, action) => {
+            state.deletingErr = action.payload
+        },
         [deleteVideo.fulfilled]: (state, action) => {
             state.deletingErr = null
             const index = state.currentCourse.chapters.findIndex(chap => {
@@ -394,6 +423,10 @@ export const lecCourseSlice = createSlice({
             })
 
             state.currentCourse.chapters[index].videos.splice(vindex, 1)
+            if (state.currentCourse.chapters[index].videos.length < 1) {
+                state.currentCourseIsExpand[index].expandable = false
+            }
+            // store.dispatch(lecCourseSlice.actions.updateExpandState())
         },
         [deleteVideo.rejected]: (state, action) => {
             state.deletingErr = action.payload
