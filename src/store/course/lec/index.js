@@ -3,17 +3,34 @@ import {
     createSlice,
     createAsyncThunk,
 } from '@reduxjs/toolkit';
+import {act} from "@testing-library/react";
+import store from "../../index";
 
 const initialState = {
+    myCourses: null,
+    fetchingMyCourses: false,
+    fetchingMyCoursesErr: null,
     currentCourse: null,
     currentCourseFetching: false,
     currentCourseErr: null,
     currentCourseIsExpand: [],
     addingChapter: false,
     addChapterErr: null,
+    addingChapterDone: false,
     uploadingVideo: false,
+    uploadingVideoDone: false,
     uploadingVideoErr: null,
     progress: 0,
+    creatingCourse: false,
+    creatingCourseErr: null,
+    creatingCourseDone: false,
+    updatingCourse: false,
+    updatingCourseDone: false,
+    updatingErr: null,
+    courseContentErr: null,
+    changingStatus: false,
+    changingStatusDone: false,
+    deletingErr: null
 }
 
 export const fetchCurrentCourse = createAsyncThunk(
@@ -21,61 +38,12 @@ export const fetchCurrentCourse = createAsyncThunk(
     async (courseId, thunkAPI) => {
         thunkAPI.dispatch(lecCourseSlice.actions.fetchingCurrentCourse())
 
-        return {
-            "cid": "Co001",
-            "chapters": [
-                {
-                    "ccid": "C0001",
-                    "title": "Getting started",
-                    "previewable": true,
-                    "videos": [
-                        {
-                            "vid": "V0001",
-                            "title": "How to roll gacha"
-                        },
-                        {
-                            "vid": "V0002",
-                            "title": "How to upgrade your character"
-                        },
-                        {
-                            "vid": "V0003",
-                            "title": "How to upgrade artifact"
-                        }
-                    ]
-                },
-                {
-                    "ccid": "C0002",
-                    "title": "Basic",
-                    "previewable": false,
-                    "videos": [
-                        {
-                            "vid": "V0021",
-                            "title": "Movement"
-                        },
-                        {
-                            "vid": "V0022",
-                            "title": "Combat"
-                        },
-                        {
-                            "vid": "V0023",
-                            "title": "Equipments"
-                        }
-                    ]
-                },
-                {
-                    "ccid": "C0003",
-                    "title": "Advanced",
-                    "previewable": false,
-                    "videos": []
-                },
-                {
-                    "ccid": "C0004",
-                    "title": "Extras",
-                    "previewable": true,
-                    "videos": [],
-                }
-            ],
-            "isDone": true
+        try {
+            const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/course/full/${courseId}`)
+
+            return res.data
+        } catch (e) {
+            return thunkAPI.rejectWithValue(e.response.data.error)
         }
     }
 )
@@ -85,11 +53,37 @@ export const addChapter = createAsyncThunk(
     async (chapter, thunkApi) => {
         thunkApi.dispatch(lecCourseSlice.actions.addingChapter())
 
-        return {
-            "id": "cc" + Math.random(),
-            "title": chapter.title,
-            "cid": chapter.cid,
-            "previewable": chapter.previewable,
+        try {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/course/chapter`, {
+                "cid": chapter.cid,
+                "title": chapter.title,
+                "previewable": chapter.previewable,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
+export const deleteChapter = createAsyncThunk(
+    'leccourse/deleteChapter',
+    async (chapterData, thunkApi) => {
+        try {
+            const res = await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/course/chapter/${chapterData.chap_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
         }
     }
 )
@@ -99,15 +93,130 @@ export const uploadVideo = createAsyncThunk(
     async (videoInfo, thunkApi) => {
         thunkApi.dispatch(lecCourseSlice.actions.uploadingVideo())
 
-        const formData = new FormData()
-        formData.append("vid", videoInfo.file)
-        formData.append("title", videoInfo.title)
+        try {
+            const formData = new FormData()
+            formData.append("vid", videoInfo.file)
+            formData.append("title", videoInfo.title)
 
-        return {
-            "id": "v" + Math.random(),
-            "title": videoInfo.title,
-            "cid": videoInfo.cid,
-            "chap_id": videoInfo.chap_id,
+            const res = await axios.put(`${process.env.REACT_APP_BACKEND_URL}/vid/upload/${videoInfo.cid}/${videoInfo.chap_id}`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+
+    }
+)
+
+export const deleteVideo = createAsyncThunk(
+    'leccourse/deleteVideo',
+    async (data, thunkApi) => {
+        try {
+            const res = await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/vid/${data.cid}/${data.chap_id}/${data.vid}`, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
+export const createCourse = createAsyncThunk(
+    'leccourse/createCourse',
+    async (courseInfo, thunkApi) => {
+        try {
+            const formData = new FormData()
+            if (!courseInfo.ava) {
+                return thunkApi.rejectWithValue("missing avatar")
+            }
+            formData.append("ava", courseInfo.ava[0])
+            formData.append("cid", courseInfo.cid)
+            formData.append("name", courseInfo.name)
+            formData.append("short_desc", courseInfo.short_desc)
+            formData.append("full_desc", courseInfo.full_desc)
+            formData.append("fee", courseInfo.fee)
+
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/course/create`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
+export const updateCourse = createAsyncThunk(
+    'leccourse/updateCourse',
+    async (updateInfo, thunkApi) => {
+        thunkApi.dispatch(lecCourseSlice.actions.updatingCourse())
+        try {
+            const discountF = parseFloat(updateInfo.discount)
+
+            if (Number.isNaN(discountF)) {
+                return thunkApi.rejectWithValue("wrong discount format")
+            }
+
+            if (discountF > 100.0 || discountF < 0.0) {
+                return thunkApi.rejectWithValue("discount must be between 0-1.0")
+            }
+
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/course/update/${updateInfo.cid}`, {
+                "short_desc": updateInfo.short_desc,
+                "full_desc": updateInfo.full_desc,
+                "discount": discountF / 100,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
+export const fetchAllCoursesByMe = createAsyncThunk(
+    'leccourse/fetchAllCourseByMe',
+    async (_, thunkApi) => {
+        try {
+            const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/course/allByMe`, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return e.response.data.error
+        }
+    }
+)
+
+export const changeStatus = createAsyncThunk(
+    'leccourse/changeStatus',
+    async (courseData, thunkApi) => {
+        try {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/course/${courseData.changeOption}/${courseData.cid}`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                }
+            })
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
         }
     }
 )
@@ -116,11 +225,70 @@ export const lecCourseSlice = createSlice({
     name: 'leccourse',
     initialState: initialState,
     reducers: {
+        fetchingMyCourses: (state, action) => {
+            state.fetchingMyCourses = true
+        },
+        clearFetchingMyCoursesState: (state, action) => {
+            state.fetchingMyCourses = false
+            state.myCourses = null
+            state.fetchingMyCoursesErr = null
+        },
         fetchingCurrentCourse: (state, action) => {
             state.currentCourseFetching = true
         },
+        changingStatus: (state, action) => {
+            state.changingStatus = true
+        },
+        clearCreateCourseState: (state, action) => {
+            state.creatingCourse = false
+            state.creatingCourseDone = false
+            state.creatingCourseErr = null
+        },
+        clearUploadVideoState: (state, action) => {
+            state.uploadingVideo = false
+            state.uploadingVideoDone = false
+            state.uploadingVideoErr = null
+        },
+        clearUpdateCourseState: (state, action) => {
+            state.myCourses = null
+            state.fetchingMyCourses = false
+            state.fetchingMyCoursesErr = null
+            state.currentCourse = null
+            state.currentCourseFetching = false
+            state.currentCourseErr = null
+            state.updatingCourse = false
+            state.updatingErr = null
+            state.updatingCourseDone = false
+            state.changingStatusDone = false
+        },
+        clearCourseContentState: (state, action) => {
+            state.currentCourse = null
+            state.currentCourseFetching = false
+            state.currentCourseErr = null
+            state.changingStatus = false
+            state.changingStatusDone = false
+        },
+        clearCourseContentDoneState: (state, action) => {
+            state.changingStatusDone = false
+        },
+        updatingCourse: (state, action) => {
+            state.updatingCourse = true
+        },
         addingChapter: (state, action) => {
             state.addingChapter = true
+        },
+        clearAddingChapterState: (state, action) => {
+            state.addingChapter = false
+            state.addChapterErr = null
+            state.addingChapterDone = false
+        },
+        creatingCourse: (state, action) => {
+            state.creatingCourse = true
+        },
+        resetCreatingCourseState: (state, action) => {
+            state.creatingCourse = false
+            state.creatingCourseErr = null
+            state.creatingCourseDone = false
         },
         uploadingVideo: (state, action) => {
             state.uploadingVideo = true
@@ -128,6 +296,20 @@ export const lecCourseSlice = createSlice({
         toggleItem: (state, action) => {
             state.currentCourseIsExpand[action.payload.index].open = action.payload.open
         },
+        updateExpandState: (state, action) => {
+            state.currentCourseIsExpand = state.currentCourse.chapters.map((chapter, index) => {
+                if (!chapter.videos || chapter.videos.length < 1) {
+                    return {
+                        "expandable": false,
+                        "open": false,
+                    }
+                }
+                return {
+                    "expandable": true,
+                    "open": false,
+                }
+            })
+        }
     },
     extraReducers: {
         [fetchCurrentCourse.fulfilled]: (state, action) => {
@@ -149,6 +331,7 @@ export const lecCourseSlice = createSlice({
         [fetchCurrentCourse.rejected]: (state, action) => {
             state.currentCourseFetching = false
             state.currentCourseErr = action.payload
+            state.currentCourse = {}
         },
         [addChapter.fulfilled]: (state, action) => {
             state.addingChapter = false
@@ -157,6 +340,7 @@ export const lecCourseSlice = createSlice({
                 "open": false,
                 "expandable": false,
             }]
+            state.addingChapterDone = true
         },
         [addChapter.rejected]: (state, action) => {
             state.addingChapter = false
@@ -164,19 +348,88 @@ export const lecCourseSlice = createSlice({
         },
         [uploadVideo.fulfilled]: (state, action) => {
             state.uploadingVideo = false
-            const index = state.currentCourse.chapters.findIndex(chap => chap.ccid === action.payload.chap_id)
+            const index = state.currentCourse.chapters.findIndex(chap => {
+                return chap.Id === action.payload.chap_id
+            })
 
             state.currentCourse.chapters[index].videos.push(
                 {
-                    "vid": action.payload.id,
+                    "Id": action.payload.Id,
                     "title": action.payload.title
                 }
             )
             state.currentCourseIsExpand[index].expandable = true
+            state.uploadingVideoDone = true
         },
         [uploadVideo.rejected]: (state, action) => {
             state.uploadingVideo = false
             state.uploadingVideoErr = action.payload
-        }
+        },
+        [createCourse.fulfilled]: (state, action) => {
+            state.creatingCourse = false
+            state.creatingCourseDone = true
+        },
+        [createCourse.rejected]: (state, action) => {
+            state.creatingCourse = false
+            state.creatingCourseErr = action.payload
+        },
+        [fetchAllCoursesByMe.fulfilled]: (state, action) => {
+            state.fetchingMyCourses = false
+            state.myCourses = action.payload
+        },
+        [fetchAllCoursesByMe.rejected]: (state, action) => {
+            state.fetchingMyCourses = false
+            state.fetchingMyCoursesErr = action.payload
+            state.myCourses = []
+        },
+        [updateCourse.fulfilled]: (state, action) => {
+            state.updatingCourse = false
+            state.currentCourse = action.payload
+            state.updatingCourseDone = true
+        },
+        [updateCourse.rejected]: (state, action) => {
+            state.updatingCourse = false
+            state.updatingErr = action.payload
+        },
+        [changeStatus.fulfilled]: (state, action) => {
+            state.changingStatus = false
+            state.changingStatusDone = true
+            state.currentCourse.is_done = !state.currentCourse.is_done
+        },
+        [changeStatus.rejected]: (state, action) => {
+            state.changingStatus = false
+            state.courseContentErr = action.payload
+        },
+        [deleteChapter.fulfilled]: (state, action) => {
+            state.deletingErr = null
+            const index = state.currentCourse.chapters.findIndex(chap => {
+                return chap.Id === action.payload.Id
+            })
+
+            state.currentCourse.chapters.splice(index, 1)
+            // store.dispatch(lecCourseSlice.actions.updateExpandState())
+        },
+        [deleteChapter.rejected]: (state, action) => {
+            state.deletingErr = action.payload
+        },
+        [deleteVideo.fulfilled]: (state, action) => {
+            state.deletingErr = null
+            const index = state.currentCourse.chapters.findIndex(chap => {
+                return chap.Id === action.payload.chap_id
+            })
+
+            const vindex = state.currentCourse.chapters[index].videos.findIndex(vid => {
+                return vid.Id === action.payload.Id
+            })
+
+            state.currentCourse.chapters[index].videos.splice(vindex, 1)
+            if (state.currentCourse.chapters[index].videos.length < 1) {
+                state.currentCourseIsExpand[index].expandable = false
+            }
+            // store.dispatch(lecCourseSlice.actions.updateExpandState())
+        },
+        [deleteVideo.rejected]: (state, action) => {
+            state.deletingErr = action.payload
+        },
     }
 })

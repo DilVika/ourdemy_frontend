@@ -69,9 +69,10 @@ export const updateProfile = createAsyncThunk(
                     'Authorization': `Bearer ${thunkAPI.getState().authen.token}`
                 }
             });
+
             return response.data
         } catch (err) {
-            return thunkAPI.rejectWithValue("login failed: username or password mismatch")
+            return thunkAPI.rejectWithValue(err.response.data.error)
         }
     },
 );
@@ -280,7 +281,7 @@ export const authenSlice = createSlice({
             state.updateErr = action.payload
         },
         [updateProfile.fulfilled]: (state, action) => {
-            state.user.fullname = action.payload.user
+            state.user.fullname = action.payload.fullname
             state.user.email = action.payload.email
             state.updating = false
             state.updatingFinish = true

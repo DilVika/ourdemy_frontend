@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 
 import PageFrame from "../components/PageFrame";
 import store from "../store";
@@ -9,7 +9,7 @@ import {
     CardContent,
     CardHeader,
     CardMedia, Checkbox,
-    Chip,
+    Chip, CircularProgress,
     Fab,
     Grid,
     ListItem,
@@ -23,6 +23,8 @@ import IconButton from "@material-ui/core/IconButton";
 import {
     useHistory,
 } from 'react-router-dom'
+import {connect} from "react-redux";
+import {fetchAllCoursesByMe} from "../store/course/lec";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -34,113 +36,125 @@ const useStyles = makeStyles((theme) => ({
     },
     card: {
         width: '90%'
+    },
+    loadingCenter: {
+        display: 'flex',
+        justifyContent: 'center'
     }
-
 }))
 
-const CourseManage = ({courses}) => {
+const CourseManage = ({courses, err, loading}) => {
     const classes = useStyles()
     const history = useHistory()
+
+    useEffect(() => {
+        store.dispatch(fetchAllCoursesByMe())
+    }, [])
 
     return (<>
         <div className={classes.root}>
             <PageFrame>
                 <div className={classes.main}>
-                    <Grid container spacing={3}>
-                        {/*course list*/}
-                        <Grid item xs={9}>
-                            <div style={{maxHeight: '80vh', overflow: 'auto'}}>
-                                <List>
-                                    {courses.map((course, index) => (
-                                        <ListItem key={course.cid}>
-                                            <Card raised className={classes.card}>
-                                                <CardHeader
-                                                    title={course.title}
-                                                    subheader={
-                                                        <>
-                                                            <Chip
-                                                                label={course.category}
-                                                                color={"primary"}
-                                                            />
-                                                            <Chip
-                                                                style={{marginLeft: "5px"}}
-                                                                label={course.review_score.toFixed(2) + "/5.00"}
-                                                                color={"secondary"}
-                                                            />
-                                                            <Chip
-                                                                style={{marginLeft: "5px"}}
-                                                                label={course.chapterCount + " chapters"}
-                                                                color={"default"}
-                                                            />
-                                                        </>
-                                                    }
-                                                    action={
-                                                        <>
-                                                            <IconButton onClick={() => (
-                                                                history.push(`/course/content/${course.cid}`)
-                                                            )}>
-                                                                <VideoCall/>
-                                                            </IconButton>
-                                                            <IconButton onClick={() => (
-                                                                history.push(`/course/update/${course.cid}`)
-                                                            )}>
-                                                                <Edit/>
-                                                            </IconButton>
-                                                        </>
-                                                    }
-                                                />
-                                                <CardMedia
-                                                    component={"img"}
-                                                    src={"data:image/png;base64," + course.ava}
-                                                />
-                                                <CardContent>
-                                                    <Typography variant={"body2"} color={"textSecondary"}>
-                                                        {course.shortDesc}
-                                                    </Typography>
-                                                </CardContent>
-                                            </Card>
-                                        </ListItem>
-                                    ))}
-                                </List>
+                    {
+                        loading || !courses ? <>
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
                             </div>
-                        </Grid>
-                        {/*controls*/}
-                        <Grid item xs={3}>
-                            <Button variant={"outlined"} color={"primary"}
-                                    onClick={() => history.push("/course/create")}>
-                                Create Course
-                            </Button>
-                        </Grid>
-                    </Grid>
+                        </> : <>
+                            {
+                                err ? <>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12}>
+                                            <Typography color={"error"} component={"p"}>
+                                                {err}
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                </> : <Grid container spacing={3}>
+                                    {/*course list*/}
+                                    <Grid item xs={9}>
+                                        <div style={{maxHeight: '80vh', overflow: 'auto'}}>
+                                            <List>
+                                                {courses.map((course, index) => (
+                                                    <ListItem key={course.id}>
+                                                        <Card raised className={classes.card}>
+                                                            <CardHeader
+                                                                title={course.title}
+                                                                subheader={
+                                                                    <>
+                                                                        <Chip
+                                                                            label={course.category}
+                                                                            color={"primary"}
+                                                                        />
+                                                                        <Chip
+                                                                            style={{marginLeft: "5px"}}
+                                                                            label={course.review_score.toFixed(2) + "/5.00"}
+                                                                            color={"secondary"}
+                                                                        />
+                                                                        <Chip
+                                                                            style={{marginLeft: "5px"}}
+                                                                            label={course.chapters.length + " chapters"}
+                                                                            color={"default"}
+                                                                        />
+                                                                    </>
+                                                                }
+                                                                action={
+                                                                    <>
+                                                                        <IconButton onClick={() => {
+                                                                            const res = course.id.split("\"")
+                                                                            const id = res[1]
+                                                                            history.push(`/course/content/${id}`)
+                                                                        }}>
+                                                                            <VideoCall/>
+                                                                        </IconButton>
+                                                                        <IconButton onClick={() => {
+                                                                            const res = course.id.split("\"")
+                                                                            const id = res[1]
+                                                                            history.push(`/course/update/${id}`)
+                                                                        }}>
+                                                                            <Edit/>
+                                                                        </IconButton>
+                                                                    </>
+                                                                }
+                                                            />
+                                                            <CardMedia
+                                                                component={"img"}
+                                                                src={"data:image/png;base64," + course.ava}
+                                                            />
+                                                            <CardContent>
+                                                                <Typography variant={"body2"} color={"textSecondary"}>
+                                                                    {course.short_desc}
+                                                                </Typography>
+                                                            </CardContent>
+                                                        </Card>
+                                                    </ListItem>
+                                                ))}
+                                            </List>
+                                        </div>
+                                    </Grid>
+                                    {/*controls*/}
+                                    <Grid item xs={3}>
+                                        <Button variant={"outlined"} color={"primary"}
+                                                onClick={() => history.push("/course/create")}>
+                                            Create Course
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            }
+                        </>
+                    }
                 </div>
             </PageFrame>
         </div>
     </>)
 }
 
-CourseManage.defaultProps = {
-    courses: [
-        {
-            "cid": "123",
-            "category": "Cyberpunk 2077",
-            "title": "How to get all legendary weapons",
-            "review_score": 5.0,
-            "ava": data.exampleAva1,
-            "shortDesc": "Locations of 500 legendary weapons",
-            "chapterCount": 5,
-            "isDone": false,
-        },
-        {
-            "cid": "124",
-            "category": "Genshin",
-            "title": "Best farming route guide",
-            "review_score": 5.0,
-            "ava": data.exampleAva2,
-            "shortDesc": "Everyday route for f2p players",
-            "chapterCount": 3,
-            "isDone": true
-        }
-    ]
-}
+const mapStateToProps = state => ({
+    courses: state.lecCourse.myCourses,
+    loading: state.lecCourse.fetchingMyCourses,
+    err: state.lecCourse.fetchingMyCoursesErr
+})
 
-export default CourseManage
+export default connect(
+    mapStateToProps
+)(CourseManage)
