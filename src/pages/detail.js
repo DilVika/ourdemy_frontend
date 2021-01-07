@@ -9,8 +9,9 @@ import Card from "@material-ui/core/Card";
 import Grid from "@material-ui/core/Grid";
 import Rating from "react-star-review";
 import Paper from "@material-ui/core/Paper";
+import InforCard from "../components/InforCard";
 
-const dummyHigh = {
+const dummyInfo = {
   src: "https://picsum.photos/500/300",
   title: "2021 Complete Python Bootcamp From Zero to Hero in Python",
   kind: "Web Devevlopment",
@@ -20,192 +21,86 @@ const dummyHigh = {
   currentPrice: "50",
   originPrice: "70",
   brief: "Java code giay",
+  detail: [
+    "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
+    "Được code giấy",
+    "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
+    "Được code giấy",
+    "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
+    "Được code giấy",
+  ],
+  contents: [
+    {
+      name: "Chapter 1: Code giay dai cudai cudai cudai cudai cudai cudai cudai cudai cuongz",
+      link: "google.com",
+    },
+    {
+      name: "Chapter 2: Code giay dai phap",
+      link: "google.com",
+    },
+  ],
 };
-// .map((val, index) => (
-//   <ComplexCard
-//     key={index}
-//     className="item"
-//     title={val.title}
-//     price={val.currentPrice}
-//     originPrice={val.originPrice}
-//     kind={val.kind}
-//     rate={val.rate}
-//     count={val.count}
-//     author={val.author}
-//     imagesrc={val.src}
+//✓
+const dummyDetail = dummyInfo.detail.map((val, index) => (
+  <Grid key={index} item xs={6}>
+    <Typography style={{ fontSize: "14" }}>✓ {val}</Typography>
+  </Grid>
+));
+const dummyContents = dummyInfo.contents.map((val, index) => (
+  <Grid key={index} item xs={12} >
+    <Typography
+      style={{ fontSize: "14" }}
+      onPress={() => Linking.openURL("http://google.com")}
+    >
+      {" "}
+      {val.name}
+    </Typography>
+  </Grid>
+));
 
-//   />
-// ));
-const cardStyles = makeStyles({
+const infoTextStyle = makeStyles({
   root: {
-    minWidth: 275,
-    backgroundColor: "#1E1E1C",
-  },
-  bullet: {
-    display: "inline-block",
-    margin: "0 2px",
-    transform: "scale(0.8)",
+    border: "2px solid grey",
+    marginTop: "10px",
+    padding: "10px",
+    borderRadius: "5px",
   },
   title: {
-    //fontSize: 14,
-    color: "white",
-  },
-  subtitle: {
-    fontSize: 14,
-  },
-  pos: {
-    paddingTop: 12,
-    marginBottom: 12,
+    fontWeight: "bold",
   },
 });
 
-const detailStyle = makeStyles({
-  paper: {
-    //padding: theme.spacing(1),
-    textAlign: "center",
-    //color: theme.palette.text.secondary,
-    whiteSpace: "nowrap",
-    //marginBottom: theme.spacing(1),
-  },
-});
 const Detail = (props) => {
-  const cardClass = cardStyles();
-  const detailClass = detailStyle();
+  const infoClass = infoTextStyle();
   return (
     <PageFrame>
-      <Paper elevation={3} className={cardClass.root}>
-        <Grid
-          container
-          direction="row"
-          wrap="nowrap"
-          style={{ padding: "10px" }}
-        >
-          <img src={dummyHigh.src} />
-          <Card
-            className={cardClass.root}
-            style={{ borderRadius: "0px 10px 10px 0px" }}
-          >
-            <CardContent>
-              <Typography
-                className={`${cardClass.title} ${cardClass.subtitle}`}
-                gutterBottom
-              >
-                Ba Tee
-              </Typography>
-              <Typography className={cardClass.title} variant="" component="h2">
-                {dummyHigh.title}
-              </Typography>
-              <Typography
-                className={`${cardClass.pos}  ${cardClass.title} ${cardClass.subtitle}`}
-              >
-                Learn Python like a Professional Start from the basics and go
-                all the way to creating your own applications and games
-              </Typography>
-              <Grid container direction="row" justify="start">
-                <Rating size={15} rating={props.rate ?? 1} />
-                <p
-                  cardClass={cardClass.title}
-                  style={{
-                    color: "white",
-                    margin: 0,
-                    paddingLeft: "10px",
-                    opacity: "0.65",
-                  }}
-                >
-                  ( {props.count ?? "0"} )
-                </p>
-              </Grid>
-            </CardContent>
-            <CardActions style={{ padding: "15px" }}>
-              <Grid
-                container
-                direction="row"
-                wrap="nowrap"
-                justify="space-between"
-              >
-                <Button variant="contained" size="small" color="secondary">
-                  Enroll
-                </Button>
-                <Grid container direction="row" wrap="nowrap" justify="center">
-                  <Typography
-                    className={cardClass.title}
-                    variant="h6"
-                    style={{ fontWeight: "bold" }}
-                  >
-                    {"$" + (props.price ?? "0")}
-                  </Typography>
-                  <Typography
-                    className={cardClass.title}
-                    variant="subtitle"
-                    style={{
-                      textDecoration: "line-through",
-                      // fontWeight: "lighter",
-                      // fontSize:"1rem",
-                      opacity: "0.65",
-                      paddingInline: "5px",
-                    }}
-                  >
-                    {props.originPrice ? "$" + props.originPrice : "$10"}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </CardActions>
-          </Card>
-        </Grid>
-      </Paper>
-      <Typography
-        variant="subtitle1"
-        gutterBottom
-        style={{ paddingTop: "1rem" }}
-      >
-        Material-UI Grid:
-      </Typography>
-      <Grid container spacing={3} xs={6}>
-        <Grid item xs={6}>
-          <Typography className={`${cardClass.subtitle}`}>
-            Learn Python like a Professional Start from the basics and go all
-            the way to creating your own applications and games
-          </Typography>
-        </Grid>
-        <Grid item xs={6}>
+      <InforCard />
+      <Grid container xs={12} drirection="row" justify="space-between">
+        <Grid container xs={5} direction="column" className={infoClass.root}>
           <Typography
-            className={`${cardClass.subtitle}`}
+            className={infoClass.title}
+            variant="subtitle1"
+            gutterBottom
+            style={{ paddingTop: "1rem" }}
           >
-            Learn Python like a Professional Start from the basics and go all
-            the way to creating your own applications and games
+            What you'll learn
           </Typography>
+          <Grid container spacing={3} xs={12}>
+            {dummyDetail}
+          </Grid>
         </Grid>
-        <Grid item xs={6}>
+        <Grid container xs={6} direction="column" className={infoClass.root}>
           <Typography
-            className={` ${cardClass.subtitle}`}
+            className={infoClass.title}
+            variant="subtitle1"
+            gutterBottom
+            style={{ paddingTop: "1rem" }}
           >
-            Learn Python like a Professional Start from the basics and go all
-            the way to creating your own applications and games
+            What you'll learnzz
           </Typography>
-        </Grid>
-        <Grid item xs={6}>
-          <Typography
-            className={`${cardClass.subtitle}`}
-          >
-            Learn Python like a Professional Start from the basics and go all
-            the way to creating your own applications and games
-          </Typography>
-        </Grid>
-        <Grid item xs={6}>
-          <Typography
-            className={`${cardClass.subtitle}`}
-          >
-            Learn Python like a Professional Start from the basics and go all
-            the way to creating your own applications and games
-          </Typography>
-        </Grid>
-        <Grid item xs={6}>
-          <Typography
-            className={`${cardClass.subtitle}`}
-          >
-            Learn Python like a Professional Start from the basics and go all
-            the way to creating your own applications and games
-          </Typography>
+          <Grid container direction="column" spacing={3} xs={12}>
+            {dummyContents}
+          </Grid>
         </Grid>
       </Grid>
     </PageFrame>
