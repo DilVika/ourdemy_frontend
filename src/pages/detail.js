@@ -1,15 +1,14 @@
 import PageFrame from "../components/PageFrame";
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import CardContent from "@material-ui/core/CardContent";
-import CardActions from "@material-ui/core/CardActions";
+import ComplexCard from "../components/ComplexCard"
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import Grid from "@material-ui/core/Grid";
 import Rating from "react-star-review";
 import Paper from "@material-ui/core/Paper";
 import InforCard from "../components/InforCard";
+import CCarousel from "../components/CCarousel.js"
 
 const dummyInfo = {
   src: "https://picsum.photos/500/300",
@@ -22,16 +21,16 @@ const dummyInfo = {
   originPrice: "70",
   brief: "Java code giay",
   detail: [
-    "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
+    "Được code giấy",
     "Được code giấy",
     "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
-    "Được code giấy",
+    "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
     "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
     "Được code giấy",
   ],
   contents: [
     {
-      name: "Chapter 1: Code giay dai cudai cudai cudai cudai cudai cudai cudai cudai cuongz",
+      name: "Chapter 1: Code giay dai cudai cudai cudai cudai cudai cuongz",
       link: "google.com",
     },
     {
@@ -47,7 +46,7 @@ const dummyDetail = dummyInfo.detail.map((val, index) => (
   </Grid>
 ));
 const dummyContents = dummyInfo.contents.map((val, index) => (
-  <Grid key={index} item xs={12} >
+  <Grid key={index} item>
     <Typography
       style={{ fontSize: "14" }}
       onPress={() => Linking.openURL("http://google.com")}
@@ -58,11 +57,87 @@ const dummyContents = dummyInfo.contents.map((val, index) => (
   </Grid>
 ));
 
+const dummyCourse = [
+  {
+    src: "https://picsum.photos/300/200",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 5,
+    count: "700",
+    currentPrice: "50",
+    originPrice: "70",
+    brief: "Java code giay",
+  },
+  {
+    src: "https://picsum.photos/300/200",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 1,
+    count: "700",
+    currentPrice: "1",
+    originPrice: "70",
+    brief: "Java code giay",
+  },
+  {
+    src: "https://picsum.photos/300/200",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 2,
+    count: "700",
+    currentPrice: "1",
+    originPrice: "70",
+    brief: "Java code giay",
+  },
+  {
+    src: "https://picsum.photos/300/200",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 5,
+    count: "1",
+    currentPrice: "0",
+    originPrice: "70",
+    brief: "Java code giay",
+  },
+  {
+    src: "https://picsum.photos/300/200",
+    title: "Java Code Giấy",
+    kind: "Web Devevlopment",
+    author: "Ba Tê",
+    rate: 4.5,
+    count: "1",
+    currentPrice: "0",
+    originPrice: "70",
+    brief: "Java code giay",
+  },
+].map((val, index) => (
+  <ComplexCard
+    key={index}
+    className="item"
+    title={val.title}
+    price={val.currentPrice}
+    originPrice={val.originPrice}
+    kind={val.kind}
+    rate={val.rate}
+    count={val.count}
+    author={val.author}
+    imagesrc={val.src}
+    
+  />
+));
+
 const infoTextStyle = makeStyles({
   root: {
-    border: "2px solid grey",
+
     marginTop: "10px",
     padding: "10px",
+   
+  },
+  border: {
+    border: "2px solid grey",
     borderRadius: "5px",
   },
   title: {
@@ -75,8 +150,14 @@ const Detail = (props) => {
   return (
     <PageFrame>
       <InforCard />
-      <Grid container xs={12} drirection="row" justify="space-between">
-        <Grid container xs={5} direction="column" className={infoClass.root}>
+      <Grid
+        container
+        xs={12}
+        drirection="row"
+        justify="space-between"
+        alignItems="flex-start"
+      >
+        <Grid container xs={5} direction="column" className={`${infoClass.root} ${infoClass.border}`}>
           <Typography
             className={infoClass.title}
             variant="subtitle1"
@@ -89,20 +170,33 @@ const Detail = (props) => {
             {dummyDetail}
           </Grid>
         </Grid>
-        <Grid container xs={6} direction="column" className={infoClass.root}>
-          <Typography
-            className={infoClass.title}
-            variant="subtitle1"
-            gutterBottom
-            style={{ paddingTop: "1rem" }}
+        <Paper elevation={2} className={infoClass.root}>
+          <Grid
+            container
+            spacing={1}
+            direction="column"
+            wrap="nowrap"
+            style={{padding: "10px"}}
           >
-            What you'll learnzz
-          </Typography>
-          <Grid container direction="column" spacing={3} xs={12}>
+            <Typography
+              className={infoClass.title}
+              variant="subtitle1"
+              gutterBottom
+              style={{ paddingTop: "1rem" }}
+            >
+              What you'll learnzz
+            </Typography>
+
             {dummyContents}
           </Grid>
-        </Grid>
+        </Paper>
       </Grid>
+      <h2>Lecture Information</h2>
+      <h2>Review</h2>
+      <h2>Relative Couses</h2>
+      <CCarousel>
+      {dummyCourse}
+      </CCarousel>
     </PageFrame>
   );
 };
