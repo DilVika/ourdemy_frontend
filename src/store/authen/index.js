@@ -8,7 +8,7 @@ import jwtDecode from "jwt-decode";
 const initialState = {
     token: localStorage.getItem("token") || null,
     refresh: localStorage.getItem("refresh") || null,
-    isLec: jwtDecode(localStorage.getItem("token")).IsLec || false,
+    isLec: localStorage.getItem("token") ? jwtDecode(localStorage.getItem("token")).IsLec || false : false,
     user: {
         "username": "",
         "fullname": "",
