@@ -152,19 +152,9 @@ const PageFrame = ({token, categories, children}) => {
                     <Typography role={"button   `1"} onClick={() => history.push("/")} className={classes.title} variant="h4" noWrap>
                         Ourdemy
                     </Typography>
-                    <div className={classes.search}>
-                        <div className={classes.searchIcon}>
-                            <SearchIcon/>
-                        </div>
-                        <InputBase
-                            placeholder="Search…"
-                            classes={{
-                                root: classes.inputRoot,
-                                input: classes.inputInput,
-                            }}
-                            inputProps={{'aria-label': 'search'}}
-                        />
-                    </div>
+                    <IconButton onClick={() => history.push("/search")} color="inherit" >
+                        <SearchIcon />
+                    </IconButton>
                     {!token ? <div>
                         <Button className={classes.btn}
                                 onClick={() => setSignInDialogOpen(true)}
