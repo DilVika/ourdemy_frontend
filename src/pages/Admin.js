@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {makeStyles} from "@material-ui/core";
+import {AppBar, makeStyles, Toolbar} from "@material-ui/core";
 import PageFrame from "../components/PageFrame";
 import Paper from "@material-ui/core/Paper";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -19,10 +19,22 @@ import CloseIcon from '@material-ui/icons/Close';
 import TablePagination from "@material-ui/core/TablePagination";
 import List from "@material-ui/core/List";
 import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
 
 const useStyle = makeStyles((theme) => ({
     table: {
         minWidth: 650,
+    },
+    root: {
+        display: 'flex',
+        justifyContent: 'center'
+    },
+    title: {
+        flexGrow: 1,
+        display: 'none',
+        [theme.breakpoints.up('sm')]: {
+            display: 'block',
+        },
     },
     paper: {
         position: 'absolute',
@@ -85,252 +97,261 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
     }
 
     return (
-        <div>
-            <PageFrame>
-                <Grid container spacing={3}>
-                    <Grid item xs={9}>
-                        <h2>User Table</h2>
-                        <TableContainer component={Paper}>
-                            <Table className={classes.Table} aria-label="Users Table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>UID</TableCell>
-                                        <TableCell align="right">Username</TableCell>
-                                        <TableCell align="right">Fullname</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {users
-                                        .slice(page * 10, page * 10 + 10)
-                                        .map(function (user) {
-                                            return (
-                                                <TableRow key={user.uid}>
-                                                    <TableCell component="th">
-                                                        {user.uid}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {user.username}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {user.fullname}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        <div>
-                                                            <IconButton onClick={handleBlockUser(user.uid)}>
-                                                                <BlockIcon/>
-                                                            </IconButton>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                </TableBody>
-                            </Table>
-                            <TablePagination
-                                count={(users && users.length) || 0}
-                                page={page}
-                                rowsPerPage={10}
-                                rowsPerPageOptions={[0]}
-                                colSpan={4}
-                                onChangePage={(_, newPage) => setPage(newPage)}
-                            />
-                        </TableContainer>
-
-                        <h2>Category Table</h2>
-                        <TableContainer component={Paper}>
-                            <Table className={classes.Table} aria-label="Categories Table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>CID</TableCell>
-                                        <TableCell align="right">Name</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {cats
-                                        .slice(page * 10, page * 10 + 10)
-                                        .map(function (cat) {
-                                            return (
-                                                <TableRow key={cat.cid}>
-                                                    <TableCell component="th">
-                                                        {cat.cid}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {cat.cat_name}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        <div>
-                                                            <IconButton onClick={handleAddCat(cat.cid)}>
-                                                                <AddIcon/>
-                                                            </IconButton>
-                                                            <IconButton onClick={handleEditCat(cat.cid)}>
-                                                                <EditIcon/>
-                                                            </IconButton>
-                                                            <IconButton onClick={handleDeleteCat(cat.cid)}>
-                                                                <DeleteIcon/>
-                                                            </IconButton>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                </TableBody>
-                            </Table>
-                            <TablePagination
-                                count={(cats && cats.length) || 0}
-                                page={page}
-                                rowsPerPage={10}
-                                rowsPerPageOptions={[0]}
-                                colSpan={4}
-                                onChangePage={(_, newPage) => setPage(newPage)}
-                            />
-                        </TableContainer>
-
-                        <h2>Sub-Category Table</h2>
-                        <TableContainer component={Paper}>
-                            <Table className={classes.Table} aria-label="Sub-Categories Table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>SCID</TableCell>
-                                        <TableCell align="left">Name</TableCell>
-                                        <TableCell align="left">Parent Name</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {subcatsData
-                                        .slice(page * 10, page * 10 + 10)
-                                        .map(function (subcat, index) {
-                                            return (
-                                                <TableRow key={subcat.scid}>
-                                                    <TableCell component="th">
-                                                        {subcat.scid}
-                                                    </TableCell>
-                                                    <TableCell align="left">
-                                                        {subcat.name}
-                                                    </TableCell>
-                                                    <TableCell align="left">
-                                                        {subcat.catName}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        <div>
-                                                            <IconButton>
-                                                                <AddIcon/>
-                                                            </IconButton>
-                                                            <IconButton>
-                                                                <DeleteIcon/>
-                                                            </IconButton>
-                                                            <IconButton>
-                                                                <DeleteIcon/>
-                                                            </IconButton>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                </TableBody>
-                            </Table>
-                            <TablePagination
-                                count={(subcatsData && subcatsData.length) || 0}
-                                page={page}
-                                rowsPerPage={10}
-                                rowsPerPageOptions={[0]}
-                                colSpan={4}
-                                onChangePage={(_, newPage) => setPage(newPage)}
-                            />
-                        </TableContainer>
-
-                        <h2>Promote Table</h2>
-                        <TableContainer component={Paper}>
-                            <Table className={classes.Table} aria-label="Promotes Table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>UID</TableCell>
-                                        <TableCell align="left">Username</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {promotes
-                                        .slice(page * 10, page * 10 + 10)
-                                        .map(function (promote) {
-                                            return (
-                                                <TableRow key={promote.uid}>
-                                                    <TableCell component="th">
-                                                        {promote.uid}
-                                                    </TableCell>
-                                                    <TableCell align="left">
-                                                        {promote.username}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        <div>
-                                                            <IconButton onClick={handlePromote(promote.uid)}>
-                                                                <CheckIcon/>
-                                                            </IconButton>
-                                                            <IconButton onClick={handlePromote(promote.uid)}>
-                                                                <CloseIcon/>
-                                                            </IconButton>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                </TableBody>
-                            </Table>
-                            <TablePagination
-                                count={(promotes && promotes.length) || 0}
-                                page={page}
-                                rowsPerPage={10}
-                                rowsPerPageOptions={[0]}
-                                colSpan={4}
-                                onChangePage={(_, newPage) => setPage(newPage)}
-                            />
-                        </TableContainer>
-
-                        <h2>Course Table</h2>
-                        <TableContainer component={Paper}>
-                            <Table className={classes.Table} aria-label="Courses Table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>CCID</TableCell>
-                                        <TableCell align="left">Name</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {courseContents
-                                        .slice(page * 10, page * 10 + 10)
-                                        .map(function (course) {
-                                            return (
-                                                <TableRow key={course.ccid}>
-                                                    <TableCell component="th">
-                                                        {course.ccid}
-                                                    </TableCell>
-                                                    <TableCell align="left">
-                                                        {course.name}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        <div>
-                                                            <IconButton onClick={handleDeleteCourse(course.ccid)}>
-                                                                <DeleteIcon/>
-                                                            </IconButton>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                </TableBody>
-                            </Table>
-                            <TablePagination
-                                count={(courseContents && courseContents.length) || 0}
-                                page={page}
-                                rowsPerPage={10}
-                                rowsPerPageOptions={[0]}
-                                colSpan={4}
-                                onChangePage={(_, newPage) => setPage(newPage)}
-                            />
-                        </TableContainer>
-                    </Grid>
-                    <Grid item xs={3}>
-                    </Grid>
+        <div className={classes.root}>
+            <Grid container spacing={3}>
+                <Grid item xs={12} style={{marginBottom: '32px'}}>
+                    <AppBar position={"fixed"}>
+                        <Toolbar>
+                            <Typography className={classes.title} variant="h4" noWrap>
+                                Admin
+                            </Typography>
+                        </Toolbar>
+                    </AppBar>
                 </Grid>
-            </PageFrame>
+                <Grid item xs={2}>
+                </Grid>
+                <Grid item xs={9}>
+                    <h2>User Table</h2>
+                    <TableContainer component={Paper}>
+                        <Table className={classes.Table} aria-label="Users Table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>UID</TableCell>
+                                    <TableCell align="right">Username</TableCell>
+                                    <TableCell align="right">Fullname</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {users
+                                    .slice(page * 10, page * 10 + 10)
+                                    .map(function (user) {
+                                        return (
+                                            <TableRow key={user.uid}>
+                                                <TableCell component="th">
+                                                    {user.uid}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {user.username}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {user.fullname}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <div>
+                                                        <IconButton onClick={handleBlockUser(user.uid)}>
+                                                            <BlockIcon/>
+                                                        </IconButton>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                            </TableBody>
+                        </Table>
+                        <TablePagination
+                            count={(users && users.length) || 0}
+                            page={page}
+                            rowsPerPage={10}
+                            rowsPerPageOptions={[0]}
+                            colSpan={4}
+                            onChangePage={(_, newPage) => setPage(newPage)}
+                        />
+                    </TableContainer>
+
+                    <h2>Category Table</h2>
+                    <TableContainer component={Paper}>
+                        <Table className={classes.Table} aria-label="Categories Table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>CID</TableCell>
+                                    <TableCell align="right">Name</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {cats
+                                    .slice(page * 10, page * 10 + 10)
+                                    .map(function (cat) {
+                                        return (
+                                            <TableRow key={cat.cid}>
+                                                <TableCell component="th">
+                                                    {cat.cid}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {cat.cat_name}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <div>
+                                                        <IconButton onClick={handleAddCat(cat.cid)}>
+                                                            <AddIcon/>
+                                                        </IconButton>
+                                                        <IconButton onClick={handleEditCat(cat.cid)}>
+                                                            <EditIcon/>
+                                                        </IconButton>
+                                                        <IconButton onClick={handleDeleteCat(cat.cid)}>
+                                                            <DeleteIcon/>
+                                                        </IconButton>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                            </TableBody>
+                        </Table>
+                        <TablePagination
+                            count={(cats && cats.length) || 0}
+                            page={page}
+                            rowsPerPage={10}
+                            rowsPerPageOptions={[0]}
+                            colSpan={4}
+                            onChangePage={(_, newPage) => setPage(newPage)}
+                        />
+                    </TableContainer>
+
+                    <h2>Sub-Category Table</h2>
+                    <TableContainer component={Paper}>
+                        <Table className={classes.Table} aria-label="Sub-Categories Table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>SCID</TableCell>
+                                    <TableCell align="left">Name</TableCell>
+                                    <TableCell align="left">Parent Name</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {subcatsData
+                                    .slice(page * 10, page * 10 + 10)
+                                    .map(function (subcat, index) {
+                                        return (
+                                            <TableRow key={subcat.scid}>
+                                                <TableCell component="th">
+                                                    {subcat.scid}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {subcat.name}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {subcat.catName}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <div>
+                                                        <IconButton>
+                                                            <AddIcon/>
+                                                        </IconButton>
+                                                        <IconButton>
+                                                            <DeleteIcon/>
+                                                        </IconButton>
+                                                        <IconButton>
+                                                            <DeleteIcon/>
+                                                        </IconButton>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                            </TableBody>
+                        </Table>
+                        <TablePagination
+                            count={(subcatsData && subcatsData.length) || 0}
+                            page={page}
+                            rowsPerPage={10}
+                            rowsPerPageOptions={[0]}
+                            colSpan={4}
+                            onChangePage={(_, newPage) => setPage(newPage)}
+                        />
+                    </TableContainer>
+
+                    <h2>Promote Table</h2>
+                    <TableContainer component={Paper}>
+                        <Table className={classes.Table} aria-label="Promotes Table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>UID</TableCell>
+                                    <TableCell align="left">Username</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {promotes
+                                    .slice(page * 10, page * 10 + 10)
+                                    .map(function (promote) {
+                                        return (
+                                            <TableRow key={promote.uid}>
+                                                <TableCell component="th">
+                                                    {promote.uid}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {promote.username}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <div>
+                                                        <IconButton onClick={handlePromote(promote.uid)}>
+                                                            <CheckIcon/>
+                                                        </IconButton>
+                                                        <IconButton onClick={handlePromote(promote.uid)}>
+                                                            <CloseIcon/>
+                                                        </IconButton>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                            </TableBody>
+                        </Table>
+                        <TablePagination
+                            count={(promotes && promotes.length) || 0}
+                            page={page}
+                            rowsPerPage={10}
+                            rowsPerPageOptions={[0]}
+                            colSpan={4}
+                            onChangePage={(_, newPage) => setPage(newPage)}
+                        />
+                    </TableContainer>
+
+                    <h2>Course Table</h2>
+                    <TableContainer component={Paper}>
+                        <Table className={classes.Table} aria-label="Courses Table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>CCID</TableCell>
+                                    <TableCell align="left">Name</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {courseContents
+                                    .slice(page * 10, page * 10 + 10)
+                                    .map(function (course) {
+                                        return (
+                                            <TableRow key={course.ccid}>
+                                                <TableCell component="th">
+                                                    {course.ccid}
+                                                </TableCell>
+                                                <TableCell align="left">
+                                                    {course.name}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <div>
+                                                        <IconButton onClick={handleDeleteCourse(course.ccid)}>
+                                                            <DeleteIcon/>
+                                                        </IconButton>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                            </TableBody>
+                        </Table>
+                        <TablePagination
+                            count={(courseContents && courseContents.length) || 0}
+                            page={page}
+                            rowsPerPage={10}
+                            rowsPerPageOptions={[0]}
+                            colSpan={4}
+                            onChangePage={(_, newPage) => setPage(newPage)}
+                        />
+                    </TableContainer>
+                </Grid>
+                <Grid item xs={1}>
+                </Grid>
+            </Grid>
         </div>
     )
 }
@@ -398,7 +419,7 @@ AdminPage.defaultProps = {
             "fullname": "Mona Hydro"
         }
     ],
-    cats : [
+    cats: [
         {
             "cid": "c01",
             "cat_name": "About Mondstadb",
@@ -472,7 +493,7 @@ AdminPage.defaultProps = {
             ]
         }
     ],
-    promotes : [
+    promotes: [
         {
             "uid": "u01",
             "username": "albedo",
