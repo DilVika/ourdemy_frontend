@@ -20,6 +20,8 @@ import TablePagination from "@material-ui/core/TablePagination";
 import List from "@material-ui/core/List";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import AddCategoryDialog from "../components/AddCategoryDialog";
+import AddSubCategoryDialog from "../components/AddSubCategoryDialog";
 
 const useStyle = makeStyles((theme) => ({
     table: {
@@ -44,12 +46,23 @@ const useStyle = makeStyles((theme) => ({
         boxShadow: theme.shadows[5],
         padding: theme.spacing(2, 4, 3),
     },
+    header: {
+        marginTop: 50
+    }
 }));
 
 const AdminPage = ({users, cats, promotes, courseContents}) => {
     const classes = useStyle()
 
-    const [page, setPage] = useState(0)
+    const [pageUser, setPageUser] = useState(0)
+    const [pageCat, setPageCat] = useState(0)
+    const [pageSubcat, setPageSubcat] = useState(0)
+    const [pagePromote, setPagePromote] = useState(0)
+    const [pageCourse, setPageCourse] = useState(0)
+
+    const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
+    const [addSubCategoryDialogOpen, setAddSubCategoryDialogOpen] = useState(false);
+
     const subcatsData = []
     cats.forEach((cat, index) => {
         cat.subcats.forEach((subcat, sindex) => {
@@ -111,7 +124,7 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                 <Grid item xs={2}>
                 </Grid>
                 <Grid item xs={9}>
-                    <h2>User Table</h2>
+                    <h2 className={classes.header}>User Table</h2>
                     <TableContainer component={Paper}>
                         <Table className={classes.Table} aria-label="Users Table">
                             <TableHead>
@@ -123,7 +136,7 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                             </TableHead>
                             <TableBody>
                                 {users
-                                    .slice(page * 10, page * 10 + 10)
+                                    .slice(pageUser * 10, pageUser * 10 + 10)
                                     .map(function (user) {
                                         return (
                                             <TableRow key={user.uid}>
@@ -150,15 +163,15 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                         </Table>
                         <TablePagination
                             count={(users && users.length) || 0}
-                            page={page}
+                            page={pageUser}
                             rowsPerPage={10}
                             rowsPerPageOptions={[0]}
                             colSpan={4}
-                            onChangePage={(_, newPage) => setPage(newPage)}
+                            onChangePage={(_, newPage) => setPageUser(newPage)}
                         />
                     </TableContainer>
 
-                    <h2>Category Table</h2>
+                    <h2 className={classes.header}>Category Table</h2>
                     <TableContainer component={Paper}>
                         <Table className={classes.Table} aria-label="Categories Table">
                             <TableHead>
@@ -169,7 +182,7 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                             </TableHead>
                             <TableBody>
                                 {cats
-                                    .slice(page * 10, page * 10 + 10)
+                                    .slice(pageCat * 10, pageCat * 10 + 10)
                                     .map(function (cat) {
                                         return (
                                             <TableRow key={cat.cid}>
@@ -181,9 +194,6 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                                                 </TableCell>
                                                 <TableCell align="right">
                                                     <div>
-                                                        <IconButton onClick={handleAddCat(cat.cid)}>
-                                                            <AddIcon/>
-                                                        </IconButton>
                                                         <IconButton onClick={handleEditCat(cat.cid)}>
                                                             <EditIcon/>
                                                         </IconButton>
@@ -199,15 +209,23 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                         </Table>
                         <TablePagination
                             count={(cats && cats.length) || 0}
-                            page={page}
+                            page={pageCat}
                             rowsPerPage={10}
                             rowsPerPageOptions={[0]}
                             colSpan={4}
-                            onChangePage={(_, newPage) => setPage(newPage)}
+                            onChangePage={(_, newPage) => setPageCat(newPage)}
                         />
                     </TableContainer>
+                    <Button variant="contained" color="primary"
+                            style={{marginTop: 10}}
+                            onClick={() => setAddCategoryDialogOpen(true)}>
+                        Add Category
+                    </Button>
+                    <AddCategoryDialog open={addCategoryDialogOpen}
+                                       onClose={() => setAddCategoryDialogOpen(false)}
+                    />
 
-                    <h2>Sub-Category Table</h2>
+                    <h2 className={classes.header}>Sub-Category Table</h2>
                     <TableContainer component={Paper}>
                         <Table className={classes.Table} aria-label="Sub-Categories Table">
                             <TableHead>
@@ -219,7 +237,7 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                             </TableHead>
                             <TableBody>
                                 {subcatsData
-                                    .slice(page * 10, page * 10 + 10)
+                                    .slice(pageSubcat * 10, pageSubcat * 10 + 10)
                                     .map(function (subcat, index) {
                                         return (
                                             <TableRow key={subcat.scid}>
@@ -235,10 +253,7 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                                                 <TableCell align="right">
                                                     <div>
                                                         <IconButton>
-                                                            <AddIcon/>
-                                                        </IconButton>
-                                                        <IconButton>
-                                                            <DeleteIcon/>
+                                                            <EditIcon/>
                                                         </IconButton>
                                                         <IconButton>
                                                             <DeleteIcon/>
@@ -252,15 +267,24 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                         </Table>
                         <TablePagination
                             count={(subcatsData && subcatsData.length) || 0}
-                            page={page}
+                            page={pageSubcat}
                             rowsPerPage={10}
                             rowsPerPageOptions={[0]}
                             colSpan={4}
-                            onChangePage={(_, newPage) => setPage(newPage)}
+                            onChangePage={(_, newPage) => setPageSubcat(newPage)}
                         />
                     </TableContainer>
-
-                    <h2>Promote Table</h2>
+                    <Button variant="contained" color="primary"
+                            style={{marginTop: 10}}
+                            onClick={() => setAddSubCategoryDialogOpen(true)}>
+                        Add Sub-Category
+                    </Button>
+                    <AddSubCategoryDialog
+                        cats={cats}
+                        open={addSubCategoryDialogOpen}
+                        onClose={() => setAddSubCategoryDialogOpen(false)}
+                    />
+                    <h2 className={classes.header}>Promote Table</h2>
                     <TableContainer component={Paper}>
                         <Table className={classes.Table} aria-label="Promotes Table">
                             <TableHead>
@@ -271,7 +295,7 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                             </TableHead>
                             <TableBody>
                                 {promotes
-                                    .slice(page * 10, page * 10 + 10)
+                                    .slice(pagePromote * 10, pagePromote * 10 + 10)
                                     .map(function (promote) {
                                         return (
                                             <TableRow key={promote.uid}>
@@ -298,15 +322,15 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                         </Table>
                         <TablePagination
                             count={(promotes && promotes.length) || 0}
-                            page={page}
+                            page={pagePromote}
                             rowsPerPage={10}
                             rowsPerPageOptions={[0]}
                             colSpan={4}
-                            onChangePage={(_, newPage) => setPage(newPage)}
+                            onChangePage={(_, newPage) => setPagePromote(newPage)}
                         />
                     </TableContainer>
 
-                    <h2>Course Table</h2>
+                    <h2 className={classes.header}>Course Table</h2>
                     <TableContainer component={Paper}>
                         <Table className={classes.Table} aria-label="Courses Table">
                             <TableHead>
@@ -317,7 +341,7 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                             </TableHead>
                             <TableBody>
                                 {courseContents
-                                    .slice(page * 10, page * 10 + 10)
+                                    .slice(pageCourse * 10, pageCourse * 10 + 10)
                                     .map(function (course) {
                                         return (
                                             <TableRow key={course.ccid}>
@@ -341,11 +365,11 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                         </Table>
                         <TablePagination
                             count={(courseContents && courseContents.length) || 0}
-                            page={page}
+                            page={pageCourse}
                             rowsPerPage={10}
                             rowsPerPageOptions={[0]}
                             colSpan={4}
-                            onChangePage={(_, newPage) => setPage(newPage)}
+                            onChangePage={(_, newPage) => setPageCourse(newPage)}
                         />
                     </TableContainer>
                 </Grid>
