@@ -1,14 +1,14 @@
 import PageFrame from "../components/PageFrame";
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import ComplexCard from "../components/ComplexCard"
+import ComplexCard from "../components/ComplexCard";
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import Grid from "@material-ui/core/Grid";
 import Rating from "react-star-review";
 import Paper from "@material-ui/core/Paper";
 import InforCard from "../components/InforCard";
-import CCarousel from "../components/CCarousel.js"
+import CCarousel from "../components/CCarousel.js";
 
 const dummyInfo = {
   src: "https://picsum.photos/500/300",
@@ -40,6 +40,18 @@ const dummyInfo = {
   ],
 };
 //✓
+const dummyLecture = {
+  src: "https://picsum.photos/300/200",
+  title: "Ba Tee",
+  kind: "Web Devevlopment",
+ 
+  rate: 5,
+  count: "700",
+  brief: 
+    "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
+   
+};
+
 const dummyDetail = dummyInfo.detail.map((val, index) => (
   <Grid key={index} item xs={6}>
     <Typography style={{ fontSize: "14" }}>✓ {val}</Typography>
@@ -125,16 +137,13 @@ const dummyCourse = [
     count={val.count}
     author={val.author}
     imagesrc={val.src}
-    
   />
 ));
 
 const infoTextStyle = makeStyles({
   root: {
-
     marginTop: "10px",
     padding: "10px",
-   
   },
   border: {
     border: "2px solid grey",
@@ -149,7 +158,16 @@ const Detail = (props) => {
   const infoClass = infoTextStyle();
   return (
     <PageFrame>
-      <InforCard />
+      <InforCard
+        src={dummyInfo.src}
+        title={dummyInfo.title}
+        author={dummyInfo.author}
+        brief={dummyInfo.brief}
+        rate={dummyInfo.rate}
+        count={dummyInfo.count}
+        price={dummyInfo.currentPrice}
+        originPrice={dummyInfo.originPrice}
+      />
       <Grid
         container
         xs={12}
@@ -157,7 +175,12 @@ const Detail = (props) => {
         justify="space-between"
         alignItems="flex-start"
       >
-        <Grid container xs={5} direction="column" className={`${infoClass.root} ${infoClass.border}`}>
+        <Grid
+          container
+          xs={5}
+          direction="column"
+          className={`${infoClass.root} ${infoClass.border}`}
+        >
           <Typography
             className={infoClass.title}
             variant="subtitle1"
@@ -176,7 +199,7 @@ const Detail = (props) => {
             spacing={1}
             direction="column"
             wrap="nowrap"
-            style={{padding: "10px"}}
+            style={{ padding: "10px" }}
           >
             <Typography
               className={infoClass.title}
@@ -192,14 +215,19 @@ const Detail = (props) => {
         </Paper>
       </Grid>
       <h2>Lecture Information</h2>
+      <InforCard
+        src={dummyLecture.src}
+        title={dummyLecture.title}
+        brief={dummyLecture.brief}
+        rate={dummyLecture.rate}
+        count={dummyLecture.count}
+        author={dummyLecture.kind}
+      />
       <h2>Review</h2>
       <h2>Relative Couses</h2>
-      <CCarousel>
-      {dummyCourse}
-      </CCarousel>
+      <CCarousel>{dummyCourse}</CCarousel>
     </PageFrame>
   );
 };
-
 
 export default Detail;

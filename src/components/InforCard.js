@@ -9,17 +9,17 @@ import Rating from "react-star-review";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button"
 
-const dummyHigh = {
-  src: "https://picsum.photos/500/300",
-  title: "2021 Complete Python Bootcamp From Zero to Hero in Python",
-  kind: "Web Devevlopment",
-  author: "Ba Tê",
-  rate: 5,
-  count: "700",
-  currentPrice: "50",
-  originPrice: "70",
-  brief: "Java code giay",
-};
+// const dummyHigh = {
+//   src: "https://picsum.photos/500/300",
+//   title: "2021 Complete Python Bootcamp From Zero to Hero in Python",
+//   kind: "Web Devevlopment",
+//   author: "Ba Tê",
+//   rate: 5,
+//   count: "700",
+//   currentPrice: "50",
+//   originPrice: "70",
+//   brief: "Java code giay",
+// };
 
 const cardStyles = makeStyles({
   root: {
@@ -48,7 +48,7 @@ const InforCard = (props) => {
   return (
     <Paper elevation={3} className={cardClass.root}>
       <Grid container direction="row" wrap="nowrap" style={{ padding: "10px" }}>
-        <img src={dummyHigh.src} />
+        <img src={props.src} />
         <Card
           className={cardClass.root}
           style={{ borderRadius: "0px 10px 10px 0px" }}
@@ -58,16 +58,15 @@ const InforCard = (props) => {
               className={`${cardClass.title} ${cardClass.subtitle}`}
               gutterBottom
             >
-              Ba Tee
+              {props.author}
             </Typography>
             <Typography className={cardClass.title} variant="" component="h2">
-              {dummyHigh.title}
+              {props.title}
             </Typography>
             <Typography
               className={`${cardClass.pos}  ${cardClass.title} ${cardClass.subtitle}`}
             >
-              Learn Python like a Professional Start from the basics and go all
-              the way to creating your own applications and games
+               {props.brief}
             </Typography>
             <Grid container direction="row" justify="start">
               <Rating size={15} rating={props.rate ?? 1} />
@@ -91,16 +90,15 @@ const InforCard = (props) => {
               wrap="nowrap"
               justify="space-between"
             >
-              <Button variant="contained" size="small" color="secondary">
-                Enroll
-              </Button>
+              {props.price ? (<Button variant="contained" size="small" color="secondary">Enroll</Button> ) : ""}
+              
               <Grid container direction="row" wrap="nowrap" justify="center">
                 <Typography
                   className={cardClass.title}
                   variant="h6"
                   style={{ fontWeight: "bold" }}
                 >
-                  {"$" + (props.price ?? "0")}
+                  {(props.price ? ("$"+props.price) : "")}
                 </Typography>
                 <Typography
                   className={cardClass.title}
@@ -113,7 +111,7 @@ const InforCard = (props) => {
                     paddingInline: "5px",
                   }}
                 >
-                  {props.originPrice ? "$" + props.originPrice : "$10"}
+                  {props.originPrice ? "$" + props.originPrice : ""}
                 </Typography>
               </Grid>
             </Grid>
