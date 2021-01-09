@@ -50,9 +50,9 @@ function App() {
                     {/*<Route exact path={"/course/view"}>*/}
                     {/*    <ViewVideo/>*/}
                     {/*</Route>*/}
-                    <Route exact path={"/course/view/:vid"}>
+                    <AuthRoute exact path={"/course/:cid/view/:vid"}>
                         <ViewVideo/>
-                    </Route>
+                    </AuthRoute>
                     <Route exact path={"/admin"}>
                         <AdminPage/>
                     </Route>
