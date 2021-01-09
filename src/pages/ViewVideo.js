@@ -110,7 +110,6 @@ const ViewVideo = ({courseContents, vidUrl, loading, err, time}) => {
                                                 url={`${vidUrl}#t=${time}`} width={'100%'}
                                                 progressInterval={10000}
                                                 onStart={() => {
-                                                    console.log(time)
                                                     const intTime = Math.floor(time);
                                                     playerRef.current.seekTo(intTime, 'seconds')
                                                 }

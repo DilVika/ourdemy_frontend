@@ -6,22 +6,21 @@ import {
 
 import {connect} from "react-redux";
 
-const LecturerRoute = ({children, authed, isLec, ...rest}) => {
+const AdminRoute = ({children, authed, ...rest}) => {
     return (
         <Route
             {...rest}
-            render={(props) => authed === true && isLec === true
+            render={(props) => authed
                 ? children
-                : <Redirect to={{pathname: "/", state: {from: props.location}}}/>}
+                : <Redirect to={{pathname: "/admin/signin", state: {from: props.location}}}/>}
         />
     )
 }
 
 const mapStateToProps = state => ({
-    authed: !!state.authen.token,
-    isLec: state.authen.isLec
+    authed: !!state.adminAuth.adminToken,
 })
 
 export default connect(
     mapStateToProps
-)(LecturerRoute)
+)(AdminRoute)
