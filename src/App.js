@@ -1,16 +1,15 @@
-import React from 'react';
+import React from "react";
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link,
-    useParams,
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams,
 } from "react-router-dom";
-
 
 import Home from "./pages/home";
 import store from "./store";
-import {Provider} from "react-redux";
+import { Provider } from "react-redux";
 import NotFound from "./pages/NotFound";
 import AuthRoute from "./components/AuthRoute";
 import Profile from "./pages/Profile";
@@ -21,6 +20,7 @@ import CourseManage from "./pages/CourseManage";
 import CreateCourse from "./pages/CreateCourse";
 import UpdateCourse from "./pages/UpdateCourse";
 import CourseContent from "./pages/CourseContent";
+import Detail from "./pages/detail";
 import {fetchCurrentCourse} from "./store/course/lec";
 import SearchPage from "./pages/Search";
 
@@ -31,6 +31,9 @@ function App() {
                 <Switch>
                     <Route exact path="/">
                         <Home/>
+                    </Route>
+                    <Route exact path="/detail">
+                        <Detail/>
                     </Route>
                     <AuthRoute exact path="/profile">
                         <Profile/>
@@ -68,6 +71,6 @@ function App() {
     );
 }
 
-store.subscribe(App)
+store.subscribe(App);
 
 export default App;
