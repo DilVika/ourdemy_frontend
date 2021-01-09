@@ -86,7 +86,7 @@ export default function ComplexCard(props) {
               alignContent="center"
             >
               <Typography variant="h6" style={{ fontWeight: "bold" }}>
-                {"$" + (props.price ?? "$10")}
+                {"$" + (props.price ?? "10")}
               </Typography>
               <Typography className={classes.alignText}
                 variant="subtitle"
@@ -98,7 +98,7 @@ export default function ComplexCard(props) {
                   paddingInline: "5px",
                 }}
               >
-                {"$" + (props.originPrice ?? "$10")}
+                {(props.originPrice ? ("$" + props.originPrice) : "")}
               </Typography>
             </Grid>
 
