@@ -9,6 +9,8 @@ import Rating from "react-star-review";
 import Paper from "@material-ui/core/Paper";
 import InforCard from "../components/InforCard";
 import CCarousel from "../components/CCarousel.js";
+import { Button, Comment, Form, Header } from "semantic-ui-react";
+import "semantic-ui-css/semantic.min.css";
 
 const dummyInfo = {
   src: "https://picsum.photos/500/300",
@@ -44,12 +46,11 @@ const dummyLecture = {
   src: "https://picsum.photos/300/200",
   title: "Ba Tee",
   kind: "Web Devevlopment",
- 
+
   rate: 5,
   count: "700",
-  brief: 
+  brief:
     "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
-   
 };
 
 const dummyDetail = dummyInfo.detail.map((val, index) => (
@@ -140,6 +141,33 @@ const dummyCourse = [
   />
 ));
 
+const commentList = [
+  {
+    avt: "https://picsum.photos/25/25",
+    name: "Ba Teez",
+    time: "Today at 5:42PM",
+    content: "How artistic!",
+  },
+  {
+    avt: "https://picsum.photos/25/25",
+    name: "eTez",
+    time: "Today at 5:43PM",
+    content: "Bad!",
+  },
+].map((val, index) => (
+  <Comment key={index}>
+    <Comment.Avatar src="https://react.semantic-ui.com/images/avatar/small/matt.jpg" />
+    <Comment.Content>
+      <Comment.Author as="a">{val.name}</Comment.Author>
+      <Comment.Metadata>
+        <div>{val.time}</div>
+      </Comment.Metadata>
+      <Comment.Text>{val.content}</Comment.Text>
+    </Comment.Content>
+  </Comment>
+));
+const isJoined = true;
+
 const infoTextStyle = makeStyles({
   root: {
     marginTop: "10px",
@@ -223,7 +251,25 @@ const Detail = (props) => {
         count={dummyLecture.count}
         author={dummyLecture.kind}
       />
-      <h2>Review</h2>
+
+      <Comment.Group>
+        <Header as="h2" dividing>
+          Review
+        </Header>
+        {commentList}
+        {isJoined == true ? (<Form reply>
+          <Form.TextArea />
+          <Button
+            content="Add Reply"
+            labelPosition="left"
+            icon="edit"
+            primary
+          />
+        </Form>): ""} 
+        <Header as="h2" dividing>
+          
+        </Header>
+      </Comment.Group>
       <h2>Relative Couses</h2>
       <CCarousel>{dummyCourse}</CCarousel>
     </PageFrame>
