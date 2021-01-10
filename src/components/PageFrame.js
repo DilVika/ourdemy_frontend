@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useHistory} from "react-router-dom";
 import {fade, makeStyles} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -25,6 +25,7 @@ import SignUpDialog from "./SignUpDialog";
 import SignInDialog from "./SignInDialog";
 import {Menu, MenuItem} from "@material-ui/core";
 import {AccountCircle} from "@material-ui/icons";
+import {fetchCategories} from "../store/category";
 
 const drawerWidth = 240;
 
@@ -114,16 +115,26 @@ const useStyles = makeStyles((theme) => ({
 
 const PageFrame = ({token, categories, children}) => {
     const classes = useStyles();
-    const isOpenArray = categories.map((cat, index) => {
-        return false
-    })
 
-    const [itemOpen, setItemOpen] = useState(isOpenArray);
+
+    const [itemOpen, setItemOpen] = useState([]);
     const [signUpDialogOpen, setSignUpDialogOpen] = useState(false);
     const [signInDialogOpen, setSignInDialogOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
 
     const history = useHistory();
+
+    useEffect(() => {
+        store.dispatch(fetchCategories())
+    }, [])
+
+    useEffect(() => {
+        const isOpenArray = categories.map((cat, index) => {
+            return false
+        })
+
+        setItemOpen(isOpenArray)
+    }, [categories])
 
     const toggleItem = (index, open) => {
         const itemOpenCopy = [...itemOpen]

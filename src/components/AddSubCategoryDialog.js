@@ -71,7 +71,9 @@ const AddSubCategoryDialog = ({cats, open, onClose, onCreate}) => {
                 </DialogContent>
                 <DialogActions>
                     <Button variant={"contained"} color={"secondary"} onClick={
-                        () => {onClose()}
+                        () => {
+                            onClose()
+                        }
                     }>
                         Cancel
                     </Button>
@@ -81,6 +83,7 @@ const AddSubCategoryDialog = ({cats, open, onClose, onCreate}) => {
                                 "name": nameRef.current.value,
                                 "parent_name": category.cat_name
                             })
+                            onClose()
                         }
                     }>
                         Create
