@@ -46,7 +46,7 @@ const cardStyles = makeStyles({
 const InforCard = (props) => {
     const cardClass = cardStyles();
   return (
-    <Paper elevation={3} className={cardClass.root}>
+    <Paper elevation={3} className={cardClass.root} style={props.style}>
       <Grid container direction="row" wrap="nowrap" style={{ padding: "10px" }}>
         <img src={props.src} />
         <Card
