@@ -23,7 +23,7 @@ import Typography from "@material-ui/core/Typography";
 import AddCategoryDialog from "../components/AddCategoryDialog";
 import AddSubCategoryDialog from "../components/AddSubCategoryDialog";
 import {connect} from "react-redux";
-import {ExitToApp} from "@material-ui/icons";
+import {Check, ExitToApp, Lock, LockOpen} from "@material-ui/icons";
 import {adminSignOut} from "../store/admin/authen";
 import store from "../store";
 import {useHistory} from 'react-router-dom'
@@ -38,6 +38,17 @@ import {
 import AnnounceDialog from "../components/AnnounceDialog";
 import UpdateCategoryDialog from "../components/UpdateCategoryDialog";
 import UpdateSubcategoryDialog from "../components/UpdateSubcategoryDialog";
+import {
+    adminUsersSlice,
+    banUser,
+    denyPromoteUser,
+    fetchPromote,
+    fetchUsersAdmin,
+    promoteUser,
+    unbanUser
+} from "../store/admin/user";
+import {adminCoursesSlice, fetchCoursesAdmin, forceDeleteCourseAdmin} from "../store/admin/courses";
+import YesNoDialog from "../components/YesNoDialog";
 
 const useStyle = makeStyles((theme) => ({
     table: {
@@ -71,7 +82,20 @@ const useStyle = makeStyles((theme) => ({
     }
 }));
 
-const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr}) => {
+const AdminPage = ({
+                       users,
+                       usersFetching,
+                       usersErr,
+                       cats,
+                       catFetching,
+                       catErr,
+                       promotes,
+                       promoteFetching,
+                       promoteErr,
+                       courses,
+                       coursesFetching,
+                       coursesErr
+                   }) => {
     const classes = useStyle()
     const history = useHistory()
 
@@ -85,13 +109,18 @@ const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr})
     const [addSubCategoryDialogOpen, setAddSubCategoryDialogOpen] = useState(false);
     const [updateCategoryDialogOpen, setUpdateCategoryDialogOpen] = useState(false);
     const [updateSubcategoryDialogOpen, setUpdateSubcategoryDialogOpen] = useState(false);
+    const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false);
 
     const [subcatsData, setSubcatsData] = useState([]);
     const [targetCat, setTargetCat] = useState({"cid": "0", "name": "0"});
     const [targetSubcat, setTargetSubcat] = useState({"scid": "0", "name": "0"});
+    const [targetCourseId, setTargetCourseId] = useState("");
 
     useEffect(() => {
+        store.dispatch(fetchUsersAdmin())
         store.dispatch(fetchCatsAdmin())
+        store.dispatch(fetchPromote())
+        store.dispatch(fetchCoursesAdmin())
     }, [])
 
     useEffect(() => {
@@ -111,24 +140,11 @@ const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr})
         setSubcatsData(subs)
     }, [cats])
 
-
-    function handleBlockUser(id) {
-
-    }
-
-    function handleEditCat(cid) {
-        return undefined;
-    }
-
-
-    function handlePromote(uid) {
-        //Send req to server and delete that user from promote list when receive 200 status code
-        return undefined;
-    }
-
     function handleDeleteCourse(ccid) {
         return undefined;
     }
+
+    console.log(courses)
 
     return (
         <div className={classes.root}>
@@ -150,55 +166,89 @@ const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr})
                         </Toolbar>
                     </AppBar>
                 </Grid>
-                <Grid item xs={2}>
-                </Grid>
+                <Grid item xs={2}/>
                 <Grid item xs={9}>
-                    <h2 className={classes.header}>User Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Users Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>UID</TableCell>
-                                    <TableCell align="right">Username</TableCell>
-                                    <TableCell align="right">Fullname</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {users
-                                    .slice(pageUser * 10, pageUser * 10 + 10)
-                                    .map(function (user) {
-                                        return (
-                                            <TableRow key={user.uid}>
-                                                <TableCell component="th">
-                                                    {user.uid}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    {user.username}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    {user.fullname}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton onClick={handleBlockUser(user.uid)}>
-                                                            <BlockIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                    {
+                        usersFetching ?
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
+                            </div> :
+                            <>
+                                <h2 className={classes.header}>User Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Users Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>UID</TableCell>
+                                                <TableCell align="right">Username</TableCell>
+                                                <TableCell align="right">Fullname</TableCell>
+                                                <TableCell align="right">Email</TableCell>
+                                                <TableCell align="right">IsLec</TableCell>
+                                                <TableCell align="right">Ban</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(users && users.length) || 0}
-                            page={pageUser}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPageUser(newPage)}
-                        />
-                    </TableContainer>
+                                        </TableHead>
+                                        <TableBody>
+                                            {users
+                                                .slice(pageUser * 10, pageUser * 10 + 10)
+                                                .map(function (user) {
+                                                    return (
+                                                        <TableRow key={user.Id}>
+                                                            <TableCell component="th">
+                                                                {user.Id}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {user.username}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {user.fullname}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {user.email}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {user.isLec ? <Check/> : <div></div>}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <div>
+                                                                    {
+                                                                        user.is_banned ?
+                                                                            <IconButton onClick={() => {
+                                                                                store.dispatch(unbanUser({
+                                                                                    "id": user.Id
+                                                                                }))
+                                                                            }}>
+                                                                                <LockOpen/>
+                                                                            </IconButton> :
+                                                                            <IconButton onClick={() => {
+                                                                                store.dispatch(banUser({
+                                                                                    "id": user.Id
+                                                                                }))
+                                                                            }}>
+                                                                                <Lock/>
+                                                                            </IconButton>
+                                                                    }
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(users && users.length) || 0}
+                                        page={pageUser}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPageUser(newPage)}
+                                    />
+                                </TableContainer>
+                                <AnnounceDialog open={usersErr != null} onClose={() => {
+                                    store.dispatch(adminUsersSlice.actions.clearUsersErr())
+                                }
+                                } title={"Error"} content={catErr}/>
+                            </>
+                    }
 
                     {
                         catFetching ?
@@ -360,100 +410,179 @@ const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr})
                                     onSubmit={(data) => {
                                         store.dispatch(updateSubcatAdmin(data))
                                     }
-                                }
+                                    }
                                 />
                             </>
 
                     }
 
-                    <h2 className={classes.header}>Promote Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Promotes Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>UID</TableCell>
-                                    <TableCell align="left">Username</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {promotes
-                                    .slice(pagePromote * 10, pagePromote * 10 + 10)
-                                    .map(function (promote) {
-                                        return (
-                                            <TableRow key={promote.uid}>
-                                                <TableCell component="th">
-                                                    {promote.uid}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {promote.username}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton onClick={handlePromote(promote.uid)}>
-                                                            <CheckIcon/>
-                                                        </IconButton>
-                                                        <IconButton onClick={handlePromote(promote.uid)}>
-                                                            <CloseIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                    {
+                        promoteFetching ?
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
+                            </div> :
+                            <>
+                                <h2 className={classes.header}>Promote Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Promotes Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>UID</TableCell>
+                                                <TableCell align={"center"}>Action</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(promotes && promotes.length) || 0}
-                            page={pagePromote}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPagePromote(newPage)}
-                        />
-                    </TableContainer>
+                                        </TableHead>
+                                        <TableBody>
+                                            {promotes
+                                                .slice(pagePromote * 10, pagePromote * 10 + 10)
+                                                .map(function (promote) {
+                                                    return (
+                                                        <TableRow key={promote.uid}>
+                                                            <TableCell component="th">
+                                                                {promote.lid}
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <div>
+                                                                    <IconButton onClick={() => {
+                                                                        store.dispatch(promoteUser({
+                                                                            "id": promote.lid
+                                                                        }))
+                                                                    }}>
+                                                                        <CheckIcon/>
+                                                                    </IconButton>
+                                                                    <IconButton onClick={() => {
+                                                                        store.dispatch(denyPromoteUser({
+                                                                            "id": promote.lid
+                                                                        }))
+                                                                    }}>
+                                                                        <CloseIcon/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(promotes && promotes.length) || 0}
+                                        page={pagePromote}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPagePromote(newPage)}
+                                    />
+                                </TableContainer>
+                                <AnnounceDialog open={promoteErr != null} onClose={() => {
+                                    store.dispatch(adminUsersSlice.actions.clearPErr())
+                                }
+                                } title={"Error"} content={promoteErr}/>
+                            </>
+                    }
 
-                    <h2 className={classes.header}>Course Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Courses Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>CCID</TableCell>
-                                    <TableCell align="left">Name</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {courseContents
-                                    .slice(pageCourse * 10, pageCourse * 10 + 10)
-                                    .map(function (course) {
-                                        return (
-                                            <TableRow key={course.ccid}>
-                                                <TableCell component="th">
-                                                    {course.ccid}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {course.name}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton onClick={handleDeleteCourse(course.ccid)}>
-                                                            <DeleteIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                    {
+                        coursesFetching ?
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
+                            </div> :
+                            <>
+                                <h2 className={classes.header}>Course Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Courses Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>CCID</TableCell>
+                                                <TableCell align="left">Name</TableCell>
+                                                <TableCell align="left">Category</TableCell>
+                                                <TableCell align="left">Lecturer</TableCell>
+                                                <TableCell align="left">Review Score</TableCell>
+                                                <TableCell align="left">Fee</TableCell>
+                                                <TableCell align="left">Discount</TableCell>
+                                                <TableCell align="left">Done</TableCell>
+                                                <TableCell align="left">Chapters Count</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(courseContents && courseContents.length) || 0}
-                            page={pageCourse}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPageCourse(newPage)}
-                        />
-                    </TableContainer>
+                                        </TableHead>
+                                        <TableBody>
+                                            {courses
+                                                .slice(pageCourse * 10, pageCourse * 10 + 10)
+                                                .map(function (course) {
+                                                    return (
+                                                        <TableRow key={course.id}>
+                                                            <TableCell component="th">
+                                                                {course.id}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.title}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.category}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.lecturer}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.review_score}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.fee}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.discount}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.is_done ? <Check/> : null}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.chapters.length}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <div>
+                                                                    <IconButton
+                                                                        onClick={
+                                                                            () => {
+                                                                                setTargetCourseId(course.id)
+                                                                                setDeleteConfirmDialogOpen(true)
+                                                                            }
+                                                                        }>
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(courses && courses.length) || 0}
+                                        page={pageCourse}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPageCourse(newPage)}
+                                    />
+                                </TableContainer>
+                                <YesNoDialog open={deleteConfirmDialogOpen}
+                                             onClose={() => {
+                                                 setDeleteConfirmDialogOpen(false)
+                                             }}
+                                             onCancel={() => {
+                                                 setDeleteConfirmDialogOpen(false)
+                                             }}
+                                             onConfirm={() => {
+                                                 store.dispatch(forceDeleteCourseAdmin({
+                                                     "id": targetCourseId
+                                                 }))
+                                                 setDeleteConfirmDialogOpen(false)
+                                             }}
+                                             title={"Confirm deleting course"}
+                                             content={"Are you sure you want to delete this course? This action is not reversible!"}
+                                />
+                                <AnnounceDialog open={coursesErr != null} onClose={() => {
+                                    store.dispatch(adminCoursesSlice.actions.clearErr())
+                                }
+                                } title={"Error"} content={coursesErr}/>
+                            </>
+                    }
                 </Grid>
                 <Grid item xs={1}>
                 </Grid>
@@ -463,100 +592,6 @@ const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr})
 }
 
 AdminPage.defaultProps = {
-    users: [
-        {
-            "uid": "u01",
-            "username": "albedo",
-            "fullname": "Albedo Geo"
-        },
-        {
-            "uid": "u02",
-            "username": "xiao",
-            "fullname": "Xiao Anemo"
-        },
-        {
-            "uid": "u03",
-            "username": "venti",
-            "fullname": "Venti Anemo"
-        },
-        {
-            "uid": "u04",
-            "username": "jean",
-            "fullname": "Jean Anemo"
-        },
-        {
-            "uid": "u05",
-            "username": "ningguang",
-            "fullname": "Ningguang Geo"
-        },
-        {
-            "uid": "u06",
-            "username": "beidou",
-            "fullname": "Beidou Electro"
-        },
-        {
-            "uid": "u07",
-            "username": "zhongli",
-            "fullname": "Zhongli Geo"
-        },
-        {
-            "uid": "u08",
-            "username": "chongyun",
-            "fullname": "Chongyun Cyro"
-        },
-        {
-            "uid": "u09",
-            "username": "xiangling",
-            "fullname": "Xiangling Pyro"
-        },
-        {
-            "uid": "u10",
-            "username": "diona",
-            "fullname": "Diona Cyro"
-        },
-        {
-            "uid": "u11",
-            "username": "childe",
-            "fullname": "Childe Hydro"
-        },
-        {
-            "uid": "u12",
-            "username": "Mona",
-            "fullname": "Mona Hydro"
-        }
-    ],
-    promotes: [
-        {
-            "uid": "u01",
-            "username": "albedo",
-            "fullname": "Albedo Geo"
-        },
-        {
-            "uid": "u02",
-            "username": "xiao",
-            "fullname": "Xiao Anemo"
-        },
-        {
-            "uid": "u03",
-            "username": "venti",
-            "fullname": "Venti Anemo"
-        },
-        {
-            "uid": "u04",
-            "username": "jean",
-            "fullname": "Jean Anemo"
-        },
-        {
-            "uid": "u05",
-            "username": "ningguang",
-            "fullname": "Ningguang Geo"
-        },
-        {
-            "uid": "u06",
-            "username": "beidou",
-            "fullname": "Beidou Electro"
-        }
-    ],
     courseContents: [
         {
             "ccid": "ab1",
@@ -622,6 +657,15 @@ const mapStateToProps = state => ({
     cats: state.adminCats.category,
     catFetching: state.adminCats.fetching,
     catErr: state.adminCats.err,
+    users: state.adminUsers.users,
+    usersFetching: state.adminUsers.fetching,
+    userErr: state.adminUsers.err,
+    promotes: state.adminUsers.promote,
+    promoteFetching: state.adminUsers.pFetching,
+    promoteErr: state.adminUsers.pErr,
+    courses: state.adminCourses.courses,
+    coursesFetching: state.adminCourses.fetching,
+    coursesErr: state.adminCourses.err,
 })
 
 export default connect(
