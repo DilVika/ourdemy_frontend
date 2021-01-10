@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import {AppBar, makeStyles, Toolbar} from "@material-ui/core";
+import React, {useEffect, useState} from "react";
+import {AppBar, CircularProgress, makeStyles, Toolbar} from "@material-ui/core";
 import PageFrame from "../components/PageFrame";
 import Paper from "@material-ui/core/Paper";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -22,6 +22,21 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import AddCategoryDialog from "../components/AddCategoryDialog";
 import AddSubCategoryDialog from "../components/AddSubCategoryDialog";
+import {connect} from "react-redux";
+import {ExitToApp} from "@material-ui/icons";
+import {adminSignOut} from "../store/admin/authen";
+import store from "../store";
+import {useHistory} from 'react-router-dom'
+import {
+    adminCatSlice,
+    createCatAdmin,
+    createSubcatAdmin,
+    fetchCatsAdmin,
+    removeCatAdmin,
+    removeSubcatAdmin, updateCatAdmin
+} from "../store/admin/cat";
+import AnnounceDialog from "../components/AnnounceDialog";
+import UpdateCategoryDialog from "../components/UpdateCategoryDialog";
 
 const useStyle = makeStyles((theme) => ({
     table: {
@@ -48,11 +63,16 @@ const useStyle = makeStyles((theme) => ({
     },
     header: {
         marginTop: 50
+    },
+    loadingCenter: {
+        display: 'flex',
+        justifyContent: 'center'
     }
 }));
 
-const AdminPage = ({users, cats, promotes, courseContents}) => {
+const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr}) => {
     const classes = useStyle()
+    const history = useHistory()
 
     const [pageUser, setPageUser] = useState(0)
     const [pageCat, setPageCat] = useState(0)
@@ -62,32 +82,34 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
 
     const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
     const [addSubCategoryDialogOpen, setAddSubCategoryDialogOpen] = useState(false);
+    const [updateCategoryDialogOpen, setUpdateCategoryDialogOpen] = useState(false);
 
-    const subcatsData = []
-    cats.forEach((cat, index) => {
-        cat.subcats.forEach((subcat, sindex) => {
-            subcatsData.push({
-                "cid": cat.cid,
-                "catName": cat.cat_name,
-                "scid": subcat.scid,
-                "name": subcat.subcat_name
+    const [subcatsData, setSubcatsData] = useState([]);
+    const [targetCat, setTargetCat] = useState({"cid": "0", "name": "0"});
+
+    useEffect(() => {
+        store.dispatch(fetchCatsAdmin())
+    }, [])
+
+    useEffect(() => {
+        const subs = []
+
+        cats.forEach((cat, index) => {
+            cat.subcats.forEach((subcat, sindex) => {
+                subs.push({
+                    "cid": cat.cid,
+                    "catName": cat.cat_name,
+                    "scid": subcat.scid,
+                    "name": subcat.subcat_name
+                })
             })
         })
-    })
 
-    function handleAddUser(e) {
+        setSubcatsData(subs)
+    }, [cats])
 
-    }
 
     function handleBlockUser(id) {
-
-    }
-
-    function handleDeleteUser(id) {
-
-    }
-
-    function handleAddCat() {
 
     }
 
@@ -95,10 +117,6 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
         return undefined;
     }
 
-    function handleDeleteCat(cid) {
-        //Check if cat exist courses or not
-        return undefined;
-    }
 
     function handlePromote(uid) {
         //Send req to server and delete that user from promote list when receive 200 status code
@@ -118,6 +136,14 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                             <Typography className={classes.title} variant="h4" noWrap>
                                 Admin
                             </Typography>
+                            <IconButton onClick={
+                                () => {
+                                    store.dispatch(adminSignOut())
+                                    history.push("/admin/signin")
+                                }
+                            } color="inherit">
+                                <ExitToApp/>
+                            </IconButton>
                         </Toolbar>
                     </AppBar>
                 </Grid>
@@ -171,119 +197,157 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                         />
                     </TableContainer>
 
-                    <h2 className={classes.header}>Category Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Categories Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>CID</TableCell>
-                                    <TableCell align="right">Name</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {cats
-                                    .slice(pageCat * 10, pageCat * 10 + 10)
-                                    .map(function (cat) {
-                                        return (
-                                            <TableRow key={cat.cid}>
-                                                <TableCell component="th">
-                                                    {cat.cid}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    {cat.cat_name}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton onClick={handleEditCat(cat.cid)}>
-                                                            <EditIcon/>
-                                                        </IconButton>
-                                                        <IconButton onClick={handleDeleteCat(cat.cid)}>
-                                                            <DeleteIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                    {
+                        catFetching ?
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
+                            </div> :
+                            <>
+                                <h2 className={classes.header}>Category Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Categories Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>CID</TableCell>
+                                                <TableCell align="right">Name</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(cats && cats.length) || 0}
-                            page={pageCat}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPageCat(newPage)}
-                        />
-                    </TableContainer>
-                    <Button variant="contained" color="primary"
-                            style={{marginTop: 10}}
-                            onClick={() => setAddCategoryDialogOpen(true)}>
-                        Add Category
-                    </Button>
-                    <AddCategoryDialog open={addCategoryDialogOpen}
-                                       onClose={() => setAddCategoryDialogOpen(false)}
-                    />
+                                        </TableHead>
+                                        <TableBody>
+                                            {cats
+                                                .slice(pageCat * 10, pageCat * 10 + 10)
+                                                .map(function (cat) {
+                                                    return (
+                                                        <TableRow key={cat.cid}>
+                                                            <TableCell component="th">
+                                                                {cat.cid}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {cat.cat_name}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <div>
+                                                                    <IconButton onClick={() => {
+                                                                        setTargetCat(cat)
+                                                                        setUpdateCategoryDialogOpen(true)
+                                                                    }}>
+                                                                        <EditIcon/>
+                                                                    </IconButton>
+                                                                    <IconButton onClick={
+                                                                        () => {
+                                                                            store.dispatch(removeCatAdmin({
+                                                                                "id": cat.cid
+                                                                            }))
+                                                                        }
+                                                                    }>
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(cats && cats.length) || 0}
+                                        page={pageCat}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPageCat(newPage)}
+                                    />
+                                </TableContainer>
+                                <Button variant="contained" color="primary"
+                                        style={{marginTop: 10}}
+                                        onClick={() => setAddCategoryDialogOpen(true)}>
+                                    Add Category
+                                </Button>
+                                <AddCategoryDialog open={addCategoryDialogOpen}
+                                                   onCreate={(data) => store.dispatch(createCatAdmin(data))}
+                                                   onClose={() => setAddCategoryDialogOpen(false)}
+                                />
+                                <AnnounceDialog open={catErr != null} onClose={() => {
+                                    store.dispatch(adminCatSlice.actions.clearCatErr())
+                                }
+                                } title={"Error"} content={catErr}/>
+                                <UpdateCategoryDialog open={updateCategoryDialogOpen} onClose={() => {
+                                    setUpdateCategoryDialogOpen(false)
+                                }
+                                } cat={targetCat} onSubmit={(data) => {
+                                    store.dispatch(updateCatAdmin(data))
+                                }
+                                }/>
 
-                    <h2 className={classes.header}>Sub-Category Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Sub-Categories Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>SCID</TableCell>
-                                    <TableCell align="left">Name</TableCell>
-                                    <TableCell align="left">Parent Name</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {subcatsData
-                                    .slice(pageSubcat * 10, pageSubcat * 10 + 10)
-                                    .map(function (subcat, index) {
-                                        return (
-                                            <TableRow key={subcat.scid}>
-                                                <TableCell component="th">
-                                                    {subcat.scid}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {subcat.name}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {subcat.catName}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton>
-                                                            <EditIcon/>
-                                                        </IconButton>
-                                                        <IconButton>
-                                                            <DeleteIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                                <h2 className={classes.header}>Sub-Category Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Sub-Categories Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>SCID</TableCell>
+                                                <TableCell align="left">Name</TableCell>
+                                                <TableCell align="left">Parent Name</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(subcatsData && subcatsData.length) || 0}
-                            page={pageSubcat}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPageSubcat(newPage)}
-                        />
-                    </TableContainer>
-                    <Button variant="contained" color="primary"
-                            style={{marginTop: 10}}
-                            onClick={() => setAddSubCategoryDialogOpen(true)}>
-                        Add Sub-Category
-                    </Button>
-                    <AddSubCategoryDialog
-                        cats={cats}
-                        open={addSubCategoryDialogOpen}
-                        onClose={() => setAddSubCategoryDialogOpen(false)}
-                    />
+                                        </TableHead>
+                                        <TableBody>
+                                            {subcatsData
+                                                .slice(pageSubcat * 10, pageSubcat * 10 + 10)
+                                                .map(function (subcat, index) {
+                                                    return (
+                                                        <TableRow key={subcat.scid}>
+                                                            <TableCell component="th">
+                                                                {subcat.scid}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {subcat.name}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {subcat.catName}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <div>
+                                                                    <IconButton>
+                                                                        <EditIcon/>
+                                                                    </IconButton>
+                                                                    <IconButton onClick={() => {
+                                                                        store.dispatch(removeSubcatAdmin({
+                                                                            "id": subcat.scid
+                                                                        }))
+                                                                    }}>
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(subcatsData && subcatsData.length) || 0}
+                                        page={pageSubcat}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPageSubcat(newPage)}
+                                    />
+                                </TableContainer>
+                                <Button variant="contained" color="primary"
+                                        style={{marginTop: 10}}
+                                        onClick={() => setAddSubCategoryDialogOpen(true)}>
+                                    Add Sub-Category
+                                </Button>
+                                <AddSubCategoryDialog
+                                    cats={cats}
+                                    open={addSubCategoryDialogOpen}
+                                    onClose={() => setAddSubCategoryDialogOpen(false)}
+                                    onCreate={(data) => {
+                                        store.dispatch(createSubcatAdmin(data))
+                                    }
+                                    }
+                                />
+                            </>
+                    }
+
                     <h2 className={classes.header}>Promote Table</h2>
                     <TableContainer component={Paper}>
                         <Table className={classes.Table} aria-label="Promotes Table">
@@ -443,80 +507,6 @@ AdminPage.defaultProps = {
             "fullname": "Mona Hydro"
         }
     ],
-    cats: [
-        {
-            "cid": "c01",
-            "cat_name": "About Mondstadb",
-            "subcats": [
-                {
-                    "scid": "scid01",
-                    "subcat_name": "Wind"
-                }
-            ]
-        },
-        {
-            "cid": "c02",
-            "cat_name": "About Liyue",
-            "subcats": [
-                {
-                    "scid": "scid02",
-                    "subcat_name": "Glaze"
-                }
-            ]
-        },
-        {
-            "cid": "c03",
-            "cat_name": "About Izunami",
-            "subcats": [
-                {
-                    "scid": "scid03",
-                    "subcat_name": "Frost"
-                }
-            ]
-        },
-        {
-            "cid": "c04",
-            "cat_name": "Games",
-            "subcats": [
-                {
-                    "scid": "5febfb7c474022678a2477bc",
-                    "subcat_name": "Genshin"
-                },
-                {
-                    "scid": "5febfb92474022678a2477bd",
-                    "subcat_name": "Destiny 2"
-                },
-                {
-                    "scid": "5febfb9f474022678a2477be",
-                    "subcat_name": "Cyberpunk 2077"
-                },
-                {
-                    "scid": "5febfc45474022678a2477bf",
-                    "subcat_name": "Sakuna of Rice and Ruin"
-                },
-                {
-                    "scid": "5febfc4c474022678a2477c0",
-                    "subcat_name": "Patapon"
-                },
-                {
-                    "scid": "5febfc5d474022678a2477c1",
-                    "subcat_name": "Crusade Kings 3"
-                },
-                {
-                    "scid": "5febfc7e474022678a2477c2",
-                    "subcat_name": "Heart of Iron 4"
-                },
-                {
-                    "scid": "5febfc8a474022678a2477c3",
-                    "subcat_name": "The Witcher 3"
-                },
-                {
-                    "scid": "5febfc91474022678a2477c4",
-                    "subcat_name": "Call of Duty"
-                }
-            ]
-        }
-    ],
     promotes: [
         {
             "uid": "u01",
@@ -610,4 +600,12 @@ AdminPage.defaultProps = {
     ]
 }
 
-export default AdminPage
+const mapStateToProps = state => ({
+    cats: state.adminCats.category,
+    catFetching: state.adminCats.fetching,
+    catErr: state.adminCats.err,
+})
+
+export default connect(
+    mapStateToProps
+)(AdminPage)

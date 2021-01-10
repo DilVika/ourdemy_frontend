@@ -24,55 +24,57 @@ import Detail from "./pages/detail";
 import Courses from "./pages/courses";
 import { fetchCurrentCourse } from "./store/course/lec";
 import SearchPage from "./pages/Search";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
-  return (
-    <Provider store={store}>
-      <Router>
-        <Switch>
-          <Route exact path="/">
-            <Home />
-          </Route>
-          <Route exact path="/detail">
-            <Detail />
-          </Route>
-          <Route exact path="/courses">
-            <Courses />
-          </Route>
-          <AuthRoute exact path="/profile">
-            <Profile />
-          </AuthRoute>
-          <LecturerRoute exact path={"/course/manage"}>
-            <CourseManage />
-          </LecturerRoute>
-          <LecturerRoute exact path={"/course/create"}>
-            <CreateCourse />
-          </LecturerRoute>
-          <LecturerRoute exact path={"/course/update/:id"}>
-            <UpdateCourse />
-          </LecturerRoute>
-          <LecturerRoute exact path={"/course/content/:id"}>
-            <CourseContent />
-          </LecturerRoute>
-          {/*<Route exact path={"/course/view"}>*/}
-          {/*    <ViewVideo/>*/}
-          {/*</Route>*/}
-          <AuthRoute exact path={"/course/:cid/view/:vid"}>
-            <ViewVideo />
-          </AuthRoute>
-          <Route exact path={"/admin"}>
-            <AdminPage />
-          </Route>
-          <Route exact path={"/search"}>
-            <SearchPage />
-          </Route>
-          <Route path="*">
-            <NotFound />
-          </Route>
-        </Switch>
-      </Router>
-    </Provider>
-  );
+    return (
+        <Provider store={store}>
+            <Router>
+                <Switch>
+                    <Route exact path="/">
+                        <Home/>
+                    </Route>
+                    <Route exact path="/detail">
+                        <Detail/>
+                    </Route>
+                    <AuthRoute exact path="/profile">
+                        <Profile/>
+                    </AuthRoute>
+                    <LecturerRoute exact path={"/course/manage"}>
+                        <CourseManage/>
+                    </LecturerRoute>
+                    <LecturerRoute exact path={"/course/create"}>
+                        <CreateCourse/>
+                    </LecturerRoute>
+                    <LecturerRoute exact path={"/course/update/:id"}>
+                        <UpdateCourse/>
+                    </LecturerRoute>
+                    <LecturerRoute exact path={"/course/content/:id"}>
+                        <CourseContent/>
+                    </LecturerRoute>
+                    {/*<Route exact path={"/course/view"}>*/}
+                    {/*    <ViewVideo/>*/}
+                    {/*</Route>*/}
+                    <AuthRoute exact path={"/course/:cid/view/:vid"}>
+                        <ViewVideo/>
+                    </AuthRoute>
+                    <Route exact path={"/admin/signin"}>
+                        <AdminLoginPage/>
+                    </Route>
+                    <AdminRoute exact path={"/admin"}>
+                        <AdminPage/>
+                    </AdminRoute>
+                    <Route exact path={"/search"}>
+                        <SearchPage/>
+                    </Route>
+                    <Route path="*">
+                        <NotFound/>
+                    </Route>
+                </Switch>
+            </Router>
+        </Provider>
+    );
 }
 
 store.subscribe(App);
