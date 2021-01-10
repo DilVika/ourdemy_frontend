@@ -33,10 +33,11 @@ import {
     createSubcatAdmin,
     fetchCatsAdmin,
     removeCatAdmin,
-    removeSubcatAdmin, updateCatAdmin
+    removeSubcatAdmin, updateCatAdmin, updateSubcatAdmin
 } from "../store/admin/cat";
 import AnnounceDialog from "../components/AnnounceDialog";
 import UpdateCategoryDialog from "../components/UpdateCategoryDialog";
+import UpdateSubcategoryDialog from "../components/UpdateSubcategoryDialog";
 
 const useStyle = makeStyles((theme) => ({
     table: {
@@ -83,9 +84,11 @@ const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr})
     const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
     const [addSubCategoryDialogOpen, setAddSubCategoryDialogOpen] = useState(false);
     const [updateCategoryDialogOpen, setUpdateCategoryDialogOpen] = useState(false);
+    const [updateSubcategoryDialogOpen, setUpdateSubcategoryDialogOpen] = useState(false);
 
     const [subcatsData, setSubcatsData] = useState([]);
     const [targetCat, setTargetCat] = useState({"cid": "0", "name": "0"});
+    const [targetSubcat, setTargetSubcat] = useState({"scid": "0", "name": "0"});
 
     useEffect(() => {
         store.dispatch(fetchCatsAdmin())
@@ -305,7 +308,10 @@ const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr})
                                                             </TableCell>
                                                             <TableCell align="right">
                                                                 <div>
-                                                                    <IconButton>
+                                                                    <IconButton onClick={() => {
+                                                                        setTargetSubcat(subcat)
+                                                                        setUpdateSubcategoryDialogOpen(true)
+                                                                    }}>
                                                                         <EditIcon/>
                                                                     </IconButton>
                                                                     <IconButton onClick={() => {
@@ -345,7 +351,19 @@ const AdminPage = ({users, cats, promotes, courseContents, catFetching, catErr})
                                     }
                                     }
                                 />
+                                <UpdateSubcategoryDialog
+                                    open={updateSubcategoryDialogOpen}
+                                    onClose={() => {
+                                        setUpdateSubcategoryDialogOpen(false)
+                                    }}
+                                    subcat={targetSubcat}
+                                    onSubmit={(data) => {
+                                        store.dispatch(updateSubcatAdmin(data))
+                                    }
+                                }
+                                />
                             </>
+
                     }
 
                     <h2 className={classes.header}>Promote Table</h2>

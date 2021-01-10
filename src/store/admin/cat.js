@@ -85,14 +85,29 @@ export const updateCatAdmin = createAsyncThunk(
         }
     }
 )
-//
-// export const updateSubcatAdmin = createAsyncThunk(
-//     'adminAuthen/adminSignOut',
-//     async (_, thunkApi) => {
-//         thunkApi.dispatch(adminAuthenSlice.actions.clear())
-//     }
-// )
-//
+
+export const updateSubcatAdmin = createAsyncThunk(
+    'adminCats/updateSubcatAdmin',
+    async (data, thunkApi) => {
+        const token = thunkApi.getState().adminAuth.adminToken
+
+        try {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/category/admin/sub/update`, {
+                "name": data.name,
+                "id": data.id
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
 export const removeCatAdmin = createAsyncThunk(
     'adminCats/removeCatAdmin',
     async (data, thunkApi) => {
@@ -203,6 +218,20 @@ export const adminCatSlice = createSlice({
             state.category[index].cat_name = action.payload.name
         },
         [updateCatAdmin.rejected]: (state, action) => {
+            state.err = action.payload
+        },
+        [updateSubcatAdmin.fulfilled]: (state, action) => {
+            const index = state.category.findIndex((item) => {
+                return item.cid === action.payload.parentCategoryId
+            })
+
+            const sindex = state.category[index].subcats.findIndex((item) => {
+                return item.scid === action.payload.Id
+            })
+
+            state.category[index].subcats[sindex].subcat_name = action.payload.name
+        },
+        [updateSubcatAdmin.rejected]: (state, action) => {
             state.err = action.payload
         }
     }
