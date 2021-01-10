@@ -21,8 +21,11 @@ import CreateCourse from "./pages/CreateCourse";
 import UpdateCourse from "./pages/UpdateCourse";
 import CourseContent from "./pages/CourseContent";
 import Detail from "./pages/detail";
-import {fetchCurrentCourse} from "./store/course/lec";
+import Courses from "./pages/courses";
+import { fetchCurrentCourse } from "./store/course/lec";
 import SearchPage from "./pages/Search";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
     return (
@@ -56,9 +59,12 @@ function App() {
                     <AuthRoute exact path={"/course/:cid/view/:vid"}>
                         <ViewVideo/>
                     </AuthRoute>
-                    <Route exact path={"/admin"}>
-                        <AdminPage/>
+                    <Route exact path={"/admin/signin"}>
+                        <AdminLoginPage/>
                     </Route>
+                    <AdminRoute exact path={"/admin"}>
+                        <AdminPage/>
+                    </AdminRoute>
                     <Route exact path={"/search"}>
                         <SearchPage/>
                     </Route>
