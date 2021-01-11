@@ -1,10 +1,10 @@
-import React, {useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import {makeStyles} from "@material-ui/core/styles";
 import {Redirect, useHistory} from "react-router-dom";
 import PageFrame from "../components/PageFrame";
 import {Button, DialogContent, Grid, TextField, Typography} from "@material-ui/core";
 import store from "../store";
-import {sendRecoveryCode} from "../store/authen/reset";
+import {resetPassword, sendRecoveryCode, userResetPasswordSlice} from "../store/authen/reset";
 import {connect} from "react-redux";
 
 const useStyle = makeStyles({})
@@ -18,6 +18,12 @@ const RessetPassword = ({sendErr, resetErr, sendSuccess, resetSuccess}) => {
     const recRef = useRef()
     const passRef = useRef()
     const rpassRef = useRef()
+
+    useEffect(() => {
+        return () => {
+            store.dispatch(userResetPasswordSlice.actions.reset())
+        }
+    },[])
 
     return (
         <>
@@ -63,7 +69,7 @@ const RessetPassword = ({sendErr, resetErr, sendSuccess, resetSuccess}) => {
                             <Grid item xs={4}>
                                 <TextField
                                     margin="dense"
-                                    id="email"
+                                    id="recovery"
                                     label="Recovery Code"
                                     type="email"
                                     inputRef={recRef}
@@ -71,7 +77,7 @@ const RessetPassword = ({sendErr, resetErr, sendSuccess, resetSuccess}) => {
                                 />
                                 <TextField
                                     margin="dense"
-                                    id="email"
+                                    id="password"
                                     label="Password"
                                     type="password"
                                     inputRef={passRef}
@@ -79,7 +85,7 @@ const RessetPassword = ({sendErr, resetErr, sendSuccess, resetSuccess}) => {
                                 />
                                 <TextField
                                     margin="dense"
-                                    id="email"
+                                    id="rpassword"
                                     label="Repeat Password"
                                     type="password"
                                     inputRef={rpassRef}
@@ -94,12 +100,12 @@ const RessetPassword = ({sendErr, resetErr, sendSuccess, resetSuccess}) => {
                                 <Button
                                     onClick={() => {
                                         store.dispatch(
-                                            {
+                                            resetPassword({
                                                 "email": emailRef.current.value,
                                                 "password": passRef.current.value,
                                                 "rpassword": rpassRef.current.value,
                                                 "recovery": recRef.current.value
-                                            }
+                                            })
                                         )
                                     }}
                                     style={{marginTop: '8px'}} color={"secondary"} variant={"outlined"}>

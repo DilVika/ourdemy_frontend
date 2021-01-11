@@ -1,4 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import axios from "axios";
 
 
 const initialState = {
@@ -26,6 +27,7 @@ export const sendRecoveryCode = createAsyncThunk(
 export const resetPassword = createAsyncThunk(
     'userResetPassword/resetPassword',
     async (data, thunkApi) => {
+        console.log(data)
         try {
             const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/users/confirmResetPassword`, {
                 "email": data.email,
