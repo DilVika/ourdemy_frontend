@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import {AppBar, makeStyles, Toolbar} from "@material-ui/core";
+import React, {useEffect, useState} from "react";
+import {AppBar, CircularProgress, makeStyles, Toolbar} from "@material-ui/core";
 import PageFrame from "../components/PageFrame";
 import Paper from "@material-ui/core/Paper";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -22,6 +22,33 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import AddCategoryDialog from "../components/AddCategoryDialog";
 import AddSubCategoryDialog from "../components/AddSubCategoryDialog";
+import {connect} from "react-redux";
+import {Check, ExitToApp, Lock, LockOpen} from "@material-ui/icons";
+import {adminSignOut} from "../store/admin/authen";
+import store from "../store";
+import {useHistory} from 'react-router-dom'
+import {
+    adminCatSlice,
+    createCatAdmin,
+    createSubcatAdmin,
+    fetchCatsAdmin,
+    removeCatAdmin,
+    removeSubcatAdmin, updateCatAdmin, updateSubcatAdmin
+} from "../store/admin/cat";
+import AnnounceDialog from "../components/AnnounceDialog";
+import UpdateCategoryDialog from "../components/UpdateCategoryDialog";
+import UpdateSubcategoryDialog from "../components/UpdateSubcategoryDialog";
+import {
+    adminUsersSlice,
+    banUser,
+    denyPromoteUser,
+    fetchPromote,
+    fetchUsersAdmin,
+    promoteUser,
+    unbanUser
+} from "../store/admin/user";
+import {adminCoursesSlice, fetchCoursesAdmin, forceDeleteCourseAdmin} from "../store/admin/courses";
+import YesNoDialog from "../components/YesNoDialog";
 
 const useStyle = makeStyles((theme) => ({
     table: {
@@ -48,11 +75,29 @@ const useStyle = makeStyles((theme) => ({
     },
     header: {
         marginTop: 50
+    },
+    loadingCenter: {
+        display: 'flex',
+        justifyContent: 'center'
     }
 }));
 
-const AdminPage = ({users, cats, promotes, courseContents}) => {
+const AdminPage = ({
+                       users,
+                       usersFetching,
+                       usersErr,
+                       cats,
+                       catFetching,
+                       catErr,
+                       promotes,
+                       promoteFetching,
+                       promoteErr,
+                       courses,
+                       coursesFetching,
+                       coursesErr
+                   }) => {
     const classes = useStyle()
+    const history = useHistory()
 
     const [pageUser, setPageUser] = useState(0)
     const [pageCat, setPageCat] = useState(0)
@@ -62,52 +107,44 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
 
     const [addCategoryDialogOpen, setAddCategoryDialogOpen] = useState(false);
     const [addSubCategoryDialogOpen, setAddSubCategoryDialogOpen] = useState(false);
+    const [updateCategoryDialogOpen, setUpdateCategoryDialogOpen] = useState(false);
+    const [updateSubcategoryDialogOpen, setUpdateSubcategoryDialogOpen] = useState(false);
+    const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false);
 
-    const subcatsData = []
-    cats.forEach((cat, index) => {
-        cat.subcats.forEach((subcat, sindex) => {
-            subcatsData.push({
-                "cid": cat.cid,
-                "catName": cat.cat_name,
-                "scid": subcat.scid,
-                "name": subcat.subcat_name
+    const [subcatsData, setSubcatsData] = useState([]);
+    const [targetCat, setTargetCat] = useState({"cid": "0", "name": "0"});
+    const [targetSubcat, setTargetSubcat] = useState({"scid": "0", "name": "0"});
+    const [targetCourseId, setTargetCourseId] = useState("");
+
+    useEffect(() => {
+        store.dispatch(fetchUsersAdmin())
+        store.dispatch(fetchCatsAdmin())
+        store.dispatch(fetchPromote())
+        store.dispatch(fetchCoursesAdmin())
+    }, [])
+
+    useEffect(() => {
+        const subs = []
+
+        cats.forEach((cat, index) => {
+            cat.subcats.forEach((subcat, sindex) => {
+                subs.push({
+                    "cid": cat.cid,
+                    "catName": cat.cat_name,
+                    "scid": subcat.scid,
+                    "name": subcat.subcat_name
+                })
             })
         })
-    })
 
-    function handleAddUser(e) {
-
-    }
-
-    function handleBlockUser(id) {
-
-    }
-
-    function handleDeleteUser(id) {
-
-    }
-
-    function handleAddCat() {
-
-    }
-
-    function handleEditCat(cid) {
-        return undefined;
-    }
-
-    function handleDeleteCat(cid) {
-        //Check if cat exist courses or not
-        return undefined;
-    }
-
-    function handlePromote(uid) {
-        //Send req to server and delete that user from promote list when receive 200 status code
-        return undefined;
-    }
+        setSubcatsData(subs)
+    }, [cats])
 
     function handleDeleteCourse(ccid) {
         return undefined;
     }
+
+    console.log(courses)
 
     return (
         <div className={classes.root}>
@@ -118,260 +155,434 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
                             <Typography className={classes.title} variant="h4" noWrap>
                                 Admin
                             </Typography>
+                            <IconButton onClick={
+                                () => {
+                                    store.dispatch(adminSignOut())
+                                    history.push("/admin/signin")
+                                }
+                            } color="inherit">
+                                <ExitToApp/>
+                            </IconButton>
                         </Toolbar>
                     </AppBar>
                 </Grid>
-                <Grid item xs={2}>
-                </Grid>
+                <Grid item xs={2}/>
                 <Grid item xs={9}>
-                    <h2 className={classes.header}>User Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Users Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>UID</TableCell>
-                                    <TableCell align="right">Username</TableCell>
-                                    <TableCell align="right">Fullname</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {users
-                                    .slice(pageUser * 10, pageUser * 10 + 10)
-                                    .map(function (user) {
-                                        return (
-                                            <TableRow key={user.uid}>
-                                                <TableCell component="th">
-                                                    {user.uid}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    {user.username}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    {user.fullname}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton onClick={handleBlockUser(user.uid)}>
-                                                            <BlockIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                    {
+                        usersFetching ?
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
+                            </div> :
+                            <>
+                                <h2 className={classes.header}>User Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Users Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>UID</TableCell>
+                                                <TableCell align="right">Username</TableCell>
+                                                <TableCell align="right">Fullname</TableCell>
+                                                <TableCell align="right">Email</TableCell>
+                                                <TableCell align="right">IsLec</TableCell>
+                                                <TableCell align="right">Ban</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(users && users.length) || 0}
-                            page={pageUser}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPageUser(newPage)}
-                        />
-                    </TableContainer>
+                                        </TableHead>
+                                        <TableBody>
+                                            {users
+                                                .slice(pageUser * 10, pageUser * 10 + 10)
+                                                .map(function (user) {
+                                                    return (
+                                                        <TableRow key={user.Id}>
+                                                            <TableCell component="th">
+                                                                {user.Id}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {user.username}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {user.fullname}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {user.email}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {user.isLec ? <Check/> : <div></div>}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <div>
+                                                                    {
+                                                                        user.is_banned ?
+                                                                            <IconButton onClick={() => {
+                                                                                store.dispatch(unbanUser({
+                                                                                    "id": user.Id
+                                                                                }))
+                                                                            }}>
+                                                                                <LockOpen/>
+                                                                            </IconButton> :
+                                                                            <IconButton onClick={() => {
+                                                                                store.dispatch(banUser({
+                                                                                    "id": user.Id
+                                                                                }))
+                                                                            }}>
+                                                                                <Lock/>
+                                                                            </IconButton>
+                                                                    }
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(users && users.length) || 0}
+                                        page={pageUser}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPageUser(newPage)}
+                                    />
+                                </TableContainer>
+                                <AnnounceDialog open={usersErr != null} onClose={() => {
+                                    store.dispatch(adminUsersSlice.actions.clearUsersErr())
+                                }
+                                } title={"Error"} content={catErr}/>
+                            </>
+                    }
 
-                    <h2 className={classes.header}>Category Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Categories Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>CID</TableCell>
-                                    <TableCell align="right">Name</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {cats
-                                    .slice(pageCat * 10, pageCat * 10 + 10)
-                                    .map(function (cat) {
-                                        return (
-                                            <TableRow key={cat.cid}>
-                                                <TableCell component="th">
-                                                    {cat.cid}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    {cat.cat_name}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton onClick={handleEditCat(cat.cid)}>
-                                                            <EditIcon/>
-                                                        </IconButton>
-                                                        <IconButton onClick={handleDeleteCat(cat.cid)}>
-                                                            <DeleteIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                    {
+                        catFetching ?
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
+                            </div> :
+                            <>
+                                <h2 className={classes.header}>Category Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Categories Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>CID</TableCell>
+                                                <TableCell align="right">Name</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(cats && cats.length) || 0}
-                            page={pageCat}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPageCat(newPage)}
-                        />
-                    </TableContainer>
-                    <Button variant="contained" color="primary"
-                            style={{marginTop: 10}}
-                            onClick={() => setAddCategoryDialogOpen(true)}>
-                        Add Category
-                    </Button>
-                    <AddCategoryDialog open={addCategoryDialogOpen}
-                                       onClose={() => setAddCategoryDialogOpen(false)}
-                    />
+                                        </TableHead>
+                                        <TableBody>
+                                            {cats
+                                                .slice(pageCat * 10, pageCat * 10 + 10)
+                                                .map(function (cat) {
+                                                    return (
+                                                        <TableRow key={cat.cid}>
+                                                            <TableCell component="th">
+                                                                {cat.cid}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                {cat.cat_name}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <div>
+                                                                    <IconButton onClick={() => {
+                                                                        setTargetCat(cat)
+                                                                        setUpdateCategoryDialogOpen(true)
+                                                                    }}>
+                                                                        <EditIcon/>
+                                                                    </IconButton>
+                                                                    <IconButton onClick={
+                                                                        () => {
+                                                                            store.dispatch(removeCatAdmin({
+                                                                                "id": cat.cid
+                                                                            }))
+                                                                        }
+                                                                    }>
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(cats && cats.length) || 0}
+                                        page={pageCat}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPageCat(newPage)}
+                                    />
+                                </TableContainer>
+                                <Button variant="contained" color="primary"
+                                        style={{marginTop: 10}}
+                                        onClick={() => setAddCategoryDialogOpen(true)}>
+                                    Add Category
+                                </Button>
+                                <AddCategoryDialog open={addCategoryDialogOpen}
+                                                   onCreate={(data) => store.dispatch(createCatAdmin(data))}
+                                                   onClose={() => setAddCategoryDialogOpen(false)}
+                                />
+                                <AnnounceDialog open={catErr != null} onClose={() => {
+                                    store.dispatch(adminCatSlice.actions.clearCatErr())
+                                }
+                                } title={"Error"} content={catErr}/>
+                                <UpdateCategoryDialog open={updateCategoryDialogOpen} onClose={() => {
+                                    setUpdateCategoryDialogOpen(false)
+                                }
+                                } cat={targetCat} onSubmit={(data) => {
+                                    store.dispatch(updateCatAdmin(data))
+                                }
+                                }/>
 
-                    <h2 className={classes.header}>Sub-Category Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Sub-Categories Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>SCID</TableCell>
-                                    <TableCell align="left">Name</TableCell>
-                                    <TableCell align="left">Parent Name</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {subcatsData
-                                    .slice(pageSubcat * 10, pageSubcat * 10 + 10)
-                                    .map(function (subcat, index) {
-                                        return (
-                                            <TableRow key={subcat.scid}>
-                                                <TableCell component="th">
-                                                    {subcat.scid}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {subcat.name}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {subcat.catName}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton>
-                                                            <EditIcon/>
-                                                        </IconButton>
-                                                        <IconButton>
-                                                            <DeleteIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                                <h2 className={classes.header}>Sub-Category Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Sub-Categories Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>SCID</TableCell>
+                                                <TableCell align="left">Name</TableCell>
+                                                <TableCell align="left">Parent Name</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(subcatsData && subcatsData.length) || 0}
-                            page={pageSubcat}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPageSubcat(newPage)}
-                        />
-                    </TableContainer>
-                    <Button variant="contained" color="primary"
-                            style={{marginTop: 10}}
-                            onClick={() => setAddSubCategoryDialogOpen(true)}>
-                        Add Sub-Category
-                    </Button>
-                    <AddSubCategoryDialog
-                        cats={cats}
-                        open={addSubCategoryDialogOpen}
-                        onClose={() => setAddSubCategoryDialogOpen(false)}
-                    />
-                    <h2 className={classes.header}>Promote Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Promotes Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>UID</TableCell>
-                                    <TableCell align="left">Username</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {promotes
-                                    .slice(pagePromote * 10, pagePromote * 10 + 10)
-                                    .map(function (promote) {
-                                        return (
-                                            <TableRow key={promote.uid}>
-                                                <TableCell component="th">
-                                                    {promote.uid}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {promote.username}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton onClick={handlePromote(promote.uid)}>
-                                                            <CheckIcon/>
-                                                        </IconButton>
-                                                        <IconButton onClick={handlePromote(promote.uid)}>
-                                                            <CloseIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(promotes && promotes.length) || 0}
-                            page={pagePromote}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPagePromote(newPage)}
-                        />
-                    </TableContainer>
+                                        </TableHead>
+                                        <TableBody>
+                                            {subcatsData
+                                                .slice(pageSubcat * 10, pageSubcat * 10 + 10)
+                                                .map(function (subcat, index) {
+                                                    return (
+                                                        <TableRow key={subcat.scid}>
+                                                            <TableCell component="th">
+                                                                {subcat.scid}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {subcat.name}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {subcat.catName}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <div>
+                                                                    <IconButton onClick={() => {
+                                                                        setTargetSubcat(subcat)
+                                                                        setUpdateSubcategoryDialogOpen(true)
+                                                                    }}>
+                                                                        <EditIcon/>
+                                                                    </IconButton>
+                                                                    <IconButton onClick={() => {
+                                                                        store.dispatch(removeSubcatAdmin({
+                                                                            "id": subcat.scid
+                                                                        }))
+                                                                    }}>
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(subcatsData && subcatsData.length) || 0}
+                                        page={pageSubcat}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPageSubcat(newPage)}
+                                    />
+                                </TableContainer>
+                                <Button variant="contained" color="primary"
+                                        style={{marginTop: 10}}
+                                        onClick={() => setAddSubCategoryDialogOpen(true)}>
+                                    Add Sub-Category
+                                </Button>
+                                <AddSubCategoryDialog
+                                    cats={cats}
+                                    open={addSubCategoryDialogOpen}
+                                    onClose={() => setAddSubCategoryDialogOpen(false)}
+                                    onCreate={(data) => {
+                                        store.dispatch(createSubcatAdmin(data))
+                                    }
+                                    }
+                                />
+                                <UpdateSubcategoryDialog
+                                    open={updateSubcategoryDialogOpen}
+                                    onClose={() => {
+                                        setUpdateSubcategoryDialogOpen(false)
+                                    }}
+                                    subcat={targetSubcat}
+                                    onSubmit={(data) => {
+                                        store.dispatch(updateSubcatAdmin(data))
+                                    }
+                                    }
+                                />
+                            </>
 
-                    <h2 className={classes.header}>Course Table</h2>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.Table} aria-label="Courses Table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>CCID</TableCell>
-                                    <TableCell align="left">Name</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {courseContents
-                                    .slice(pageCourse * 10, pageCourse * 10 + 10)
-                                    .map(function (course) {
-                                        return (
-                                            <TableRow key={course.ccid}>
-                                                <TableCell component="th">
-                                                    {course.ccid}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {course.name}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <div>
-                                                        <IconButton onClick={handleDeleteCourse(course.ccid)}>
-                                                            <DeleteIcon/>
-                                                        </IconButton>
-                                                    </div>
-                                                </TableCell>
+                    }
+
+                    {
+                        promoteFetching ?
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
+                            </div> :
+                            <>
+                                <h2 className={classes.header}>Promote Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Promotes Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>UID</TableCell>
+                                                <TableCell align={"center"}>Action</TableCell>
                                             </TableRow>
-                                        )
-                                    })}
-                            </TableBody>
-                        </Table>
-                        <TablePagination
-                            count={(courseContents && courseContents.length) || 0}
-                            page={pageCourse}
-                            rowsPerPage={10}
-                            rowsPerPageOptions={[0]}
-                            colSpan={4}
-                            onChangePage={(_, newPage) => setPageCourse(newPage)}
-                        />
-                    </TableContainer>
+                                        </TableHead>
+                                        <TableBody>
+                                            {promotes
+                                                .slice(pagePromote * 10, pagePromote * 10 + 10)
+                                                .map(function (promote) {
+                                                    return (
+                                                        <TableRow key={promote.uid}>
+                                                            <TableCell component="th">
+                                                                {promote.lid}
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <div>
+                                                                    <IconButton onClick={() => {
+                                                                        store.dispatch(promoteUser({
+                                                                            "id": promote.lid
+                                                                        }))
+                                                                    }}>
+                                                                        <CheckIcon/>
+                                                                    </IconButton>
+                                                                    <IconButton onClick={() => {
+                                                                        store.dispatch(denyPromoteUser({
+                                                                            "id": promote.lid
+                                                                        }))
+                                                                    }}>
+                                                                        <CloseIcon/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(promotes && promotes.length) || 0}
+                                        page={pagePromote}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPagePromote(newPage)}
+                                    />
+                                </TableContainer>
+                                <AnnounceDialog open={promoteErr != null} onClose={() => {
+                                    store.dispatch(adminUsersSlice.actions.clearPErr())
+                                }
+                                } title={"Error"} content={promoteErr}/>
+                            </>
+                    }
+
+                    {
+                        coursesFetching ?
+                            <div className={classes.loadingCenter}>
+                                <CircularProgress/>
+                            </div> :
+                            <>
+                                <h2 className={classes.header}>Course Table</h2>
+                                <TableContainer component={Paper}>
+                                    <Table className={classes.Table} aria-label="Courses Table">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>CCID</TableCell>
+                                                <TableCell align="left">Name</TableCell>
+                                                <TableCell align="left">Category</TableCell>
+                                                <TableCell align="left">Lecturer</TableCell>
+                                                <TableCell align="left">Review Score</TableCell>
+                                                <TableCell align="left">Fee</TableCell>
+                                                <TableCell align="left">Discount</TableCell>
+                                                <TableCell align="left">Done</TableCell>
+                                                <TableCell align="left">Chapters Count</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {courses
+                                                .slice(pageCourse * 10, pageCourse * 10 + 10)
+                                                .map(function (course) {
+                                                    return (
+                                                        <TableRow key={course.id}>
+                                                            <TableCell component="th">
+                                                                {course.id}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.title}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.category}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.lecturer}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.review_score}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.fee}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.discount}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.is_done ? <Check/> : null}
+                                                            </TableCell>
+                                                            <TableCell align="left">
+                                                                {course.chapters.length}
+                                                            </TableCell>
+                                                            <TableCell align="right">
+                                                                <div>
+                                                                    <IconButton
+                                                                        onClick={
+                                                                            () => {
+                                                                                setTargetCourseId(course.id)
+                                                                                setDeleteConfirmDialogOpen(true)
+                                                                            }
+                                                                        }>
+                                                                        <DeleteIcon/>
+                                                                    </IconButton>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(courses && courses.length) || 0}
+                                        page={pageCourse}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPageCourse(newPage)}
+                                    />
+                                </TableContainer>
+                                <YesNoDialog open={deleteConfirmDialogOpen}
+                                             onClose={() => {
+                                                 setDeleteConfirmDialogOpen(false)
+                                             }}
+                                             onCancel={() => {
+                                                 setDeleteConfirmDialogOpen(false)
+                                             }}
+                                             onConfirm={() => {
+                                                 store.dispatch(forceDeleteCourseAdmin({
+                                                     "id": targetCourseId
+                                                 }))
+                                                 setDeleteConfirmDialogOpen(false)
+                                             }}
+                                             title={"Confirm deleting course"}
+                                             content={"Are you sure you want to delete this course? This action is not reversible!"}
+                                />
+                                <AnnounceDialog open={coursesErr != null} onClose={() => {
+                                    store.dispatch(adminCoursesSlice.actions.clearErr())
+                                }
+                                } title={"Error"} content={coursesErr}/>
+                            </>
+                    }
                 </Grid>
                 <Grid item xs={1}>
                 </Grid>
@@ -381,174 +592,6 @@ const AdminPage = ({users, cats, promotes, courseContents}) => {
 }
 
 AdminPage.defaultProps = {
-    users: [
-        {
-            "uid": "u01",
-            "username": "albedo",
-            "fullname": "Albedo Geo"
-        },
-        {
-            "uid": "u02",
-            "username": "xiao",
-            "fullname": "Xiao Anemo"
-        },
-        {
-            "uid": "u03",
-            "username": "venti",
-            "fullname": "Venti Anemo"
-        },
-        {
-            "uid": "u04",
-            "username": "jean",
-            "fullname": "Jean Anemo"
-        },
-        {
-            "uid": "u05",
-            "username": "ningguang",
-            "fullname": "Ningguang Geo"
-        },
-        {
-            "uid": "u06",
-            "username": "beidou",
-            "fullname": "Beidou Electro"
-        },
-        {
-            "uid": "u07",
-            "username": "zhongli",
-            "fullname": "Zhongli Geo"
-        },
-        {
-            "uid": "u08",
-            "username": "chongyun",
-            "fullname": "Chongyun Cyro"
-        },
-        {
-            "uid": "u09",
-            "username": "xiangling",
-            "fullname": "Xiangling Pyro"
-        },
-        {
-            "uid": "u10",
-            "username": "diona",
-            "fullname": "Diona Cyro"
-        },
-        {
-            "uid": "u11",
-            "username": "childe",
-            "fullname": "Childe Hydro"
-        },
-        {
-            "uid": "u12",
-            "username": "Mona",
-            "fullname": "Mona Hydro"
-        }
-    ],
-    cats: [
-        {
-            "cid": "c01",
-            "cat_name": "About Mondstadb",
-            "subcats": [
-                {
-                    "scid": "scid01",
-                    "subcat_name": "Wind"
-                }
-            ]
-        },
-        {
-            "cid": "c02",
-            "cat_name": "About Liyue",
-            "subcats": [
-                {
-                    "scid": "scid02",
-                    "subcat_name": "Glaze"
-                }
-            ]
-        },
-        {
-            "cid": "c03",
-            "cat_name": "About Izunami",
-            "subcats": [
-                {
-                    "scid": "scid03",
-                    "subcat_name": "Frost"
-                }
-            ]
-        },
-        {
-            "cid": "c04",
-            "cat_name": "Games",
-            "subcats": [
-                {
-                    "scid": "5febfb7c474022678a2477bc",
-                    "subcat_name": "Genshin"
-                },
-                {
-                    "scid": "5febfb92474022678a2477bd",
-                    "subcat_name": "Destiny 2"
-                },
-                {
-                    "scid": "5febfb9f474022678a2477be",
-                    "subcat_name": "Cyberpunk 2077"
-                },
-                {
-                    "scid": "5febfc45474022678a2477bf",
-                    "subcat_name": "Sakuna of Rice and Ruin"
-                },
-                {
-                    "scid": "5febfc4c474022678a2477c0",
-                    "subcat_name": "Patapon"
-                },
-                {
-                    "scid": "5febfc5d474022678a2477c1",
-                    "subcat_name": "Crusade Kings 3"
-                },
-                {
-                    "scid": "5febfc7e474022678a2477c2",
-                    "subcat_name": "Heart of Iron 4"
-                },
-                {
-                    "scid": "5febfc8a474022678a2477c3",
-                    "subcat_name": "The Witcher 3"
-                },
-                {
-                    "scid": "5febfc91474022678a2477c4",
-                    "subcat_name": "Call of Duty"
-                }
-            ]
-        }
-    ],
-    promotes: [
-        {
-            "uid": "u01",
-            "username": "albedo",
-            "fullname": "Albedo Geo"
-        },
-        {
-            "uid": "u02",
-            "username": "xiao",
-            "fullname": "Xiao Anemo"
-        },
-        {
-            "uid": "u03",
-            "username": "venti",
-            "fullname": "Venti Anemo"
-        },
-        {
-            "uid": "u04",
-            "username": "jean",
-            "fullname": "Jean Anemo"
-        },
-        {
-            "uid": "u05",
-            "username": "ningguang",
-            "fullname": "Ningguang Geo"
-        },
-        {
-            "uid": "u06",
-            "username": "beidou",
-            "fullname": "Beidou Electro"
-        }
-    ],
     courseContents: [
         {
             "ccid": "ab1",
@@ -610,4 +653,21 @@ AdminPage.defaultProps = {
     ]
 }
 
-export default AdminPage
+const mapStateToProps = state => ({
+    cats: state.adminCats.category,
+    catFetching: state.adminCats.fetching,
+    catErr: state.adminCats.err,
+    users: state.adminUsers.users,
+    usersFetching: state.adminUsers.fetching,
+    userErr: state.adminUsers.err,
+    promotes: state.adminUsers.promote,
+    promoteFetching: state.adminUsers.pFetching,
+    promoteErr: state.adminUsers.pErr,
+    courses: state.adminCourses.courses,
+    coursesFetching: state.adminCourses.fetching,
+    coursesErr: state.adminCourses.err,
+})
+
+export default connect(
+    mapStateToProps
+)(AdminPage)

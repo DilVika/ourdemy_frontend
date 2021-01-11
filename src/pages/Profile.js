@@ -17,7 +17,7 @@ import {Close, Delete} from "@material-ui/icons";
 import YesNoDialog from "../components/YesNoDialog";
 import {useHistory} from "react-router-dom";
 import {connect} from "react-redux";
-import {fetchFavList, fetchProfile, updateProfile} from "../store/authen";
+import {fetchFavList, fetchProfile, selfPromote, updateProfile} from "../store/authen";
 import store from "../store";
 import UpdatePasswordDialog from "../components/UpdatePassword";
 
@@ -122,7 +122,11 @@ const Profile = ({user, favList, fetching, favListFetching, err, favErr}) => {
                                         {
                                             updateMode && !user.isLec ? <Grid item xs={12}>
                                                 <div className={classes.buttonBar}>
-                                                    <Button variant={"outlined"} color={"secondary"}>
+                                                    <Button variant={"outlined"} color={"secondary"}
+                                                            onClick={() => {
+                                                                store.dispatch(selfPromote())
+                                                            }}
+                                                    >
                                                         Upgrade to Lecturer
                                                     </Button>
                                                 </div>

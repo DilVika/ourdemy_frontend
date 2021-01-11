@@ -1,16 +1,15 @@
-import React from 'react';
+import React from "react";
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link,
-    useParams,
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams,
 } from "react-router-dom";
-
 
 import Home from "./pages/home";
 import store from "./store";
-import {Provider} from "react-redux";
+import { Provider } from "react-redux";
 import NotFound from "./pages/NotFound";
 import AuthRoute from "./components/AuthRoute";
 import Profile from "./pages/Profile";
@@ -21,8 +20,12 @@ import CourseManage from "./pages/CourseManage";
 import CreateCourse from "./pages/CreateCourse";
 import UpdateCourse from "./pages/UpdateCourse";
 import CourseContent from "./pages/CourseContent";
-import {fetchCurrentCourse} from "./store/course/lec";
+import Detail from "./pages/detail";
+import Courses from "./pages/courses";
+import { fetchCurrentCourse } from "./store/course/lec";
 import SearchPage from "./pages/Search";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
     return (
@@ -31,6 +34,9 @@ function App() {
                 <Switch>
                     <Route exact path="/">
                         <Home/>
+                    </Route>
+                    <Route exact path="/detail">
+                        <Detail/>
                     </Route>
                     <AuthRoute exact path="/profile">
                         <Profile/>
@@ -53,9 +59,12 @@ function App() {
                     <AuthRoute exact path={"/course/:cid/view/:vid"}>
                         <ViewVideo/>
                     </AuthRoute>
-                    <Route exact path={"/admin"}>
-                        <AdminPage/>
+                    <Route exact path={"/admin/signin"}>
+                        <AdminLoginPage/>
                     </Route>
+                    <AdminRoute exact path={"/admin"}>
+                        <AdminPage/>
+                    </AdminRoute>
                     <Route exact path={"/search"}>
                         <SearchPage/>
                     </Route>
@@ -68,6 +77,6 @@ function App() {
     );
 }
 
-store.subscribe(App)
+store.subscribe(App);
 
 export default App;

@@ -48,10 +48,29 @@ export const signin = createAsyncThunk(
             });
             return response.data
         } catch (err) {
-            return thunkAPI.rejectWithValue("login failed: username or password mismatch")
+            return thunkAPI.rejectWithValue(err.response.data.error)
         }
     },
 );
+
+export const selfPromote = createAsyncThunk(
+    'authen/selfPromote',
+    async (_, thunkApi) => {
+        const token = thunkApi.getState().authen.token
+
+        try {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/lecturers/promote`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
 
 export const updateProfile = createAsyncThunk(
     'authen/updateProfile',
@@ -305,6 +324,9 @@ export const authenSlice = createSlice({
         [fetchFavList.rejected]: (state, action) => {
             state.fetchingFav = false
             state.favListErr = action.payload
+        },
+        [selfPromote.rejected]: (state, action) => {
+            state.updateErr = action.payload
         }
     }
 })

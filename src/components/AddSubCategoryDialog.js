@@ -23,7 +23,7 @@ const useStyle = makeStyles((theme) => ({
     },
 }));
 
-const AddSubCategoryDialog = ({cats, open, onClose, err, success}) => {
+const AddSubCategoryDialog = ({cats, open, onClose, onCreate}) => {
     const classes = useStyle()
 
     const nameRef = useRef('');
@@ -70,8 +70,21 @@ const AddSubCategoryDialog = ({cats, open, onClose, err, success}) => {
                     </Select>
                 </DialogContent>
                 <DialogActions>
+                    <Button variant={"contained"} color={"secondary"} onClick={
+                        () => {
+                            onClose()
+                        }
+                    }>
+                        Cancel
+                    </Button>
                     <Button variant={"contained"} color={"primary"} onClick={
-                        () => {}
+                        () => {
+                            onCreate({
+                                "name": nameRef.current.value,
+                                "parent_name": category.cat_name
+                            })
+                            onClose()
+                        }
                     }>
                         Create
                     </Button>
