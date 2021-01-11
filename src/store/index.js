@@ -10,6 +10,8 @@ import {adminAuthenSlice} from "./admin/authen";
 import {adminCatSlice} from "./admin/cat";
 import {adminUsersSlice} from "./admin/user";
 import {adminCoursesSlice} from "./admin/courses";
+import {detailSlice} from "./course/detail/detail";
+import {joinSlice} from "./course/detail/join";
 
 const store = configureStore({
     reducer: {
@@ -22,6 +24,8 @@ const store = configureStore({
         adminCats: adminCatSlice.reducer,
         adminUsers: adminUsersSlice.reducer,
         adminCourses: adminCoursesSlice.reducer,
+        detail: detailSlice.reducer,
+        join: joinSlice.reducer,
     }
 })
 

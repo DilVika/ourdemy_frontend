@@ -30,7 +30,6 @@ export const catSlice = createSlice({
     reducers: {},
     extraReducers: {
         [fetchCategories.fulfilled]: (state, action) => {
-            console.log(`payload: ${action.payload}`)
             state.category = action.payload
         },
         [fetchCategories.rejected]: (state, action) => {

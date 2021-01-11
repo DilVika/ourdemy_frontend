@@ -118,6 +118,10 @@ const CourseManage = ({courses, err, loading}) => {
                                                                 }
                                                             />
                                                             <CardMedia
+                                                                style={{
+                                                                    maxWidth: '200px',
+                                                                    maxHeight: '500px'
+                                                                }}
                                                                 component={"img"}
                                                                 src={"data:image/png;base64," + course.ava}
                                                             />

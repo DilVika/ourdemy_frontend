@@ -98,7 +98,6 @@ export const videoSlice = createSlice(
                 state.err = action.payload
             },
             [getTime.fulfilled]: (state, action) => {
-                console.log(action.payload)
                 state.timeMark = action.payload
             },
             [getTime.rejected]: (state, action) => {
