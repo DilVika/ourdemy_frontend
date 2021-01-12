@@ -11,6 +11,7 @@ import {authenSlice, signin, signup} from "../store/authen";
 import Dialog from "@material-ui/core/Dialog";
 import React, {useRef} from "react";
 import {connect} from "react-redux";
+import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     appBar: {
@@ -23,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
 
 const SignInDialog = ({open, onClose, err, loading, finish}) => {
     const classes = useStyles();
+    const history = useHistory()
 
     const unameRef = useRef("");
     const passRef = useRef("");
@@ -77,6 +79,7 @@ const SignInDialog = ({open, onClose, err, loading, finish}) => {
                 <DialogActions>
                     {!loading ? <div>
                         <Button onClick={() => {
+                            history.push("/resetPassword")
                         }} color="secondary">
                             Reset Password
                         </Button>
