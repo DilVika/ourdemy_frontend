@@ -12,10 +12,12 @@ import {adminUsersSlice} from "./admin/user";
 import {adminCoursesSlice} from "./admin/courses";
 import {detailSlice} from "./course/detail/detail";
 import {joinSlice} from "./course/detail/join";
+import {userResetPasswordSlice} from "./authen/reset";
 
 const store = configureStore({
     reducer: {
         authen: authenSlice.reducer,
+        reset: userResetPasswordSlice.reducer,
         cat: catSlice.reducer,
         lecCourse: lecCourseSlice.reducer,
         search: searchSlice.reducer,

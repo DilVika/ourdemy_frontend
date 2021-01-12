@@ -26,6 +26,7 @@ import { fetchCurrentCourse } from "./store/course/lec";
 import SearchPage from "./pages/Search";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminRoute from "./components/AdminRoute";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
     return (
@@ -37,6 +38,9 @@ function App() {
                     </Route>
                     <Route exact path="/detail/:id">
                         <Detail/>
+                    </Route>
+                    <Route exact path="/resetPassword">
+                        <ResetPassword/>
                     </Route>
                     <AuthRoute exact path="/profile">
                         <Profile/>
