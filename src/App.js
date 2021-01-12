@@ -36,7 +36,7 @@ function App() {
                     <Route exact path="/">
                         <Home/>
                     </Route>
-                    <Route exact path="/detail">
+                    <Route exact path="/detail/:id">
                         <Detail/>
                     </Route>
                     <Route exact path="/resetPassword">
@@ -45,6 +45,9 @@ function App() {
                     <AuthRoute exact path="/profile">
                         <Profile/>
                     </AuthRoute>
+                    <Route exact path={"/course"}>
+                        <Courses/>
+                    </Route>
                     <LecturerRoute exact path={"/course/manage"}>
                         <CourseManage/>
                     </LecturerRoute>
@@ -57,9 +60,6 @@ function App() {
                     <LecturerRoute exact path={"/course/content/:id"}>
                         <CourseContent/>
                     </LecturerRoute>
-                    {/*<Route exact path={"/course/view"}>*/}
-                    {/*    <ViewVideo/>*/}
-                    {/*</Route>*/}
                     <AuthRoute exact path={"/course/:cid/view/:vid"}>
                         <ViewVideo/>
                     </AuthRoute>
