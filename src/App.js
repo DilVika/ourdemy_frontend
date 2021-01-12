@@ -45,6 +45,9 @@ function App() {
                     <AuthRoute exact path="/profile">
                         <Profile/>
                     </AuthRoute>
+                    <Route exact path={"/course"}>
+                        <Courses/>
+                    </Route>
                     <LecturerRoute exact path={"/course/manage"}>
                         <CourseManage/>
                     </LecturerRoute>

@@ -20,7 +20,7 @@ export const checkJoin = createAsyncThunk(
         try {
             const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/course/checkJoined/${data.id}`, {
                 headers: {
-                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                    'Authorization': `Bearer ${token}`
                 }
             })
 
@@ -40,7 +40,7 @@ export const joinCourse = createAsyncThunk(
         try {
             const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/course/buy/${data.id}`, {}, {
                 headers: {
-                    'Authorization': `Bearer ${thunkApi.getState().authen.token}`
+                    'Authorization': `Bearer ${token}`
                 }
             })
 

@@ -99,30 +99,30 @@ const InforCard = (props) => {
                                         <Button onClick={() => {props.onEnroll()}} variant="contained" size="small" color="secondary">Enroll</Button>
                                     </Grid> : null
                             }
-
-                            <Grid item xs={5}>
-                                <Typography
-                                    className={classes.title}
-                                    variant="h6"
-                                    style={{fontWeight: "bold"}}
-                                >
-                                    Price: {(props.price ? ("$" + props.price) : ("$" + props.originPrice))}
-                                </Typography>
-                                <Typography
-                                    className={classes.title}
-                                    variant="subtitle"
-                                    style={{
-                                        textDecoration: props.price ? "line-through" : "none",
-                                        // fontWeight: "lighter",
-                                        // fontSize:"1rem",
-                                        opacity: "0.65",
-                                        paddingInline: "5px",
-                                    }}
-                                >
-                                    {props.price ? "$" + props.originPrice : null}
-                                </Typography>
-                            </Grid>
-
+                            {
+                                !props.joined ? <Grid item xs={5}>
+                                    <Typography
+                                        className={classes.title}
+                                        variant="h6"
+                                        style={{fontWeight: "bold"}}
+                                    >
+                                        Price: {(props.price ? ("$" + props.price) : ("$" + props.originPrice))}
+                                    </Typography>
+                                    <Typography
+                                        className={classes.title}
+                                        variant="subtitle"
+                                        style={{
+                                            textDecoration: props.price ? "line-through" : "none",
+                                            // fontWeight: "lighter",
+                                            // fontSize:"1rem",
+                                            opacity: "0.65",
+                                            paddingInline: "5px",
+                                        }}
+                                    >
+                                        {props.price ? "$" + props.originPrice : null}
+                                    </Typography>
+                                </Grid> : null
+                            }
                         </Grid>
                     </CardActions>
                 </Card>

@@ -17,6 +17,9 @@ import {
 import {connect} from "react-redux";
 import {Avatar, Chip, CircularProgress, Divider} from "@material-ui/core";
 import {checkJoin, joinCourse, joinSlice} from "../store/course/detail/join";
+import {commentsSlice, fetchComments, fetchMyComment, sendComment} from "../store/course/detail/comment";
+import AnnounceDialog from "../components/AnnounceDialog";
+import {fetchRelevance, relSlice} from "../store/course/detail/relevance";
 
 const dummyInfo = {
     src: "https://picsum.photos/500/300",
@@ -195,8 +198,6 @@ const dummyCourse = [
     />
 ));
 
-const isJoined = true;
-
 const useStyle = makeStyles({
     root: {
         marginTop: "10px",
@@ -216,7 +217,20 @@ const useStyle = makeStyles({
     },
 });
 
-const Detail = ({course, courseLoading, courseErr, joined, authed, comments, commentsLoading, commentsErr}) => {
+const Detail = ({
+                    course,
+                    courseLoading,
+                    courseErr,
+                    joined,
+                    authed,
+                    comments,
+                    commentsLoading,
+                    commentsErr,
+                    commenting,
+                    commentSuccess,
+                    myComment,
+                    relevance
+                }) => {
     const classes = useStyle()
     const {id} = useParams()
 
@@ -227,10 +241,15 @@ const Detail = ({course, courseLoading, courseErr, joined, authed, comments, com
     useEffect(() => {
         store.dispatch(fetchCourse({"id": id}))
         store.dispatch(checkJoin({"id": id}))
+        store.dispatch(fetchComments({"id": id}))
+        store.dispatch(fetchMyComment({"id": id}))
+        store.dispatch(fetchRelevance({"id": id}))
 
         return () => {
             store.dispatch(detailSlice.actions.clear())
             store.dispatch(joinSlice.actions.clear())
+            store.dispatch(commentsSlice.actions.clear())
+            store.dispatch(relSlice.actions.clear())
         }
     }, [])
 
@@ -341,60 +360,130 @@ const Detail = ({course, courseLoading, courseErr, joined, authed, comments, com
                                         <Header as="h2" dividing>
                                             Review
                                         </Header>
-                                        {comments
-                                            .slice(commentPage * 10, commentPage * 10 + 10)
-                                            .map((comment, index) => {
-                                                return (<div key={comment.id}>
-                                                    <Comment style={{marginTop: '4px', marginBottom: '4px'}}
-                                                             >
-                                                        <Comment.Content>
-                                                            <Comment.Author>{comment.username}</Comment.Author>
-                                                            <Comment.Metadata>
-                                                                <div>{comment.time}</div>
-                                                                <Rating disabled rating={comment.score} maxRating={5}/>
-                                                            </Comment.Metadata>
-                                                            <Comment.Text>{comment.content}</Comment.Text>
-                                                        </Comment.Content>
-                                                    </Comment>
-                                                    <Divider style={{marginBottom: '4px'}}/>
-                                                </div>)
-                                            })}
-                                        <Pagination
-                                            totalPages={(comments && Math.floor((comments.length / 10 + 1))) || 0}
-                                            shape="rounded"
-                                            page={commentPage}
-                                            onPageChange={(_, p) => setCommentPage(p.activePage)}
-                                        />
+                                        {
+                                            commentsLoading ? <div className={classes.loadingCenter}>
+                                                <CircularProgress/>
+                                            </div> : <>
+                                                {
+                                                    commentsErr ? <Typography color={"error"}>
+                                                        {commentsErr}
+                                                    </Typography> : null
+                                                }
+                                                {comments
+                                                    .slice(commentPage * 10, commentPage * 10 + 10)
+                                                    .map((comment, index) => {
+                                                        return (<div key={comment.id}>
+                                                            <Comment style={{marginTop: '4px', marginBottom: '4px'}}
+                                                            >
+                                                                <Comment.Content>
+                                                                    <Comment.Author>{comment.username}</Comment.Author>
+                                                                    <Comment.Metadata>
+                                                                        <div>{comment.time}</div>
+                                                                        <Rating disabled rating={comment.score}
+                                                                                maxRating={5}/>
+                                                                    </Comment.Metadata>
+                                                                    <Comment.Text>{comment.content}</Comment.Text>
+                                                                </Comment.Content>
+                                                            </Comment>
+                                                            <Divider style={{marginBottom: '4px'}}/>
+                                                        </div>)
+                                                    })}
+                                                {
+                                                    comments.length > 0 ? <Pagination
+                                                        totalPages={(comments && Math.floor((comments.length / 10 + 1))) || 0}
+                                                        shape="rounded"
+                                                        page={commentPage}
+                                                        onPageChange={(_, p) => setCommentPage(p.activePage)}
+                                                    /> : null
+                                                }
+                                            </>
+                                        }
                                         {joined && authed ? (
-                                            <Form reply>
-                                                <Typography variant={"h5"}>
-                                                    Comment
-                                                </Typography>
-                                                <Rating
-                                                    onRate={(e, d) => {
-                                                        setCurStar(d.rating)
-                                                    }}
-                                                    icon='star'
-                                                    defaultRating={5}
-                                                    maxRating={5}/>
-                                                <Form.TextArea onChange={(e, d) => {
-                                                    setCurComment(d.value)
-                                                }}/>
-                                                <Button
-                                                    content="Add Reply"
-                                                    labelPosition="left"
-                                                    icon="edit"
-                                                    primary
-                                                    onClick={() => {
-                                                    }
-                                                    }
-                                                />
-                                            </Form>) : null}
+                                            <>
+                                                {
+                                                    !myComment ?
+                                                        <Form reply>
+                                                            <Typography variant={"h5"}>
+                                                                Comment
+                                                            </Typography>
+                                                            <Rating
+                                                                onRate={(e, d) => {
+                                                                    setCurStar(d.rating)
+                                                                }}
+                                                                icon='star'
+                                                                defaultRating={5}
+                                                                maxRating={5}/>
+                                                            <Form.TextArea onChange={(e, d) => {
+                                                                setCurComment(d.value)
+                                                            }}/>
+                                                            {
+                                                                commenting ? <div className={classes.loadingCenter}>
+                                                                    <CircularProgress/>
+                                                                </div> : <Button
+                                                                    content="Add Reply"
+                                                                    labelPosition="left"
+                                                                    icon="edit"
+                                                                    primary
+                                                                    onClick={() => {
+                                                                        store.dispatch(sendComment(
+                                                                            {
+                                                                                "id": id,
+                                                                                "content": curComment,
+                                                                                "score": curStar
+                                                                            }
+                                                                        ))
+                                                                    }
+                                                                    }
+                                                                />
+                                                            }
+                                                        </Form> :
+                                                        <div style={{marginTop: '16px'}}>
+                                                            <Typography variant={"h5"}>
+                                                                My Comment
+                                                            </Typography>
+                                                            <Comment style={{marginTop: '4px', marginBottom: '4px'}}
+                                                            >
+                                                                <Comment.Content>
+                                                                    <Comment.Author>{myComment.username}</Comment.Author>
+                                                                    <Comment.Metadata>
+                                                                        <div>{myComment.time}</div>
+                                                                        <Rating disabled rating={myComment.score}
+                                                                                maxRating={5}/>
+                                                                    </Comment.Metadata>
+                                                                    <Comment.Text>{myComment.content}</Comment.Text>
+                                                                </Comment.Content>
+                                                            </Comment>
+                                                        </div>
+                                                }
+                                            </>) : null}
                                         <Header as="h2" dividing>
                                         </Header>
                                     </Comment.Group>
+                                    <AnnounceDialog open={commentSuccess} title={"Success"}
+                                                    content={"Your review has been received"} onClose={() => {
+                                        store.dispatch(commentsSlice.actions.clearSuccess())
+                                    }
+                                    }/>
                                     <h2>Relative Couses</h2>
-                                    <CCarousel>{dummyCourse}</CCarousel>
+                                    <CCarousel>
+                                        {
+                                            relevance.map((course, index) => {
+                                                return (
+                                                    <ComplexCard
+                                                        key={course.id}
+                                                        className="item"
+                                                        title={course.title}
+                                                        price={course.currentPrice}
+                                                        kind={course.category}
+                                                        rate={course.review_score}
+                                                        count={10}
+                                                        author={course.lecturer}
+                                                        imagesrc={`data:image/png;base64,${course.ava}`}
+                                                    />
+                                                )
+                                            })
+                                        }
+                                    </CCarousel>
                                 </>
                         }
                     </>
@@ -402,7 +491,6 @@ const Detail = ({course, courseLoading, courseErr, joined, authed, comments, com
         </PageFrame>
     );
 }
-
 
 const mapStateToProps = state => (
     {
@@ -412,33 +500,21 @@ const mapStateToProps = state => (
         courseErr:
         state.detail.err,
         comments:
-            [
-                {
-                    "id": "rv001",
-                    "content": "Good",
-                    "score": 5.0,
-                    "username": "ABC",
-                    "time": "20-1-2020",
-                },
-                {
-                    "id": "rv002",
-                    "content": "Suck",
-                    "score": 1.0,
-                    "username": "AGH",
-                    "time": "20-1-2020",
-                },
-                {
-                    "id": "rv003",
-                    "content": "Ok",
-                    "score": 3.0,
-                    "username": "GC",
-                    "time": "20-1-2020",
-                },
-            ],
+        state.comment.comments,
+        commentsLoading:
+        state.comment.fetching,
+        commentsErr:
+        state.comment.err,
         authed:
             !!state.authen.token,
         joined:
         state.join.joined,
+        commenting:
+        state.comment.commenting,
+        commentSuccess:
+        state.comment.success,
+        myComment: state.comment.myComment,
+        relevance: state.rel.relevance
     }
 )
 
