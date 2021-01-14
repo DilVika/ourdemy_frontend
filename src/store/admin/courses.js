@@ -32,7 +32,7 @@ export const forceDeleteCourseAdmin = createAsyncThunk(
     async (data, thunkApi) => {
         const token = thunkApi.getState().adminAuth.adminToken
         try {
-            const res = await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/admin/courses/${data.id}`, {
+            const res = await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/admin/course/${data.id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -44,6 +44,45 @@ export const forceDeleteCourseAdmin = createAsyncThunk(
         }
     }
 )
+
+export const disableCourseAdmin = createAsyncThunk(
+    'adminCourses/disableCourseAdmin',
+    async (data, thunkApi) => {
+        const token = thunkApi.getState().adminAuth.adminToken
+
+        try {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/admin/course/disable/${data.id}`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
+export const enableCourseAdmin = createAsyncThunk(
+    'adminCourses/enableCourseAdmin',
+    async (data, thunkApi) => {
+        const token = thunkApi.getState().adminAuth.adminToken
+
+        try {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/admin/courses/enable/${data.id}`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
+
 
 export const adminCoursesSlice = createSlice({
     name: 'adminCourses',
@@ -78,6 +117,26 @@ export const adminCoursesSlice = createSlice({
         },
         [forceDeleteCourseAdmin.rejected]: (state, action) => {
             state.err = action.payload
-        }
+        },
+        [enableCourseAdmin.fulfilled]: (state, action) => {
+            const index = state.courses.findIndex((course) => {
+                return course.id === action.payload.Id
+            })
+
+            state.courses[index].disabled = false
+        },
+        [enableCourseAdmin.rejected]: (state, action) => {
+            state.err = action.payload
+        },
+        [disableCourseAdmin.fulfilled]: (state, action) => {
+            const index = state.courses.findIndex((course) => {
+                return course.id === action.payload.Id
+            })
+
+            state.courses[index].disabled = true
+        },
+        [disableCourseAdmin.rejected]: (state, action) => {
+            state.err = action.payload
+        },
     }
 })
