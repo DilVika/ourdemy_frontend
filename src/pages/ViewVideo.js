@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {CircularProgress, Grid, makeStyles, Typography} from "@material-ui/core";
+import {Chip, CircularProgress, Grid, makeStyles, Typography} from "@material-ui/core";
 import PageFrame from "../components/PageFrame";
 import ReactPlayer from "react-player";
 import List from "@material-ui/core/List";
@@ -14,6 +14,7 @@ import {useParams} from "react-router"
 import {fetchVidCurrentCourse, getTime, markTime, videoSlice} from "../store/course/video";
 import store from "../store";
 import {connect} from "react-redux";
+import {checkJoin, joinSlice} from "../store/course/detail/join";
 
 const useStyle = makeStyles((theme) => ({
     loadingCenter: {
@@ -22,11 +23,12 @@ const useStyle = makeStyles((theme) => ({
     }
 }))
 
-const ViewVideo = ({courseContents, vidUrl, loading, err, time}) => {
+const ViewVideo = ({courseContents, vidUrl, loading, err, time, joined}) => {
     const classes = useStyle()
 
     const [itemOpen, setItemOpen] = useState([]);
     const [videoTitle, setVideoTitle] = useState("");
+    const [currentChapterPreviewable, setCurrentChapterPreviewable] = useState(false);
 
     const history = useHistory();
 
@@ -42,9 +44,11 @@ const ViewVideo = ({courseContents, vidUrl, loading, err, time}) => {
             "cid": cid,
             "vid": vid
         }))
+        store.dispatch(checkJoin({"id": cid}))
 
         return () => {
             store.dispatch(videoSlice.actions.clear())
+            store.dispatch(joinSlice.actions.clear())
         }
     }, [])
 
@@ -66,6 +70,7 @@ const ViewVideo = ({courseContents, vidUrl, loading, err, time}) => {
             for (const chap of courseContents.chapters) {
                 for (const video of chap.videos) {
                     if (video.Id === vid) {
+                        setCurrentChapterPreviewable(chap.previewable)
                         setVideoTitle(video.title)
                         breakFlag = true
                         break
@@ -91,6 +96,9 @@ const ViewVideo = ({courseContents, vidUrl, loading, err, time}) => {
 
     const playerRef = useRef()
 
+    console.log(loading)
+    console.log(courseContents)
+
     return (
         <div>
             <PageFrame>
@@ -103,41 +111,55 @@ const ViewVideo = ({courseContents, vidUrl, loading, err, time}) => {
                                 !courseContents || loading ?
                                     <div className={classes.loadingCenter}><CircularProgress/></div> :
                                     <Grid container spacing={3}>
-                                        <Grid item xs={9}>
-                                            <h2>{videoTitle}</h2>
-                                            <ReactPlayer
-                                                ref={playerRef}
-                                                url={`${vidUrl}#t=${time}`} width={'100%'}
-                                                progressInterval={10000}
-                                                onStart={() => {
-                                                    const intTime = Math.floor(time);
-                                                    playerRef.current.seekTo(intTime, 'seconds')
-                                                }
-                                                }
-                                                onProgress={(state) => {
-                                                    store.dispatch(markTime({
-                                                        "vid": vid,
-                                                        "curTime": state.playedSeconds
-                                                    }))
-                                                }
-                                                }
-                                                config={{
-                                                    file: {
-                                                        attributes: {
-                                                            controls: true,
+                                        {
+                                            joined || currentChapterPreviewable ? <Grid item xs={9}>
+                                                    <h2>{videoTitle}</h2>
+                                                    <ReactPlayer
+                                                        ref={playerRef}
+                                                        url={`${vidUrl}#t=${time}`} width={'100%'}
+                                                        progressInterval={10000}
+                                                        onStart={() => {
+                                                            const intTime = Math.floor(time);
+                                                            playerRef.current.seekTo(intTime, 'seconds')
                                                         }
-                                                    }
-                                                }}
-                                                height={'80vh'}/>
-                                        </Grid>
+                                                        }
+                                                        onProgress={(state) => {
+                                                            store.dispatch(markTime({
+                                                                "vid": vid,
+                                                                "curTime": state.playedSeconds
+                                                            }))
+                                                        }
+                                                        }
+                                                        config={{
+                                                            file: {
+                                                                attributes: {
+                                                                    controls: true,
+                                                                }
+                                                            }
+                                                        }}
+                                                        height={'80vh'}/>
+                                                </Grid>
+                                                : <Grid item xs={9}>
+                                                    This chapter is not previewable, please join the course to view this chapter
+                                                </Grid>
+                                        }
                                         <Grid item xs={3}>
                                             <List>
                                                 {
                                                     courseContents.chapters.map((chapter, index) => (
                                                         <div key={chapter.Id}>
                                                             <ListItem button
-                                                                      onClick={(e) => toggleItem(index, !itemOpen[index])}>
+                                                                      onClick={
+                                                                          (e) =>
+                                                                              joined || chapter.previewable ?
+                                                                                  toggleItem(index, !itemOpen[index])
+                                                                                  : null}>
                                                                 <ListItemText primary={chapter.title}/>
+                                                                {
+                                                                    chapter.previewable ?
+                                                                        <Chip color={"primary"}
+                                                                              label={"Previewable"}/> : null
+                                                                }
                                                                 <div role="button">
                                                                     {itemOpen[index] ? <IconExpandLess/> :
                                                                         <IconExpandMore/>}
@@ -179,7 +201,8 @@ const mapStateToProps = state => ({
     loading: state.video.fetching,
     err: state.video.err,
     vidUrl: state.video.vidUrl,
-    time: state.video.timeMark
+    time: state.video.timeMark,
+    joined: state.join.joined,
 })
 
 export default connect(

@@ -4,7 +4,7 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
 import Typography from "@material-ui/core/Typography";
-import {CardHeader, Paper} from "@material-ui/core";
+import {CardHeader, Chip, Paper} from "@material-ui/core";
 import Rating from "react-star-review";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button"
@@ -49,7 +49,10 @@ const InforCard = (props) => {
     return (
         <Paper elevation={3} className={classes.root} style={props.style}>
             <Grid container direction="row" wrap="nowrap" style={{padding: "10px"}}>
-                <img src={props.src}/>
+                <img style={{
+                    maxWidth: '300px',
+                    maxHeight: '300px',
+                }} src={props.src}/>
                 <Card
                     className={classes.root}
                     style={{borderRadius: "0px 10px 10px 0px"}}
@@ -86,6 +89,12 @@ const InforCard = (props) => {
                             </Grid>
                         </Grid>
                     </CardContent>
+                    <CardContent>
+                        <CardContent className={classes.topPadding}>
+                            <Chip color={props.is_done ? "primary" : "secondary"}
+                                  label={props.is_done ? "Done" : "Ongoing"}/>
+                        </CardContent>
+                    </CardContent>
                     <CardActions style={{padding: "15px"}}>
                         <Grid
                             container
@@ -99,6 +108,9 @@ const InforCard = (props) => {
                                         <Button onClick={() => {props.onEnroll()}} variant="contained" size="small" color="secondary">Enroll</Button>
                                     </Grid> : null
                             }
+                            <Grid item xs={3}>
+                                <Button variant={"outlined"} size={"small"} color={"primary"} onClick={() => props.onView()}>View</Button>
+                            </Grid>
                             {
                                 !props.joined ? <Grid item xs={5}>
                                     <Typography

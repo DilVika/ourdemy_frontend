@@ -151,8 +151,8 @@ const PageFrame = ({token, categories, children}) => {
         history.push(`/${path}`)
     }
 
-    const navCat = (path) => {
-        history.push(`/cat/${path}`)
+    const navCat = (query) => {
+        history.push(`/course${query}`)
     }
 
     return (
@@ -192,10 +192,13 @@ const PageFrame = ({token, categories, children}) => {
                 <div className={classes.toolbar}/>
                 <Divider/>
                 <List>
+                    <ListItem button>
+                        <ListItemText primary={"All"} onClick={() => navCat("")}/>
+                    </ListItem>
                     {categories.map((cat, index) => (
                         <div key={cat.cid}>
                             <ListItem button>
-                                <ListItemText primary={cat.cat_name} onClick={() => navCat(cat.cat_name)}/>
+                                <ListItemText primary={cat.cat_name} onClick={() => navCat(`?catId=${cat.cid}`)}/>
                                 <div role="button" onClick={(e) => toggleItem(index, !itemOpen[index])}>
                                     {itemOpen[index] ? <IconExpandLess/> :
                                         <IconExpandMore/>}
@@ -209,7 +212,7 @@ const PageFrame = ({token, categories, children}) => {
                                             {cat.subcats.map((sub, index) => (
                                                 <ListItem button key={sub.scid}>
                                                     <ListItemText inset
-                                                                  onClick={() => navCat(`${cat.cat_name}/${sub.subcat_name}`)}
+                                                                  onClick={() => navCat(`?subcatId=${sub.scid}`)}
                                                                   primary={sub.subcat_name}/>
                                                 </ListItem>
                                             ))}

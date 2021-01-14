@@ -75,6 +75,7 @@ const SearchPage = ({cats, searchRes, searching, err}) => {
             "subcatId": subcatId,
             "keyword": needle,
         }))
+
     }, [needle, catId, subcatId])
 
     function search() {
@@ -190,8 +191,10 @@ const SearchPage = ({cats, searchRes, searching, err}) => {
                                             {searchRes
                                                 .slice(page * 10, page * 10 + 10)
                                                 .map(function (course, index) {
+                                                    const ids = course.id.split("\"")
+
                                                     return (
-                                                        <TableRow key={course.Id}>
+                                                        <TableRow key={ids[1]}>
                                                             <TableCell component="th">
                                                                 {index + 1}
                                                             </TableCell>
@@ -209,7 +212,8 @@ const SearchPage = ({cats, searchRes, searching, err}) => {
                                                             </TableCell>
                                                             <TableCell align="right">
                                                                 <div>
-                                                                    <IconButton>
+                                                                    <IconButton
+                                                                        onClick={() => history.push(`/detail/${ids[1]}`)}>
                                                                         <LinkSharp/>
                                                                     </IconButton>
                                                                 </div>
@@ -217,25 +221,25 @@ const SearchPage = ({cats, searchRes, searching, err}) => {
                                                         </TableRow>
                                                     )
                                                 })}
-                                                </TableBody>
-                                                </Table>
-                                                <TablePagination
-                                                count={(searchRes && searchRes.length) || 0}
-                                                page={page}
-                                                rowsPerPage={10}
-                                                rowsPerPageOptions={[0]}
-                                                colSpan={4}
-                                                onChangePage={(_, newPage) => setPage(newPage)}
-                                                />
-                                                </TableContainer>
+                                        </TableBody>
+                                    </Table>
+                                    <TablePagination
+                                        count={(searchRes && searchRes.length) || 0}
+                                        page={page}
+                                        rowsPerPage={10}
+                                        rowsPerPageOptions={[0]}
+                                        colSpan={4}
+                                        onChangePage={(_, newPage) => setPage(newPage)}
+                                    />
+                                </TableContainer>
 
-                                            }
-                                        </Grid>
-                                    </Grid>
-                                </PageFrame>
-                            </div>
-                            )
                         }
+                    </Grid>
+                </Grid>
+            </PageFrame>
+        </div>
+    )
+}
 
 SearchPage.defaultProps = {
     cats: [],
