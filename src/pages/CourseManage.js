@@ -16,7 +16,7 @@ import {
     Paper,
     Typography
 } from "@material-ui/core";
-import {Add, Edit, VideoCall} from "@material-ui/icons";
+import {Add, Edit, LinkSharp, VideoCall} from "@material-ui/icons";
 import List from "@material-ui/core/List";
 import data from "../ava.json"
 import IconButton from "@material-ui/core/IconButton";
@@ -100,6 +100,13 @@ const CourseManage = ({courses, err, loading}) => {
                                                                 }
                                                                 action={
                                                                     <>
+                                                                        <IconButton onClick={() => {
+                                                                            const res = course.id.split("\"")
+                                                                            const id = res[1]
+                                                                            history.push(`/detail/${id}`)
+                                                                        }}>
+                                                                            <LinkSharp/>
+                                                                        </IconButton>
                                                                         <IconButton onClick={() => {
                                                                             const res = course.id.split("\"")
                                                                             const id = res[1]

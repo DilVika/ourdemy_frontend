@@ -202,6 +202,24 @@ export const signout = createAsyncThunk(
     },
 );
 
+export const rmFav = createAsyncThunk(
+    'authen/rmFav',
+    async (data, thunkApi) => {
+        const token = thunkApi.getState().authen.token
+
+        try {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/users/unfav/${data.cid}`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            return res.data
+        } catch (e) {
+            return thunkApi.rejectWithValue(e.response.data.error)
+        }
+    }
+)
 
 export const authenSlice = createSlice({
     name: 'authen',
@@ -254,6 +272,11 @@ export const authenSlice = createSlice({
             state.passwordErr = null
             state.updatingPassword = false
             state.updatingPasswordFinish = false
+        },
+        clearFav: (state, action) => {
+            state.favList = []
+            state.favListErr = null
+            state.fetchingFav = false
         }
     },
     extraReducers: {
@@ -327,6 +350,13 @@ export const authenSlice = createSlice({
         },
         [selfPromote.rejected]: (state, action) => {
             state.updateErr = action.payload
+        },
+        [rmFav.fulfilled]: (state, action) => {
+            state.favList = state.favList.filter((fav) => {
+                return fav.cid !== action.payload.cid
+            })
+        },
+        [rmFav.rejected]: (state, action) => {
         }
     }
 })

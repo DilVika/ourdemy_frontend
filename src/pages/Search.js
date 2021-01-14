@@ -199,7 +199,11 @@ const SearchPage = ({cats, searchRes, searching, err}) => {
                                                                 {index + 1}
                                                             </TableCell>
                                                             <TableCell align="left">
-                                                                {course.title}
+                                                                {
+                                                                    course.is_discount ? <Typography color={"primary"}>
+                                                                        {course.title}
+                                                                    </Typography> : <>{course.title}</>
+                                                                }
                                                             </TableCell>
                                                             <TableCell align="left">
                                                                 {course.category}

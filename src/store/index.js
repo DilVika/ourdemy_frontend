@@ -22,6 +22,7 @@ import {mostViewedSlice} from "./course/home/mostViewed";
 import {mostRegSlice} from "./course/home/mostReg";
 import {newestSlice} from "./course/home/newest";
 import {contentSlice} from "./course/detail/content";
+import {regListSlice} from "./course/reg/regList";
 
 const store = configureStore({
     reducer: {
@@ -46,6 +47,7 @@ const store = configureStore({
         mostReg: mostRegSlice.reducer,
         newest: newestSlice.reducer,
         content: contentSlice.reducer,
+        regList: regListSlice.reducer,
     }
 })
 

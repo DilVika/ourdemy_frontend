@@ -13,13 +13,14 @@ import {
     Typography
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {Close, Delete} from "@material-ui/icons";
+import {Close, Delete, LinkSharp} from "@material-ui/icons";
 import YesNoDialog from "../components/YesNoDialog";
 import {useHistory} from "react-router-dom";
 import {connect} from "react-redux";
-import {fetchFavList, fetchProfile, selfPromote, updateProfile} from "../store/authen";
+import {authenSlice, fetchFavList, fetchProfile, rmFav, selfPromote, updateProfile} from "../store/authen";
 import store from "../store";
 import UpdatePasswordDialog from "../components/UpdatePassword";
+import {fetchRegList, regListSlice} from "../store/course/reg/regList";
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -44,16 +45,22 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-const Profile = ({user, favList, fetching, favListFetching, err, favErr}) => {
+const Profile = ({user, favList, fetching, favListFetching, err, favErr, regList, regLoading, regErr}) => {
     const classes = useStyles()
 
     const [updateMode, setUpdateMode] = useState(false);
     const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
     const [updatePasswordDialogOpen, setUpdatePasswordDialogOpen] = useState(false);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
 
     useEffect(() => {
         store.dispatch(fetchProfile())
+        store.dispatch(fetchFavList())
+        store.dispatch(fetchRegList())
+
+        return () => {
+            store.dispatch(authenSlice.actions.clearFav())
+            store.dispatch(regListSlice.actions.clear())
+        }
     }, [])
 
     const unameRef = useRef("")
@@ -196,7 +203,7 @@ const Profile = ({user, favList, fetching, favListFetching, err, favErr}) => {
                                 </Grid>
                             </Grid>
                             {
-                                favListFetching ? <></> : <>
+                                favListFetching ? <div className={classes.loadingCenter}><CircularProgress/></div> : <>
                                     {
                                         !favErr ? <Grid item xs={12}>
                                                 <div style={{maxHeight: '80vh', overflow: 'auto'}}>
@@ -211,7 +218,21 @@ const Profile = ({user, favList, fetching, favListFetching, err, favErr}) => {
                                                                             {fav.name}
                                                                         </ListItemText>
                                                                         <ListItemSecondaryAction>
-                                                                            <IconButton edge="end" aria-label="comments">
+                                                                            <IconButton edge="end"
+                                                                                        onClick={() => {
+                                                                                            history.push(`/detail/${fav.cid}`)
+                                                                                        }}
+                                                                            >
+                                                                                <LinkSharp/>
+                                                                            </IconButton>
+                                                                            <IconButton edge="end"
+                                                                                        aria-label="comments"
+                                                                                        onClick={() => {
+                                                                                            store.dispatch(rmFav({
+                                                                                                "cid": fav.cid
+                                                                                            }))
+                                                                                        }}
+                                                                            >
                                                                                 <Delete/>
                                                                             </IconButton>
                                                                         </ListItemSecondaryAction>
@@ -230,8 +251,49 @@ const Profile = ({user, favList, fetching, favListFetching, err, favErr}) => {
 
                                     }
                                 </>
-
                             }
+                            <Grid item xs={12}>
+                                <Typography variant={"h6"} align={"center"} color={"primary"}>
+                                    Enrolled Courses
+                                </Typography>
+                                {
+                                    regErr ? <Typography color={"error"}>{regErr}</Typography> :
+                                        <>
+                                            {
+                                                regLoading ? <div className={classes.loadingCenter}>
+                                                        <CircularProgress/>
+                                                    </div> :
+                                                    <div style={{maxHeight: '80vh', overflow: 'auto'}}>
+                                                        <List>
+                                                            {
+                                                                regList.map((reg) => (
+                                                                    <Paper variant={"outlined"}
+                                                                           className={classes.coursePaper}
+                                                                           key={reg.cid}
+                                                                           elevation={1}>
+                                                                        <ListItem>
+                                                                            <ListItemText>
+                                                                                {reg.course_name}
+                                                                            </ListItemText>
+                                                                            <ListItemSecondaryAction>
+                                                                                <IconButton edge="end"
+                                                                                            onClick={() => {
+                                                                                                history.push(`/detail/${reg.cid}`)
+                                                                                            }}
+                                                                                >
+                                                                                    <LinkSharp/>
+                                                                                </IconButton>
+                                                                            </ListItemSecondaryAction>
+                                                                        </ListItem>
+                                                                    </Paper>
+                                                                ))
+                                                            }
+                                                        </List>
+                                                    </div>
+                                            }
+                                        </>
+                                }
+                            </Grid>
                         </Grid>
                     </Grid>
                 </div>
@@ -273,7 +335,10 @@ const mapStateToProps = state => ({
     err: state.authen.updateErr,
     fetching: state.authen.fetching,
     favListFetching: state.authen.fetchingFav,
-    favErr: state.authen.favListErr
+    favErr: state.authen.favListErr,
+    regList: state.regList.reg,
+    regLoading: state.regList.fetching,
+    regErr: state.regList.err,
 })
 
 export default connect(

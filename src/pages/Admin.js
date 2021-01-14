@@ -47,8 +47,15 @@ import {
     promoteUser,
     unbanUser
 } from "../store/admin/user";
-import {adminCoursesSlice, fetchCoursesAdmin, forceDeleteCourseAdmin} from "../store/admin/courses";
+import {
+    adminCoursesSlice,
+    disableCourseAdmin,
+    enableCourseAdmin,
+    fetchCoursesAdmin,
+    forceDeleteCourseAdmin
+} from "../store/admin/courses";
 import YesNoDialog from "../components/YesNoDialog";
+import SearchBar from "material-ui-search-bar";
 
 const useStyle = makeStyles((theme) => ({
     table: {
@@ -115,6 +122,9 @@ const AdminPage = ({
     const [targetCat, setTargetCat] = useState({"cid": "0", "name": "0"});
     const [targetSubcat, setTargetSubcat] = useState({"scid": "0", "name": "0"});
     const [targetCourseId, setTargetCourseId] = useState("");
+    const [keyword, setKeyword] = useState("");
+    const [catKeyword, setCatKeyword] = useState("");
+    const [filteredCourse, setFilteredCourse] = useState(courses);
 
     useEffect(() => {
         store.dispatch(fetchUsersAdmin())
@@ -140,11 +150,29 @@ const AdminPage = ({
         setSubcatsData(subs)
     }, [cats])
 
-    function handleDeleteCourse(ccid) {
-        return undefined;
+    const filter = (lecName, catName) => {
+        const filteredRes = courses.filter((course) => {
+            return course.lecturer.includes(lecName) && course.category.includes(catName)
+        })
+
+        setFilteredCourse(filteredRes)
     }
 
-    console.log(courses)
+    const filterByLecName = () => {
+        if (keyword === "") {
+            filter("", catKeyword)
+        } else {
+            filter(keyword, catKeyword)
+        }
+    }
+
+    const filterBySubcat = () => {
+        if (catKeyword === "") {
+            filter(keyword, "")
+        } else {
+            filter(keyword, catKeyword)
+        }
+    }
 
     return (
         <div className={classes.root}>
@@ -486,23 +514,46 @@ const AdminPage = ({
                             </div> :
                             <>
                                 <h2 className={classes.header}>Course Table</h2>
+                                <SearchBar
+                                    style={{
+                                        marginTop: '8px',
+                                        marginBottom: '8px'
+                                    }}
+                                    value={keyword}
+                                    cancelOnEscape
+                                    placeholder={"Lecturer Name"}
+                                    onChange={(newValue) => setKeyword(newValue)}
+                                    onRequestSearch={() => filterByLecName()}
+                                />
+                                <SearchBar
+                                    style={{
+                                        marginTop: '8px',
+                                        marginBottom: '8px'
+                                    }}
+                                    value={catKeyword}
+                                    cancelOnEscape
+                                    placeholder={"Subcat Name"}
+                                    onChange={(newValue) => setCatKeyword(newValue)}
+                                    onRequestSearch={() => filterBySubcat()}
+                                />
                                 <TableContainer component={Paper}>
                                     <Table className={classes.Table} aria-label="Courses Table">
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>CCID</TableCell>
                                                 <TableCell align="left">Name</TableCell>
-                                                <TableCell align="left">Category</TableCell>
+                                                <TableCell align="left">Subcategory</TableCell>
                                                 <TableCell align="left">Lecturer</TableCell>
                                                 <TableCell align="left">Review Score</TableCell>
                                                 <TableCell align="left">Fee</TableCell>
                                                 <TableCell align="left">Discount</TableCell>
                                                 <TableCell align="left">Done</TableCell>
                                                 <TableCell align="left">Chapters Count</TableCell>
+                                                <TableCell align="left">Disabled</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {courses
+                                            {filteredCourse
                                                 .slice(pageCourse * 10, pageCourse * 10 + 10)
                                                 .map(function (course) {
                                                     return (
@@ -534,26 +585,47 @@ const AdminPage = ({
                                                             <TableCell align="left">
                                                                 {course.chapters.length}
                                                             </TableCell>
-                                                            <TableCell align="right">
-                                                                <div>
-                                                                    <IconButton
-                                                                        onClick={
-                                                                            () => {
-                                                                                setTargetCourseId(course.id)
-                                                                                setDeleteConfirmDialogOpen(true)
-                                                                            }
-                                                                        }>
-                                                                        <DeleteIcon/>
-                                                                    </IconButton>
-                                                                </div>
+                                                            <TableCell>
+                                                                {
+                                                                    course.disabled ?
+                                                                        <IconButton onClick={() => {
+                                                                            store.dispatch(enableCourseAdmin({
+                                                                                "id": course.id
+                                                                            }))
+                                                                        }}>
+                                                                            <LockOpen/>
+                                                                        </IconButton> :
+                                                                        <IconButton
+                                                                            onClick={() => {
+                                                                                store.dispatch(disableCourseAdmin({
+                                                                                    "id": course.id
+                                                                                }))
+                                                                            }}
+                                                                        >
+                                                                            <Lock/>
+                                                                        </IconButton>
+                                                                }
                                                             </TableCell>
+                                                            {/*<TableCell align="right">*/}
+                                                            {/*    <div>*/}
+                                                            {/*        <IconButton*/}
+                                                            {/*            onClick={*/}
+                                                            {/*                () => {*/}
+                                                            {/*                    setTargetCourseId(course.id)*/}
+                                                            {/*                    setDeleteConfirmDialogOpen(true)*/}
+                                                            {/*                }*/}
+                                                            {/*            }>*/}
+                                                            {/*            <DeleteIcon/>*/}
+                                                            {/*        </IconButton>*/}
+                                                            {/*    </div>*/}
+                                                            {/*</TableCell>*/}
                                                         </TableRow>
                                                     )
                                                 })}
                                         </TableBody>
                                     </Table>
                                     <TablePagination
-                                        count={(courses && courses.length) || 0}
+                                        count={(filteredCourse && filteredCourse.length) || 0}
                                         page={pageCourse}
                                         rowsPerPage={10}
                                         rowsPerPageOptions={[0]}
