@@ -15,6 +15,13 @@ import {joinSlice} from "./course/detail/join";
 import {userResetPasswordSlice} from "./authen/reset";
 import {commentsSlice} from "./course/detail/comment";
 import {relSlice} from "./course/detail/relevance";
+import {listSlice} from "./course/home/list";
+import {favSlice} from "./course/fav/fav";
+import {highLightSlice} from "./course/home/highlights";
+import {mostViewedSlice} from "./course/home/mostViewed";
+import {mostRegSlice} from "./course/home/mostReg";
+import {newestSlice} from "./course/home/newest";
+import {contentSlice} from "./course/detail/content";
 
 const store = configureStore({
     reducer: {
@@ -32,6 +39,13 @@ const store = configureStore({
         join: joinSlice.reducer,
         comment: commentsSlice.reducer,
         rel: relSlice.reducer,
+        list: listSlice.reducer,
+        fav: favSlice.reducer,
+        highlight: highLightSlice.reducer,
+        mostViewed: mostViewedSlice.reducer,
+        mostReg: mostRegSlice.reducer,
+        newest: newestSlice.reducer,
+        content: contentSlice.reducer,
     }
 })
 

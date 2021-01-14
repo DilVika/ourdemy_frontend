@@ -12,7 +12,8 @@ import "semantic-ui-css/semantic.min.css";
 import {detailSlice, fetchCourse} from "../store/course/detail/detail";
 import store from "../store";
 import {
-    useParams
+    useParams,
+    useHistory
 } from 'react-router-dom'
 import {connect} from "react-redux";
 import {Avatar, Chip, CircularProgress, Divider} from "@material-ui/core";
@@ -20,183 +21,6 @@ import {checkJoin, joinCourse, joinSlice} from "../store/course/detail/join";
 import {commentsSlice, fetchComments, fetchMyComment, sendComment} from "../store/course/detail/comment";
 import AnnounceDialog from "../components/AnnounceDialog";
 import {fetchRelevance, relSlice} from "../store/course/detail/relevance";
-
-const dummyInfo = {
-    src: "https://picsum.photos/500/300",
-    title: "2021 Complete Python Bootcamp From Zero to Hero in Python",
-    kind: "Web Devevlopment",
-    author: "Ba Tê",
-    rate: 5,
-    count: "700",
-    currentPrice: "50",
-    originPrice: "70",
-    brief: "Java code giay",
-    detail: [
-        "Được code giấy",
-        "Được code giấy",
-        "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
-        "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
-        "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
-        "Được code giấy",
-    ],
-    contents: [
-        {
-            name: "Chapter 1: Code giay dai cudai cudai cudai cudai cudai cuongz",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-        {
-            name: "Chapter 2: Code giay dai phap",
-            link: "google.com",
-        },
-    ],
-};
-//✓
-const dummyLecture = {
-    src: "https://picsum.photos/300/200",
-    title: "Ba Tee",
-    kind: "Web Devevlopment",
-
-    rate: 5,
-    count: "700",
-    brief:
-        "Learn Python like a Professional Start from the basics and go all the way to creating your own applications and games",
-};
-
-const dummyDetail = dummyInfo.detail.map((val, index) => (
-    <Grid key={index} item xs={6}>
-        <Typography style={{fontSize: "14"}}>✓ {val}</Typography>
-    </Grid>
-));
-const dummyContents = dummyInfo.contents.map((val, index) => (
-    <Grid key={index} item>
-        <Typography
-            style={{fontSize: "14"}}
-            onPress={() => Linking.openURL("http://google.com")}
-        >
-            {" "}
-            {val.name}
-        </Typography>
-    </Grid>
-));
-
-const dummyCourse = [
-    {
-        src: "https://picsum.photos/300/200",
-        title: "Java Code Giấy",
-        kind: "Web Devevlopment",
-        author: "Ba Tê",
-        rate: 5,
-        count: "700",
-        currentPrice: "50",
-        originPrice: "70",
-        brief: "Java code giay",
-    },
-    {
-        src: "https://picsum.photos/300/200",
-        title: "Java Code Giấy",
-        kind: "Web Devevlopment",
-        author: "Ba Tê",
-        rate: 1,
-        count: "700",
-        currentPrice: "1",
-        originPrice: "70",
-        brief: "Java code giay",
-    },
-    {
-        src: "https://picsum.photos/300/200",
-        title: "Java Code Giấy",
-        kind: "Web Devevlopment",
-        author: "Ba Tê",
-        rate: 2,
-        count: "700",
-        currentPrice: "1",
-        originPrice: "70",
-        brief: "Java code giay",
-    },
-    {
-        src: "https://picsum.photos/300/200",
-        title: "Java Code Giấy",
-        kind: "Web Devevlopment",
-        author: "Ba Tê",
-        rate: 5,
-        count: "1",
-        currentPrice: "0",
-        originPrice: "70",
-        brief: "Java code giay",
-    },
-    {
-        src: "https://picsum.photos/300/200",
-        title: "Java Code Giấy",
-        kind: "Web Devevlopment",
-        author: "Ba Tê",
-        rate: 4.5,
-        count: "1",
-        currentPrice: "0",
-        originPrice: "70",
-        brief: "Java code giay",
-    },
-].map((val, index) => (
-    <ComplexCard
-        key={index}
-        className="item"
-        title={val.title}
-        price={val.currentPrice}
-        originPrice={val.originPrice}
-        kind={val.kind}
-        rate={val.rate}
-        count={val.count}
-        author={val.author}
-        imagesrc={val.src}
-    />
-));
 
 const useStyle = makeStyles({
     root: {
@@ -232,6 +56,7 @@ const Detail = ({
                     relevance
                 }) => {
     const classes = useStyle()
+    const history = useHistory()
     const {id} = useParams()
 
     const [curStar, setCurStar] = useState(5);
@@ -251,7 +76,7 @@ const Detail = ({
             store.dispatch(commentsSlice.actions.clear())
             store.dispatch(relSlice.actions.clear())
         }
-    }, [])
+    }, [id])
 
     return (
         <PageFrame>
@@ -280,6 +105,10 @@ const Detail = ({
                                         lecturer_email={course.lecturer_email}
                                         joined={joined}
                                         authed={authed}
+                                        is_done={course.is_done}
+                                        onView={() => {
+                                            history.push(`/course/${id}/view`)
+                                        }}
                                         onEnroll={() => {
                                             store.dispatch(joinCourse({
                                                 "id": id
@@ -390,7 +219,7 @@ const Detail = ({
                                                     })}
                                                 {
                                                     comments.length > 0 ? <Pagination
-                                                        totalPages={(comments && Math.floor((comments.length / 10 + 1))) || 0}
+                                                        totalPages={(comments && Math.floor((comments.length + 9) / 10)) || 0}
                                                         shape="rounded"
                                                         page={commentPage}
                                                         onPageChange={(_, p) => setCommentPage(p.activePage)}
@@ -471,6 +300,7 @@ const Detail = ({
                                                 return (
                                                     <ComplexCard
                                                         key={course.id}
+                                                        id={course.id}
                                                         className="item"
                                                         title={course.title}
                                                         price={course.currentPrice}
@@ -479,6 +309,7 @@ const Detail = ({
                                                         count={10}
                                                         author={course.lecturer}
                                                         imagesrc={`data:image/png;base64,${course.ava}`}
+                                                        is_done={course.is_done}
                                                     />
                                                 )
                                             })

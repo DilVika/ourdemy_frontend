@@ -27,6 +27,7 @@ import SearchPage from "./pages/Search";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminRoute from "./components/AdminRoute";
 import ResetPassword from "./pages/ResetPassword";
+import ViewContent from "./pages/ViewContent";
 
 function App() {
     return (
@@ -48,6 +49,12 @@ function App() {
                     <Route exact path={"/course"}>
                         <Courses/>
                     </Route>
+                    <Route exact path={"/course/:cid/view"}>
+                        <ViewContent/>
+                    </Route>
+                    <Route exact path={"/course/:cid/view/:vid"}>
+                        <ViewVideo/>
+                    </Route>
                     <LecturerRoute exact path={"/course/manage"}>
                         <CourseManage/>
                     </LecturerRoute>
@@ -60,9 +67,6 @@ function App() {
                     <LecturerRoute exact path={"/course/content/:id"}>
                         <CourseContent/>
                     </LecturerRoute>
-                    <AuthRoute exact path={"/course/:cid/view/:vid"}>
-                        <ViewVideo/>
-                    </AuthRoute>
                     <Route exact path={"/admin/signin"}>
                         <AdminLoginPage/>
                     </Route>
