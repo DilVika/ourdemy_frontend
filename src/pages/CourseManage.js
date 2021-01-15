@@ -137,6 +137,18 @@ const CourseManage = ({courses, err, loading}) => {
                                                                     {course.short_desc}
                                                                 </Typography>
                                                             </CardContent>
+                                                            <CardContent>
+                                                                <Chip
+                                                                    style={{marginLeft: "5px"}}
+                                                                    label={"$" + course.fee}
+                                                                    color={"primary"}
+                                                                />
+                                                                <Chip
+                                                                    style={{marginLeft: "5px"}}
+                                                                    label={course.discount * 100 + "%"}
+                                                                    color={"secondary"}
+                                                                />
+                                                            </CardContent>
                                                         </Card>
                                                     </ListItem>
                                                 ))}
