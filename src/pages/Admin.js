@@ -178,8 +178,6 @@ const AdminPage = ({
         }
     }
 
-    console.log(courses)
-
     return (
         <div className={classes.root}>
             <Grid container spacing={3}>
