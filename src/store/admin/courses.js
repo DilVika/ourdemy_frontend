@@ -70,7 +70,7 @@ export const enableCourseAdmin = createAsyncThunk(
         const token = thunkApi.getState().adminAuth.adminToken
 
         try {
-            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/admin/courses/enable/${data.id}`, {}, {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/admin/course/enable/${data.id}`, {}, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
