@@ -150,6 +150,10 @@ const AdminPage = ({
         setSubcatsData(subs)
     }, [cats])
 
+    useEffect(() => {
+        filter(keyword, catKeyword)
+    }, [courses])
+
     const filter = (lecName, catName) => {
         const filteredRes = courses.filter((course) => {
             return course.lecturer.includes(lecName) && course.category.includes(catName)

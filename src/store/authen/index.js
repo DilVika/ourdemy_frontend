@@ -285,6 +285,7 @@ export const authenSlice = createSlice({
             state.shouldOtp = true
         },
         [signup.rejected]: (state, action) => {
+            state.signingUp = false
             state.signUpErr = action.payload
         },
         [signin.fulfilled]: (state, action) => {

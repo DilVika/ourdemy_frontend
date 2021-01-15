@@ -165,7 +165,7 @@ const UpdateCourse = ({targetCourse, loading, err, updateErr, updating, success}
                                                             id={"price"}
                                                             label={"Price"}
                                                             type={"number"}
-                                                            defaultValue={targetCourse.price}
+                                                            defaultValue={targetCourse.fee}
                                                         />
                                                     </Grid>
                                                     <Grid item xs={12}>
