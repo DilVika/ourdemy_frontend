@@ -4,6 +4,7 @@ import {useHistory, Redirect} from 'react-router-dom'
 import store from "../store";
 import {adminLogin} from "../store/admin/authen";
 import {connect} from "react-redux";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const useStyle = makeStyles((theme) => ({
     root: {
@@ -50,14 +51,18 @@ const AdminLoginPage = ({authed, loggingIn, err}) => {
                         <Grid item xs={4}/>
                         <Grid item xs={4}/>
                         <Grid item xs={4}>
-                            <Button color="secondary" fullWidth variant="contained" onClick={() => {
-                                store.dispatch(adminLogin({
-                                    "username": uRef.current.value,
-                                    "password": pRef.current.value,
-                                }))
-                            }}>
-                                Log in
-                            </Button>
+                            {
+                                loggingIn ? <div className={classes.loadingCenter}>
+                                    <CircularProgress/>
+                                </div> : <Button color="secondary" fullWidth variant="contained" onClick={() => {
+                                    store.dispatch(adminLogin({
+                                        "username": uRef.current.value,
+                                        "password": pRef.current.value,
+                                    }))
+                                }}>
+                                    Log in
+                                </Button>
+                            }
                         </Grid>
                         <Grid item xs={4}/>
                         <Grid item xs={4}/>

@@ -94,6 +94,7 @@ export const commentsSlice = createSlice({
         },
         clearSuccess: (state) => {
             state.commenting = false
+            state.success = false
         }
     },
     extraReducers: {
@@ -109,6 +110,7 @@ export const commentsSlice = createSlice({
             state.commenting = false
             state.comments = [...state.comments, action.payload]
             state.success = true
+            state.myComment = action.payload
         },
         [sendComment.rejected]: (state, action) => {
             state.commenting = false

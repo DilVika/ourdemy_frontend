@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import {initialState} from "./store/authen";
 
 require('dotenv').config()
+console.log = () => {}
 ReactDOM.render(
     <App/>,
     document.getElementById('root')
